@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>airpool Projektkarte</title>
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f4f6f9;color:#111}
+.wrap{max-width:1480px;margin:0 auto;padding:24px 20px}
+.hdr{display:flex;align-items:flex-end;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.logo{font-size:24px;font-weight:800;color:#00234b;letter-spacing:-0.5px;white-space:nowrap}
+.logo span{color:#e41e26}
+.sb{position:relative;flex:1;min-width:180px;max-width:300px}
+.sb input{width:100%;padding:8px 28px 8px 32px;font-size:14px;border:1.5px solid #e5e7eb;border-radius:10px;background:#f8f9fb;font-family:inherit;outline:none;color:#111;transition:all .15s}
+.sb input:focus{border-color:#00234b;background:#fff}
+.sb input::placeholder{color:#9ca3af}
+.sb .si{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#9ca3af;font-size:14px;pointer-events:none}
+.sb .scl{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#9ca3af;font-size:15px;display:none}
+.dds{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.dw{position:relative;display:flex;flex-direction:column;gap:3px}
+.dw-label{font-size:11px;font-weight:600;color:#6b7280;letter-spacing:.02em}
+.dw-btn{padding:7px 26px 7px 11px;font-size:13px;border:1.5px solid #e5e7eb;border-radius:10px;background:#fff;font-family:inherit;cursor:pointer;outline:none;color:#374151;font-weight:500;min-width:105px;transition:all .15s;text-align:left;white-space:nowrap;position:relative}
+.dw-btn:focus{border-color:#00234b}
+.dw-btn.on{background:#00234b;color:#fff;border-color:#00234b}
+.dw-btn.on .da{color:#fff}
+.dw .da{position:absolute;right:8px;top:50%;transform:translateY(-50%);pointer-events:none;font-size:10px;color:#6b7280}
+.ms-drop{position:absolute;top:calc(100% + 4px);left:0;min-width:160px;background:#fff;border:1.5px solid #e5e7eb;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:500;display:none;padding:6px}
+.ms-drop.open{display:block}
+.ms-item{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;cursor:pointer;font-size:13px;color:#374151;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;transition:background .1s}
+.ms-item:hover{background:#f0f4ff}
+.ms-item input[type=checkbox]{accent-color:#00234b;width:14px;height:14px;cursor:pointer;flex-shrink:0}
+.ms-clear{width:100%;margin-top:4px;padding:5px;background:#f8f9fb;border:1px solid #e5e7eb;border-radius:7px;font-size:11px;font-weight:600;color:#6b7280;cursor:pointer;font-family:inherit}
+.ms-clear:hover{background:#eef2ff;color:#00234b}
+.hdr-r{display:flex;gap:8px;margin-left:auto;align-items:flex-end}
+.abtn{padding:8px 14px;border-radius:10px;border:1.5px solid #e5e7eb;background:#fff;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;color:#6b7280;transition:all .15s}
+.abtn:hover{border-color:#ccc;color:#111}
+.abtn.on{background:#00234b;color:#fff;border-color:#00234b}
+.kino-btn{position:absolute;top:10px;right:12px;z-index:200;padding:6px 12px;border-radius:10px;border:1.5px solid rgba(255,255,255,.9);background:rgba(255,255,255,.92);cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;color:#374151;box-shadow:0 2px 6px rgba(0,0,0,.18);white-space:nowrap;transition:all .15s}
+.kino-btn:hover{border-color:#dc0a2d;color:#dc0a2d;background:#fff}
+.kino-btn.running{background:#dc0a2d;color:#fff;border-color:#dc0a2d;box-shadow:0 2px 8px rgba(220,10,45,.35)}
+.grid{display:grid;grid-template-columns:300px 1fr;gap:16px;align-items:start}
+.sidebar{background:#fff;border:1.5px solid #e5e7eb;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.05);height:620px;display:flex;flex-direction:column}
+.sh{padding:14px 16px 10px;border-bottom:1px solid #f3f4f6}
+.sh h3{font-size:14px;font-weight:700;color:#00234b}
+.shc{font-size:12px;color:#6b7280;margin-top:2px}
+.pl{flex:1;overflow-y:auto;padding:8px;min-height:0}
+.pl::-webkit-scrollbar{width:4px}
+.pl::-webkit-scrollbar-thumb{background:#e5e7eb;border-radius:4px}
+.pi{padding:10px 12px;border-radius:10px;cursor:pointer;border:1.5px solid transparent;margin-bottom:4px;transition:all .12s}
+.pi:hover{background:#f8f9fb}
+.pi.act{background:#f0f4ff;border-color:#c7d2fe}
+.pi-n{font-size:13px;font-weight:600;color:#111;line-height:1.35;margin-bottom:5px}
+.pi-m{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.pk{padding:3px 8px;border-radius:100px;font-size:11px;font-weight:700}
+.k-b{background:#fee2e2;color:#dc0a2d}
+.k-a{background:#dcfce7;color:#15803d}
+.k-p{background:#dce8f5;color:#00234b}
+.k-d{background:#f2f2f2;color:#6b7280}
+.pi-c{font-size:11px;color:#9ca3af}
+.ss{padding:12px 14px;border-top:1px solid #f3f4f6;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sc3{background:#f8f9fb;border-radius:9px;padding:9px 10px;text-align:center}
+.sn{font-size:20px;font-weight:700;color:#00234b}
+.sl{font-size:11px;color:#6b7280;margin-top:2px}
+.mapbox{border-radius:16px;overflow:visible;position:relative;border:1.5px solid #e5e7eb;box-shadow:0 2px 12px rgba(0,0,0,.06);flex:1;min-width:0;height:620px}
+#map{width:100%;height:100%;border-radius:14px;overflow:hidden}
+.stog{position:absolute;bottom:28px;left:10px;z-index:200;display:flex;flex-direction:column;gap:4px}
+.stbtn{padding:5px 10px;font-size:12px;font-weight:600;border-radius:8px;border:1.5px solid rgba(255,255,255,.9);background:rgba(255,255,255,.92);cursor:pointer;font-family:inherit;color:#374151;box-shadow:0 1px 4px rgba(0,0,0,.12);white-space:nowrap}
+.stbtn.on{background:#00234b;color:#fff;border-color:#00234b}
+.abn{position:absolute;top:10px;right:12px;max-width:300px;background:#00234b;color:#fff;border-radius:10px;padding:9px 13px;font-size:13px;display:none;align-items:center;gap:8px;z-index:200}
+.abn.show{display:flex}
+.pin{width:16px;height:16px;border-radius:50%;border:2px solid #fff;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.28)}
+.pin:hover{box-shadow:0 3px 10px rgba(0,0,0,.4)}
+.pin.act{outline:3px solid rgba(180,180,180,.6);outline-offset:2px}
+@keyframes kino-pulse{0%{box-shadow:0 0 0 0 rgba(255,255,255,.7),0 2px 6px rgba(0,0,0,.3)}70%{box-shadow:0 0 0 10px rgba(255,255,255,0),0 2px 6px rgba(0,0,0,.3)}100%{box-shadow:0 0 0 0 rgba(255,255,255,0),0 2px 6px rgba(0,0,0,.3)}}
+.kino-pin-active{animation:kino-pulse 1.4s ease-out infinite;outline:3px solid rgba(255,255,255,.9)!important;outline-offset:3px}
+.pin.drg{cursor:grab}
+.pin.drg.dragging{cursor:grabbing}
+
+/* Panel als rechte Spalte */
+.map-panel-wrap{display:flex;gap:16px;align-items:flex-start;position:relative}
+.panel-wrap{display:none;flex-direction:column;gap:0;width:300px;flex-shrink:0;position:relative;margin-top:-44px}
+.panel-wrap.show{display:flex}
+.pnav-row{display:flex;align-items:center;padding:0 2px;height:44px;flex-shrink:0;gap:6px;position:relative}
+.pnav-btn{width:36px;height:36px;border-radius:50%;background:#fff;border:1.5px solid #e5e7eb;cursor:pointer;font-family:inherit;color:#374151;font-size:20px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.1);transition:all .15s;flex-shrink:0;line-height:1}
+.pnav-btn:hover{background:#f0f4ff;border-color:#c7d2fe;color:#00234b}
+.pnav-btn:disabled{opacity:.28;cursor:default;pointer-events:none}
+.pnav-info{font-size:11px;color:#6b7280;font-weight:500;white-space:nowrap;flex:1;text-align:center}
+.panel{background:#fff;border:1.5px solid #e5e7eb;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);overflow-y:auto;flex:1;min-height:0}
+.pim{width:100%;background:linear-gradient(135deg,#dce8f5,#e8f0fe);display:flex;align-items:center;justify-content:center;height:90px;color:#9ca3af;font-size:14px;border-radius:14px 14px 0 0;overflow:hidden}
+.pim.has{height:200px}
+.pim img{width:100%;height:100%;object-fit:cover}
+.pb{padding:18px}
+.pcls{background:#fff;border:1.5px solid #e5e7eb;cursor:pointer;color:#6b7280;font-size:13px;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.1);font-family:inherit;transition:all .15s;position:absolute;top:-32px;right:0}
+.pcls:hover{color:#dc0a2d;border-color:#dc0a2d;background:#fff8f8}
+.tgs{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.sbg{padding:4px 10px;border-radius:100px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+.sb-b{background:#fee2e2;color:#dc0a2d}
+.sb-a{background:#dcfce7;color:#15803d}
+.sb-p{background:#dce8f5;color:#00234b}
+.sb-d{background:#f2f2f2;color:#6b7280}
+.gtg{padding:4px 10px;border-radius:100px;font-size:12px;font-weight:600;background:#dce8f5;color:#00234b}
+.jtg{padding:4px 10px;border-radius:100px;font-size:12px;font-weight:600;background:#f0fdf4;color:#166534}
+.panel h3{font-size:17px;font-weight:700;color:#111;margin-bottom:5px;line-height:1.4}
+.plc{font-size:13px;color:#6b7280;margin-bottom:14px;line-height:1.45}
+.pgr{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
+.pc2{background:#f8f9fb;border-radius:10px;padding:10px 12px;border:1px solid #f0f0f0}
+.pc2 .lb{font-size:12px;color:#9ca3af;margin-bottom:3px}
+.pc2 .vl{font-size:14px;font-weight:600;color:#111}
+.pds{font-size:13px;color:#4b5563;line-height:1.65;padding-top:12px;border-top:1px solid #f3f4f6}
+.panlagen{margin-top:12px;padding-top:12px;border-top:1px solid #f3f4f6}
+.panlagen-title{font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px}
+.panlagen-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:4px}
+.panlagen-list li{font-size:12px;color:#374151;padding:5px 9px;background:#f8f9fb;border-radius:7px;border:1px solid #f0f0f0;line-height:1.4}
+.fh{font-size:12px;margin-top:7px}
+.fh a{color:#00234b;text-decoration:none}
+.fh a:hover{text-decoration:underline}
+.plcard{margin-top:14px;border-top:1.5px solid #f0f0f0;padding-top:14px;display:flex;gap:13px;align-items:flex-start}
+.plav{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#dce8f5,#e8f0fe);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#00234b;overflow:hidden;border:2.5px solid #e5e7eb}
+.plav img{width:100%;height:100%;object-fit:cover;object-position:center top}
+.pli{flex:1;min-width:0}
+.pln{font-size:14px;font-weight:700;color:#111;margin-bottom:2px}
+.plr{font-size:11px;color:#6b7280;margin-bottom:7px}
+.plco{display:flex;flex-direction:column;gap:5px}
+.plco a{font-size:13px;color:#00234b;text-decoration:none;display:flex;align-items:center;gap:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.plco a:hover{text-decoration:underline}
+.sbcard{margin-top:10px;border-top:1px dashed #e5e7eb;padding-top:10px;display:none;gap:13px;align-items:flex-start}
+.sbav{width:36px;height:36px;border-radius:50%;background:#f0f4ff;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#6b7280;border:1.5px solid #e5e7eb;overflow:hidden}
+.sbav img{width:100%;height:100%;object-fit:cover;object-position:center top}
+.sbli{flex:1;min-width:0}
+.sbln{font-size:13px;font-weight:600;color:#111;margin-bottom:1px}
+.sblr{font-size:11px;color:#9ca3af;margin-bottom:5px}
+.sbco a{font-size:12px;color:#00234b;text-decoration:none;display:flex;align-items:center;gap:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sbco a:hover{text-decoration:underline}
+.ep{position:absolute;top:12px;left:12px;width:300px;background:#fff;border:1.5px solid #00234b;border-radius:16px;z-index:300;display:none;box-shadow:0 8px 28px rgba(0,35,75,.18);max-height:calc(100% - 24px);overflow-y:auto}
+.ep.show{display:block}
+.eh{background:#00234b;color:#fff;padding:12px 15px;display:flex;align-items:center;justify-content:space-between;border-radius:14px 14px 0 0;position:sticky;top:0;z-index:1}
+.eh h4{font-size:14px;font-weight:700}
+.ecl{background:rgba(255,255,255,.2);border:none;cursor:pointer;color:#fff;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-family:inherit}
+.ecl:hover{background:rgba(255,255,255,.35)}
+.eb{padding:14px}
+.ehi{background:#eef2ff;border:1px solid #c7d2fe;border-radius:9px;padding:9px 11px;font-size:12px;color:#00234b;margin-bottom:12px;line-height:1.55}
+.esec{font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin:12px 0 7px;padding-bottom:5px;border-bottom:1px solid #f3f4f6}
+.fi{margin-bottom:9px}
+.fi label{display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:3px}
+.fi input,.fi select{width:100%;padding:8px 10px;font-size:13px;border:1.5px solid #e5e7eb;border-radius:9px;font-family:inherit;outline:none;background:#fff;color:#111;transition:border .15s}
+.fi input:focus{border-color:#00234b}
+.cr{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.gst{font-size:12px;color:#6b7280;margin-top:5px;text-align:center;min-height:16px}
+.fpr{width:100%;height:80px;border-radius:9px;background:#f8f9fb;border:1.5px dashed #e5e7eb;display:flex;align-items:center;justify-content:center;font-size:12px;color:#9ca3af;margin-top:7px;overflow:hidden}
+.fpr img{width:100%;height:80px;object-fit:cover;border-radius:7px}
+.avpr{width:50px;height:50px;border-radius:50%;background:#eef2ff;border:1.5px dashed #c7d2fe;display:flex;align-items:center;justify-content:center;font-size:20px;overflow:hidden;margin-top:6px}
+.avpr img{width:50px;height:50px;object-fit:cover;border-radius:50%}
+.upl{display:none}
+.ubtn{width:100%;margin-top:5px;padding:7px;background:#f8f9fb;border:1.5px dashed #e5e7eb;border-radius:9px;font-size:12px;color:#6b7280;cursor:pointer;font-family:inherit;text-align:center}
+.ubtn:hover{background:#eef2ff;border-color:#c7d2fe;color:#00234b}
+.br{display:flex;gap:7px;margin-top:12px}
+.bsave{flex:1;padding:9px;background:#00234b;color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+.bsave:hover{background:#003b80}
+.bsec{flex:1;padding:9px;background:#eef2ff;color:#00234b;border:1.5px solid #c7d2fe;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+.bsec:hover{background:#e0e7ff}
+.xbar{background:#fff;border:1.5px solid #e5e7eb;border-radius:12px;padding:10px 16px;margin-top:12px;display:none;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.xbar.show{display:flex}
+.xbar span{font-size:13px;color:#374151}
+.bexp{padding:7px 14px;background:#059669;color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+.nores{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;padding:10px 18px;font-size:13px;color:#6b7280;z-index:100;box-shadow:0 4px 14px rgba(0,0,0,.07);display:none;white-space:nowrap}
+.nores.show{display:block}
+
+
+/* ── KINO-MODUS ── */
+.kino-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:2000;display:none;flex-direction:column;align-items:center;justify-content:center}
+.kino-overlay.show{display:flex}
+.kino-inner{width:min(1300px,98vw);height:92vh;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.5);display:grid;grid-template-columns:1fr 480px;position:relative}
+.kino-map-wrap{position:relative}
+#kino-map{width:100%;height:100%}
+.kino-info{padding:24px;display:flex;flex-direction:column;justify-content:space-between;overflow-y:auto;border-left:1.5px solid #f3f4f6}
+.kino-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.kino-title{font-size:22px;font-weight:700;color:#111;margin-bottom:6px;line-height:1.3}
+.kino-loc{font-size:13px;color:#6b7280;margin-bottom:18px}
+.kino-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:16px}
+.kino-card{background:#f8f9fb;border-radius:10px;padding:10px 12px;border:1px solid #f0f0f0}
+.kino-card .lb{font-size:11px;color:#9ca3af;margin-bottom:2px}
+.kino-card .vl{font-size:14px;font-weight:600;color:#111}
+.kino-desc{font-size:13px;color:#4b5563;line-height:1.65;margin-bottom:18px}
+.kino-img{width:100%;height:260px;border-radius:10px;overflow:hidden;margin-bottom:14px;background:linear-gradient(135deg,#dce8f5,#e8f0fe);display:none;flex-shrink:0}
+.kino-img img{width:100%;height:100%;object-fit:cover}
+.kino-img.has{display:block}
+.kino-people{display:flex;flex-direction:row;padding-bottom:16px;margin-top:0;margin-bottom:16px;border-bottom:1.5px solid #f0f0f0;margin-left:-24px;margin-right:-24px}
+.kino-pl{display:flex;gap:12px;align-items:flex-start;width:50%;min-width:0;overflow:hidden;padding:0 24px;box-sizing:border-box}
+.kino-pl+.kino-pl{border-left:1.5px solid #f0f0f0}
+.kino-av{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#dce8f5,#e8f0fe);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#00234b;overflow:hidden;border:2.5px solid #e5e7eb}
+.kino-av img{width:100%;height:100%;object-fit:cover;object-position:center top}
+.kino-av.lg{width:64px;height:64px;font-size:22px}
+.kino-pln{font-size:14px;font-weight:700;color:#111;margin-bottom:2px}
+.kino-plr{font-size:11px;color:#6b7280;margin-bottom:5px}
+.kino-plco a{font-size:12px;color:#00234b;text-decoration:none;display:block}
+/* Controls über der Kino-Karte */
+.kino-top{position:absolute;top:12px;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:0 14px;z-index:20}
+.kino-close{background:rgba(255,255,255,.93);border:none;cursor:pointer;font-size:14px;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.2);font-family:inherit;color:#333}
+.kino-close:hover{background:#fff}
+.kino-nav{display:flex;gap:8px}
+.kino-nb{background:rgba(255,255,255,.93);border:none;cursor:pointer;font-size:18px;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.2);font-family:inherit;color:#333}
+.kino-nb:hover{background:#fff;color:#00234b}
+
+/* ── CLUSTER ── */
+.pin-cluster{background:#00234b;color:#fff;width:20px;height:20px;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;cursor:pointer;position:relative}
+.pin-cluster:hover{box-shadow:0 3px 10px rgba(0,0,0,.4)}
+.pin-cluster::after{content:attr(data-count);position:absolute;top:-5px;right:-6px;background:#dc0a2d;color:#fff;border-radius:100px;font-size:8px;font-weight:700;padding:1px 4px;border:1.5px solid #fff;line-height:1.4}
+
+/* Pin-Tooltip */
+.pin-tooltip{position:absolute;z-index:9999;pointer-events:none;width:200px;background:#fff;border-radius:11px;box-shadow:0 4px 18px rgba(0,0,0,.18);border:1px solid #e5e7eb;overflow:hidden;opacity:0;transition:opacity .15s}
+.pin-tooltip.show{opacity:1}
+.pin-tooltip-img{width:100%;height:90px;object-fit:cover;object-position:center top;display:block;background:#f0f4ff}
+.pin-tooltip-img-ph{width:100%;height:90px;background:linear-gradient(135deg,#dce8f5,#e8f0fe);display:flex;align-items:center;justify-content:center;font-size:11px;color:#9ca3af}
+.pin-tooltip-body{padding:9px 11px}
+.pin-tooltip-name{font-size:12px;font-weight:700;color:#111;line-height:1.35;margin-bottom:3px}
+.pin-tooltip-sub{font-size:11px;color:#6b7280;display:flex;align-items:center;gap:4px}
+.pin-tooltip-st{display:inline-block;width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.pin-tooltip::after{content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:#fff}
+.pin-tooltip::before{content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);border:7px solid transparent;border-top-color:#e5e7eb;margin-top:1px}
+.pi-cluster-badge{display:inline-flex;align-items:center;gap:3px;background:#dce8f5;color:#00234b;border-radius:100px;font-size:10px;font-weight:700;padding:1px 7px;margin-left:5px;vertical-align:middle}
+.cluster-hdr{background:linear-gradient(135deg,#00234b,#1a3a6b);border-radius:14px 14px 0 0;padding:14px 18px;color:#fff}
+.cluster-hdr .ch-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;opacity:.7;margin-bottom:4px}
+.cluster-hdr h3{font-size:16px;font-weight:700;color:#fff;line-height:1.35;margin-bottom:3px}
+.cluster-hdr .ch-sub{font-size:12px;opacity:.75}
+.ctabs{display:flex;gap:0;border-bottom:1.5px solid #f0f0f0;margin:0 -18px 14px;padding:0 18px;overflow-x:auto}
+.ctab{padding:9px 12px;font-size:12px;font-weight:600;color:#9ca3af;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s;margin-bottom:-1.5px;flex-shrink:0;user-select:none}
+.ctab.act{color:#00234b;border-bottom-color:#00234b}
+.ctab:hover:not(.act){color:#374151}
+.ctab-pane{display:none}
+.ctab-pane.act{display:block}
+.call-lbl{font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.06em;margin-bottom:9px;display:flex;align-items:center;gap:6px}
+.call-badge{background:#00234b;color:#fff;border-radius:100px;font-size:9px;padding:1px 6px;font-weight:700}
+.call-proj-sep{font-weight:700;color:#00234b;background:#dce8f5;border-color:#c7d2fe}
+
+.kino-list{background:#f8f9fb;border-left:1.5px solid #e5e7eb;display:flex;flex-direction:column;overflow:hidden}
+.kino-list-head{padding:14px 16px 10px;border-bottom:1px solid #e5e7eb;flex-shrink:0}
+.kino-list-head h4{font-size:13px;font-weight:700;color:#00234b}
+.kino-list-scroll{flex:1;overflow-y:auto;padding:8px}
+.kino-list-scroll::-webkit-scrollbar{width:4px}
+.kino-list-scroll::-webkit-scrollbar-thumb{background:#e5e7eb;border-radius:4px}
+.kino-pi{padding:8px 10px;border-radius:9px;cursor:pointer;border:1.5px solid transparent;margin-bottom:3px;transition:all .15s}
+.kino-pi:hover{background:#fff;border-color:#e5e7eb}
+.kino-pi.kino-act{background:#fff;border-color:#00234b}
+.kino-pi-name{font-size:12px;font-weight:600;color:#111;line-height:1.3;margin-bottom:3px}
+.kino-pi-meta{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.kino-pi-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.kino-pi-city{font-size:10px;color:#9ca3af}
+.kino-count{position:absolute;bottom:10px;right:12px;background:rgba(0,0,0,.5);color:#fff;font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;z-index:20}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hdr">
+    <img src="data:image/png;base64,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" alt="airpool" style="height:36px;width:auto">
+    <div class="sb">
+      <span class="si">&#128269;</span>
+      <input type="text" id="sq" placeholder="Suche: Krankenhaus, Lingen, Decker ..."/>
+      <button class="scl" id="scl">&#10005;</button>
+    </div>
+    <div class="dds">
+      <div class="dw" id="dw-g"><span class="dw-label">Gewerk</span><button class="dw-btn" id="dg-btn">Alle <span class="da">&#9660;</span></button><div class="ms-drop" id="dg-drop"></div></div>
+      <div class="dw" id="dw-s"><span class="dw-label">Status</span><button class="dw-btn" id="ds-btn">Alle <span class="da">&#9660;</span></button><div class="ms-drop" id="ds-drop"></div></div>
+      <div class="dw" id="dw-y"><span class="dw-label">Jahr</span><button class="dw-btn" id="dy-btn">Alle <span class="da">&#9660;</span></button><div class="ms-drop" id="dy-drop"></div></div>
+
+    </div>
+  
+  </div>
+  <div class="grid">
+    <div class="sidebar" id="sidebar-el">
+      <div class="sh"><h3>Projekte</h3><div class="shc" id="shc">0 Projekte</div></div>
+      <div class="pl" id="pl"></div>
+      <div class="ss">
+        <div class="sc3"><div class="sn" id="s1">-</div><div class="sl">Projekte</div></div>
+        <div class="sc3"><div class="sn" id="s2">-</div><div class="sl">Städte</div></div>
+        <div class="sc3"><div class="sn" id="s4">-</div><div class="sl">Projektleiter</div></div>
+      </div>
+    </div>
+    <div class="map-panel-wrap">
+      <div class="mapbox">
+        <div id="map"></div>
+        <button class="kino-btn" id="kino-btn">&#127916; Kino</button>
+        <div class="stog">
+          <button class="stbtn on" id="bn">&#128506; Karte</button>
+          <button class="stbtn" id="bsat">&#128752; Satellit</button>
+        </div>
+        <div class="nores" id="nores">Keine Projekte gefunden</div>
+      </div>
+      <!-- Info-Panel rechts -->
+      <div class="panel-wrap" id="panel-wrap">
+        <div class="pnav-row">
+          <button class="pcls" id="pcls">&#10005;</button>
+          <button class="pnav-btn" id="pnav-prev" disabled>&#8592;</button>
+          <span class="pnav-info" id="pnav-info"></span>
+          <button class="pnav-btn" id="pnav-next" disabled>&#8594;</button>
+        </div>
+        <div class="panel" id="panel">
+          <div class="pim" id="pim"><span>Kein Bild</span></div>
+          <div class="pb">
+            <div class="tgs"><span class="sbg" id="ps"></span><span class="gtg" id="pg"></span><span class="jtg" id="pj"></span></div>
+            <h3 id="pn"></h3>
+            <div class="plc">&#128205; <span id="plo"></span></div>
+            <div class="pgr">
+              <div class="pc2"><div class="lb">Kom-Nr.</div><div class="vl" id="pnr"></div></div>
+              <div class="pc2"><div class="lb">Auftraggeber</div><div class="vl" id="pa"></div></div>
+              <div class="pc2"><div class="lb">Gewerk</div><div class="vl" id="pgw"></div></div>
+            </div>
+            <div class="pds" id="pd"></div>
+            <div class="panlagen" id="panlagen" style="display:none">
+              <div class="panlagen-title">&#9881; Anlagen</div>
+              <ul class="panlagen-list" id="panlagen-list"></ul>
+            </div>
+            <div class="fh" id="fh"></div>
+            <div class="plcard" id="plcard">
+              <div class="plav" id="plav">?</div>
+              <div class="pli">
+                <div class="pln" id="pln"></div>
+                <div class="plr">Projektleiter</div>
+                <div class="plco" id="plco"></div>
+              </div>
+            </div>
+            <div class="sbcard" id="sbcard">
+              <div class="sbav">SB</div>
+              <div class="sbli">
+                <div class="sbln" id="sbln"></div>
+                <div class="sblr">Sachbearbeiter</div>
+                <div class="sbco" id="sbco"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- KINO OVERLAY -->
+<div class="kino-overlay" id="kino-overlay">
+  <div class="kino-inner">
+    <div class="kino-map-wrap">
+      <div id="kino-map"></div>
+      <div class="kino-top">
+        <div style="display:flex;gap:8px">
+          <button class="kino-close" id="kino-close">&#10005;</button>
+        </div>
+      </div>
+      <div class="kino-count" id="kino-count">1 / 13</div>
+    </div>
+    <div class="kino-info">
+      <div>
+        <div class="kino-img" id="ki-img"></div>
+        <div class="kino-people">
+          <div class="kino-pl">
+            <div class="kino-av lg" id="ki-av">?</div>
+            <div>
+              <div class="kino-pln" id="ki-pln"></div>
+              <div class="kino-plr">Projektleiter</div>
+              <div class="kino-plco" id="ki-plco"></div>
+            </div>
+          </div>
+          <div class="kino-pl" id="ki-sb-wrap" style="display:none">
+            <div class="kino-av" id="ki-sbav">?</div>
+            <div>
+              <div class="kino-pln" id="ki-sbn"></div>
+              <div class="kino-plr">Sachbearbeiter</div>
+              <div class="kino-plco" id="ki-sbco"></div>
+            </div>
+          </div>
+        </div>
+        <div class="kino-tags" id="ki-tags"></div>
+        <div class="kino-title" id="ki-title"></div>
+        <div class="kino-loc">&#128205; <span id="ki-loc"></span></div>
+        <div class="kino-grid">
+          <div class="kino-card"><div class="lb">Kom-Nr.</div><div class="vl" id="ki-nr"></div></div>
+          <div class="kino-card"><div class="lb">Auftraggeber</div><div class="vl" id="ki-ag"></div></div>
+          <div class="kino-card"><div class="lb">Gewerk</div><div class="vl" id="ki-gw"></div></div>
+        </div>
+        <div class="kino-desc" id="ki-desc"></div>
+        <div class="panlagen" id="ki-anlagen" style="display:none">
+          <div class="panlagen-title">&#9881; Anlagen</div>
+          <ul class="panlagen-list" id="ki-anlagen-list"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var DATA=[
+  {nr:503333,name:"Kreiskrankenhaus Osterholz / Neubau Intensivstation",ag:"LK Osterholz",stadt:"27711 Osterholz-Scharmbeck",adr:"Am Krankenhaus 4, 27711 Osterholz-Scharmbeck",gw:"Lüftung + Klima",val:0,foto:"https://www.deutsches-krankenhaus-verzeichnis.de/app/file/image/show/b2f9e07770fcf029_19f2a992-af7a-4afb-aef0-34e933189812.png",desc:"Ergänzung Pflegestation + Neubau Intensivstation",anlagen:"Abluftgerät = 18.100 m³/h\nZuluftgerät = 18.100 m³/h\nNachbehandlungsgerät ITS = 6.410 m³/h\n2x Kaltwassersätze = á 29,5 kW\n1x Außengerät = 5,0 kW\n1x Innengerät = 5,0 kW\n10x Heizregister = ca. 44 kW\n1x Kühlregister = 1,5 kW",pl:"sd",st:"Abgeschlossen",jr:2021,lat:53.23354,lng:8.7939,sb:{name:"Lars Klöppel",kuerzel:"kl",email:"klöppel@airpool.de",tel:"05491 9779-49"}},
+  {nr:503423,name:"Immobilien Bremen / Turnhalle Bremen",ag:"Immobilien Bremen AöR",stadt:"Bremen",adr:"Delfter Str. 16, 28259 Bremen-Huchting",gw:"Lüftung",val:0,foto:"https://static.schule.bremen.de/instanzen/200/schulbilder/355_Bild01.png",desc:"Sanierung Tunrhalle Delfter Straße",anlagen:"Zu- und Abluftgerät = 8.000 m³/h\nZu- und Abluftgerät = 5.800 m³/h\nZu- und Abluftgerät = 18.450 m³/h\nZu- und Abluftgerät = 5.800 m³/h",pl:"ma",st:"Abgeschlossen",jr:2023,lat:53.0469,lng:8.72757,sb:{name:"Nicolas Brakmann",kuerzel:"nb",email:"brakmann@airpool.de",tel:"05491 9779-554"}},
+  {nr:503588,name:"LWL / Klinik Lengerich",ag:"LWL",stadt:"49525 Lengerich",adr:"Parkallee 10, 49525 Lengerich",gw:"Lüftung + Klima",val:0,foto:"https://www.agn.de/fileadmin/Projekte/Lengerich/Lengerich_LWL_agn_Luftbild.jpg",desc:"LWL-Klinik Lengerich",anlagen:"Zu- und Abluftgerät = 8.805 m³/h\nZu- und Abluftgerät = 8.805 m³/h\nZu- und Abluftgerät = 5.000 m³/h\nZu- und Abluftgerät = 5.800 m³/h\nLuftkühler = 12,68 kW\nKVS System = 2600 m³/h\nWärmepumpe = 11,6 kW\n3x Außengeräte = ca. 34,3 kW\nInnengeräte = ca. 3,6 kW\n2x KWS = ca. 93,2 kW\nRückkühler = 49,0 kW\n3x Ventilatoren = 12.885 m³/h",pl:"lk",st:"",jr:0,lat:52.19491,lng:7.85507,sb:{name:"Luis Kempin",kuerzel:"ke",email:"kempin@airpool.de",tel:"05491 9779-61"}},
+  {nr:503614,name:"IAB Herford / Umbau Hauptgebäude",ag:"IAB Herford",stadt:"32049 Herford",adr:"Werrestraße 10, 32049 Herford",gw:"Lüftung",val:0,foto:"https://www.rg-herford.de/files/ravensberger/images/kopfgrafiken/Relaunch%202014/Schule.jpg",desc:"Umbau Hauptgebäude IAB Herford",anlagen:"4x Zu- und abluftgeräte = insgesamt 64.200 m³/h\n4x Außengeräte = 14,30 kW\n4x Innengeräte = 14,30 kW\n8x Ventilatoren 3085 m³/h",pl:"sd",st:"In Bearbeitung",jr:2025,lat:52.12077,lng:8.67739,sb:{name:"Lars Klöppel",kuerzel:"kl",email:"klöppel@airpool.de",tel:"05491 9779-49"}},
+  {nr:503753,name:"Goldbeck / PAN Bischweier",ag:"Goldbeck",stadt:"76476 Bischweier",adr:"Kuppenheimer Straße 30",gw:"Lüftungs + Klima",val:0,foto:"https://www.mercedes-fans.de/thumbs/img/News/59/21/02/p/p_full/eroeffnung-international-consolidation-center-icc-fuer-mercedes-benz-neues-logistikzentrum-mit-500-arbeitsplaetzen-in-bischweier-nahe-rastatt-22159.jpg",desc:"PAN Bischweier Neubau Logitsikpark",anlagen:"6x Kompaktlüftungsgeräte = 19.910 m³/h\n4x Zu- und Abluftgeräte = 300.000 m³/h\n2x Zuluftgeräte = 685 m³/h\n63x Ventilatoren = 595.045 m³/h\n34x Wärmepumpen = 910 kW",pl:"st",st:"Abgeschlossen",jr:2025,lat:48.83505,lng:8.27189,sb:{name:"Jonas Decker",kuerzel:"de",email:"decker@airpool.de",tel:""}},
+  {nr:503793,name:"The Family Butchers / Lüftung ZVP, Zuluft Backraum",ag:"The Family Butchers",stadt:"49638 Nortrup",adr:"Hauptstraße 2",gw:"Lüftung",val:0,foto:"https://www.lebensmittelzeitung.net/news/media/23/Produk-an-mehr-Stando-In-Nort-und-Vers-hat-der-Fle-229287.jpeg",desc:"The Family Butchers Belüftung ZVP, Zuluft Backraum",anlagen:"Zu- und Abluftgerät = 17.500 m³/h\n1x Zuluftgerät = 13.000 m³/h\n1x Abluftgerät = 8.100 m³/h\n2x Kühlregister = 7.500 m³/h",pl:"sd",st:"Abgeschlossen",jr:2024,lat:52.61833,lng:7.85863,sb:{name:"Lars Klöppel",kuerzel:"kl",email:"klöppel@airpool.de",tel:"05491 9779-49"}},
+  {nr:503795,name:"MBN / RWE Autarkie Lingen",ag:"MBN GmbH",stadt:"49811 Lingen",adr:"Am Hilgenberg 2",gw:"Lüftung + Klima",val:0,foto:"https://www.rwe.com/-/media/RWE/images/07-presse/rwe-generation-se/2023/2023-09-06-get-h2-nukleus-behoerden-genehmigen-bau-und-betrieb-der-elektrolyse-grossanlage-in-lingen.jpg?db=web&mw=1920&w=2160&hash=8ED5B1E075FF01CC14F412E536CF2DBF",desc:"RWE Autarkie Lingen",anlagen:"4x Zu- und Abluftgeräte = insgesamt 32.760 m³/h\n4x Heizregister = insgesamt 2.675 kW\n10x Außengeräte = insgesamt 125 kW\n8x Ventilatoren = 7.890 m³/h",pl:"ro",st:"Abgeschlossen",jr:2026,lat:52.47288,lng:7.32406,sb:null},
+  {nr:503807,name:"LWL / Klinik Lengerich 2. BA",ag:"LWL",stadt:"49525 Lengerich",adr:"Parkallee 10, 49525 Lengerich",gw:"Lüftung + Klima",val:0,foto:"https://www.agn.de/fileadmin/Projekte/Lengerich/Lengerich_LWL_agn_Luftbild.jpg",desc:"LWL-Klinik Lengerich 2. Bauabschnitt",anlagen:"4x Zu- und Abluftgeräte = 18.050 m³/h\n4x Außengeräte = 23,0 kW\n10x Innengeräte = 26,0 kW",pl:"lk",st:"In Bearbeitung",jr:2026,lat:52.19491,lng:7.85507,sb:null},
+  {nr:503831,name:"The Quality Group / TQG Elsdorf",ag:"The Quality Group",stadt:"27404 Elsdorf",adr:"Lange Str. 62",gw:"Lüftung",val:0,foto:"https://logistik-heute.de/sites/default/files/public/styles/_news_2100x1400_/public/images-fachartikel/3403657-100-dpi-rgb.jpg",desc:"TQG Logistics West GmbH",anlagen:"Zu- und Abluftgerät = 7.500 m³/h\n4x Außengeräte = 56,0 kW\n8x Innengeräte = 24,0 kW\n2x Ventilatoren = 10.000 kW",pl:"ma",st:"Abgeschlossen",jr:2025,lat:53.23289,lng:9.35163,sb:null},
+  {nr:503833,name:"Ludwig Freytag / Neubau Sport u. Gesundheitsbad",ag:"Ludwig Freytag",stadt:"26125 Oldenburg",adr:"Mühlenhofsweg 80",gw:"Lüftung + Klima",val:0,foto:"https://www.oldenburg.de/fileadmin/_processed_/2/a/csm_250508_19_-_Aussenperspektive_30696c9974.jpg",desc:"Neubau Sport- und Gesundheitsbad Oldenburg",anlagen:"7x Zu- und Abluftgeräte = 96.300 m³/h\n1x Außengerät = 5,0 kW\n1x Innengeräte = 5,0 kW\n8x Ventilatoren = 4.650 m³/h",pl:"ro",st:"Abgeschlossen",jr:2026,lat:53.16703,lng:8.23451,sb:{name:"Markus Schwarte",kuerzel:"schw",email:"schwarte@airpool.de",tel:"05491 9779-34"}},
+  {nr:503842,name:"Sieverding / Neubau Zentrallager Heidemark",ag:"Sieverding",stadt:"26197 Ahlhorn",adr:"Lether Gewerbestrasse 2",gw:"Lüftung + Entrauchung",val:0,foto:"https://www.heidemark.de/fileadmin/_processed_/1/2/csm_heidemark-unternehmen_3ef1a095fa.jpg",desc:"Neubau Zentrallager Heidemark 1.BA",anlagen:"1x Lüftungsgerät = 600 m³/h\n1x Zuluftbox = 150 m³/h\n3x Ventilator = 80.150 m³/h\n1x Kompaktlüftungsgerät = 4.300 m³/h\n2x Außengeräte = 19,5 kW\n1x Innengerät = 3,5 kW",pl:"ma",st:"Abgeschlossen",jr:2025,lat:52.89933,lng:8.18876,sb:null},
+  {nr:503843,name:"Gebr. Willers / Nukleus GET H2 Lingen",ag:"Gebr. Willers",stadt:"49808 Lingen",adr:"Schüttorfer Str. 100",gw:"Klima",val:0,foto:"https://www.rwe.com/presse/rwe-generation/2023-09-06-get-h2-nukleus-behoerden-genehmigen-bau-und-betrieb-der-elektrolyse-grossanlage-in-lingen/",desc:"GET H2 Nukleus Lingen",anlagen:"1x Kaltwassersatz = ca. 99 kW",pl:"ro",st:"Abgeschlossen",jr:2025,lat:52.47824,lng:7.30447,sb:null},
+  {nr:503849,name:"Ludwig Freytag / TBH Grohnde",ag:"Ludwig Freytag",stadt:"31860 Emmerthal",adr:"Kernkraftwerk Grohnde",gw:"HLK + MSR",val:0,foto:"https://www.westfalen-blatt.de/owl/kreis-hoexter/hoexter/rueckbau-atomkraftwerk-grohnde-kernkraft-strom-3552940",desc:"Neubau TBH - AKW Grohnde",anlagen:"2x Zu- und Abluftgeräte = 21.420 m³/h\n2x Ventilatoren = 180 m³/h\n32x Innengeräte = ca. 135 kW\n1x KWS = 157 kW\n1x Freikühler = 139 kW",pl:"ta",st:"Abgeschlossen",jr:2025,lat:52.0347,lng:9.41076,sb:{name:"Magdalena Prokop",kuerzel:"pro",email:"prokop@airpool.de",tel:"05491 9779-35"}},
+  {nr:503854,name:"Dasy & Höne / Lüftung",ag:"Dasy & Dasy - Die Kieferorthopäden",stadt:"49377 Vechta",adr:"An d. Cristoph-Bernh.-Bastei 1",gw:"Lüftung + Klima",val:0,foto:"",desc:"Dasy & Dasy Umbau Praxis Vechta",anlagen:"1x Zu- und Abluftgerät = 5.270 m³/h",pl:"st",st:"Abgeschlossen",jr:2025,lat:52.72504,lng:8.28202,sb:null},
+  {nr:503863,name:"Vollack / MVZ Labor Koblenz",ag:"Vollack GmbH & Co. KG",stadt:"56072 Koblenz",adr:"Im Metternicher Feld 18",gw:"Lüftung",val:0,foto:"https://vollack.de/fileadmin/_processed_/1/2/csm_Vollack_MVZ_Koblenz_Visualisierung_1920_c4bcd0ba23.jpg",desc:"MVZ Labor Koblenz",anlagen:"4x Zu- und Abluftgeräte = ca. 53.065 m³/h\n6x Ventilatoren = 6.050 m³/h",pl:"ta",st:"Abgeschlossen",jr:2026,lat:50.37257,lng:7.54992,sb:null},
+  {nr:503889,name:"ARGE / Nukleus Lingen Linie 2",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"ro",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:503890,name:"Gebr. Willers / Kältemaschine UNT-Verdichter-Geb. Linie 2",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"ro",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:503892,name:"Conditess Feine Kuchen / Kühltunnel 7",ag:"Conditess Feine Kuchen GmbH",stadt:"49740 Haselünne",adr:"Hammer-Tannen-Straße 11",gw:"Lüftung",val:0,foto:"https://www.conditess.de/wp-content/uploads/2025/09/csm-unternehmensgeschichte-conditess-1-ca9702ab37.jpg",desc:"Conditess Kühltunnel 7",anlagen:"1x Zuluftgerät = 23.000 m³/h",pl:"sd",st:"Abgeschlossen",jr:2025,lat:52.65969,lng:7.46363,sb:null},
+  {nr:503895,name:"Stadt Achim / Lüftungsinstallation GS Bierden",ag:"Stadt Achim",stadt:"28832 Achim-Bierden",adr:"Steinweg 39",gw:"Lüftung",val:0,foto:"https://www.weser-kurier.de/resources/0282-18592192dc10-7391edc7eee3-1000/format/large/grundschule_bierden_in_achim.jpeg",desc:"Lüftungsinstallation GS Bierden",anlagen:"6x Zuluftgeräte = 20.250 m³/h",pl:"ma",st:"Abgeschlossen",jr:2026,lat:53.01341,lng:9.01187,sb:null},
+  {nr:503898,name:"Goldbeck / GI0498 Semiramis Lübeck",ag:"Goldbeck",stadt:"23560 Lübeck",adr:"Langensahl 18",gw:"Lüftung + Hallenheizung",val:0,foto:"https://www.dudoq.de/media/processed/8/a/csm_steinhagen-gewerbepark_thumb-min_103900f49c.jpg",desc:"GI0498 Semiramis Lübeck \nHallenheizung, Lüftung, Server",anlagen:"6x Lüftungsgeräte = 14.100 m³/h\n6x Wärmepumpen = 60 kW\n11x Ventilatoren = 1.840 m³/h\n8x Außengeräte = 130 kW\n8 x Innengeräte = 130 kW",pl:"ma",st:"Abgeschlossen",jr:2025,lat:53.8213,lng:10.64789,sb:null},
+  {nr:503900,name:"ARGE / Airbus Nordenham Sozialgeb. 15",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"ma",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:503906,name:"Conditess / Erneuerung Kälte Kühltürme 4+6",ag:"Conditess Feine Kuchen GmbH",stadt:"49740 Haselünne",adr:"Hammer-Tannen-Straße 11",gw:"Lüftung",val:0,foto:"https://www.conditess.de/wp-content/uploads/2025/09/csm-unternehmensgeschichte-conditess-1-ca9702ab37.jpg",desc:"Conditess Kühltürme 4&6",anlagen:"2x Zuluftgeräte = 110.000 m³/h",pl:"sd",st:"Abgeschlossen",jr:2025,lat:52.65969,lng:7.46363,sb:null},
+  {nr:503914,name:"Wilh. Ranck / Energetische Sanierung Dachzentrale",ag:"Wilh. Ranck",stadt:"27232 Sulingen",adr:"Lange Straße 1",gw:"Lüftung + Klima",val:0,foto:"https://www.grosse-groessen-lueneburg.de/wp-content/uploads/2015/05/ranck-haus-1140x565.jpg",desc:"Energetische Sanierung Dachzentrale",anlagen:"1x Zu- und Abluftanlage = 40.000 m³/h\n2x Wärmepumpen = 250 kW",pl:"ro",st:"",jr:0,lat:52.68253,lng:8.81249,sb:null},
+  {nr:503920,name:"Focke / FOPAC Entrauchung Montagehalle 3",ag:"Focke",stadt:"27283 Verden (Aller)-Eitze",adr:"Max-Planck-Straße 110",gw:"Lüftung + Entrauchung",val:0,foto:"https://typisch-tietz.de/wp-content/uploads/2020/02/Au%C3%9Fenansicht-2015-Neubau-und-Umfirmierung-1400x800.jpg",desc:"FOPAC Maschinelle Entrauchung Montagehalle 1",anlagen:"4x Ventilatoren = 10.000 m³/h",pl:"ro",st:"Abgeschlossen",jr:2025,lat:52.92988,lng:9.28166,sb:null},
+  {nr:503930,name:"Magistrat d. Stadt Bremerhaven / Nordsee-Stadion",ag:"Seestadt Immobilien",stadt:"27580 Bremerhaven",adr:"Am Stadion 12",gw:"Lüftung",val:0,foto:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThHbnzRAbvYkmDmKDL79eSuBtBs6joPIT-9caltcgRRA&s=10",desc:"Stadt Bremerhaven Nordsee-Stadion",anlagen:"4x Zu- und Abluftgeräte = 16.225 m³/h",pl:"st",st:"Abgeschlossen",jr:2026,lat:53.5797,lng:8.58286,sb:null},
+  {nr:503931,name:"REHAU / BSK Schleuse",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"ta",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:503942,name:"L+T / Umnutzung Sygn",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"ta",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:503944,name:"GSE Deutschalnd / GSE Hillwood Emmerich",ag:"GSE Deutschland",stadt:"46446 Emmerich am Rhein",adr:"Georg-Elser-Straße",gw:"Lüftung",val:0,foto:"https://www.hillwood.de/images/portfolio/monchengladbach%20I/monchengladbach_I_gallery_1.jpg",desc:"Hillwood Emmerich Halle 1 / 2",anlagen:"3x Zu- und Abluftgeräte = 5.370 m³/h\n3x Außengeräte = 15 kW\n3x Innengeräte = 15kW",pl:"ta",st:"Abgeschlossen",jr:2026,lat:51.84916,lng:6.23818,sb:null},
+  {nr:503947,name:"LWL Klinik Lengerich / Spülküche Haus 13",ag:"LWL Klinik Lengerich",stadt:"49525 Lengerich",adr:"Parkallee 10",gw:"Lüftung + Klima",val:0,foto:"https://www.agn.de/fileadmin/Projekte/Lengerich/Lengerich_LWL_agn_Luftbild.jpg",desc:"LWL-Klinik Lengerich Belüftung Spülküche",anlagen:"",pl:"sd",st:"In Bearbeitung",jr:0,lat:52.19491,lng:7.85507,sb:null},
+  {nr:503948,name:"LK Osterholz / Schweißabsaugungen Interim BTG",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"lk",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:503954,name:"Projektbau Depenbrock / Neubau Grundschule",ag:"Depenbrock Bau GmbH & Co. KG",stadt:"21629 Neu Wulmstorf",adr:"Breslauer Straße 10",gw:"Lüftung + Klima",val:0,foto:"https://www.grundschule-am-moor.de/assets/images/2/PHOTO-2023-09-24-19-35-51a-399c4282.jpg",desc:"Neubau Grundschule + Kita",anlagen:"3x Zu- und Abluftgeräte = 39.875 m³/h\n1x Innengerät = 3,5 kW\n1x Außengerät = 3,5 kW\n2x Heizregister = 430 kW\n93x Volumenstromregler\n236x Volumenstromregler",pl:"st",st:"In Bearbeitung",jr:0,lat:53.4603,lng:9.80376,sb:null},
+  {nr:503956,name:"Gewerk.süd / 18008 Emsbüren",ag:"Gewerk.süd GmbH",stadt:"48488 Emsbüren",adr:"Lise-Meitner-Straße 18",gw:"Heizung / Lüftung / Kühlen",val:0,foto:"https://ge-werk.com/img/asset/YXNzZXRzL3JlZmVyZW56ZW4vaG9sei10dXNjaGUtbG9naXN0aWtoYWxsZS1lbXNidXJlbi9nZXdlcmstaG9sei10dXNjaGUtbG9naXN0aWtoYWxsZS1ob2x6a29uc3RydWt0aW9uLWVtc2J1ZXJlbi1oZWFkZXIuanBn/gewerk-holz-tusche-logistikhalle-holzkonstruktion-emsbueren-header.jpg?h=400&fit=crop&s=00aad7abea176cb7866d7fe450ea9719",desc:"Neubau von 2 Hallen Holz Tusche",anlagen:"1x Zu- und Abluftgerät = 1.890 m³/h\n10x Außengeräte = ca. 206 kW\n26x Innengeräte = ca. 213 kW\n10x Wandheizkörper = \n14x Volumenstromregler\n27x Auslässe",pl:"ro",st:"Abgeschlossen",jr:2026,lat:52.34724,lng:7.28388,sb:null},
+  {nr:503959,name:"LK Osnabrück / Sanierung IGS Fürstenau",ag:"Samtgemeinde Fürstenau",stadt:"49584 Fürstenau",adr:"Schorfteichstraße 21",gw:"Lüftung",val:0,foto:"https://www.westfaelische-hanse.de/wp-content/uploads/leben-lernen-fuerstenau-gesamtschule-aussenansicht-c-gesamtschule-fuerstenau.jpg",desc:"Sanierung IGS Fürstenau Landkreis Osnabrück",anlagen:"1x Zu- und Abluftgerät = 18.000 m³/h\n8x Brandschutzklappen\n11x Volumenstromregler\n15x Auslässe",pl:"sd",st:"Abgeschlossen",jr:2026,lat:52.52097,lng:7.67617,sb:null},
+  {nr:503963,name:"adidas / adidas eCom Fulfillment Center EFC",ag:"adidas",stadt:"49597 Rieste",adr:"Hannoversche Str. 2",gw:"Lüftung + Klima",val:0,foto:"https://jd-kielkowski.com/wp-content/uploads/2023/12/2023_07_Rieste_Jonathan-Danko-Kielkowski-104-1.jpg",desc:"Adidas eCom Fullfilment Center EFC Rieste",anlagen:"4x Zu- und Abluftgeräte = 92.000 m³/h\n1x Zuluftgerät = 36.000 m³/h\n20x  Außengeräte = 540 kW\n1x Jalousieklappe \n1x Drosselklappe (elektrisch)\n12x Brandschutzklappen\n30x Volumenstromregler\n75x Auslässe",pl:"ro",st:"In Bearbeitung",jr:0,lat:52.48881,lng:8.05615,sb:null},
+  {nr:503964,name:"Raumedic / Sanierung Reinraumlüftung",ag:"Raumedic AG",stadt:"91555 Feuchtwangen",adr:"Crailsheimer Str. 34",gw:"Lüftung + Klima",val:0,foto:"https://plasticker.de/images/news/37920_f.01.jpg",desc:"Raumedic AG Werk Feuchtwangen Sanierung Reinraumlüftung",anlagen:"2x Zu- und Abluftgeräte = 29.500 m³/h\n1x Ventilator = 1.200 m³/h\n39x Volumenstromregler\n37x Auslässe",pl:"ta",st:"Abgeschlossen",jr:2026,lat:49.17092,lng:10.32043,sb:null},
+  {nr:503965,name:"Stage Entertaiment / Erneuerung RLT Anlagen",ag:"Stage Entertainment GmbH",stadt:"20457 Hamburg",adr:"Norderelbstraße 6",gw:"Lüftung + Klima",val:0,foto:"https://www.sylent-press.de/wp-content/uploads/2024/10/900_01_08_09_1974.jpg",desc:"Erneuerung RLT Anlagen - KDL",anlagen:"4x Zu- und Abluftgeräte = 127.000 m³/h",pl:"st",st:"In Bearbeitung",jr:0,lat:53.53977,lng:9.97456,sb:null},
+  {nr:503967,name:"Danish Crown / Belüftung Schlachthalle",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"ro",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:503968,name:"Pöppelmann / Lüftung Famac Halle 10",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"ta",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:503970,name:"Mondi / Maschinelle Entrauchung",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"st",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:503972,name:"P+S / M1 Vulkolan",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"sd",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:503973,name:"Biochem - Belüftung Kantine",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"sd",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:503975,name:"Goldbeck / GI0516 BGO Kupferzell",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"ma",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:503976,name:"Goldbeck / Baytree Schwanewede",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"ma",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:503979,name:"Nordfrost / Belüftung Traforäume Versmold",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"sd",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:503982,name:"Kraiburg PuraSys / Abluft Atex Maschine",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"ro",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:503983,name:"Diehl Aviation HH / Wiederinbetriebn. RLT Anl.",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"st",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:503984,name:"Internorm / Anpassung Lüftung Halle Gießerei",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"sd",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:503985,name:"Plattenhardt Wirth / CCN LübeckNeub.+San.HL",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"sd",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:503987,name:"Internorm / Absaughaube Maschine",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"sd",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:503988,name:"OM / OM Medien Emstek Ausbau EG",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"aw",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:503989,name:"Heinrich Kühlmann / Erw. Produktion Werk 3",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"st",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:503991,name:"Krankenhaus St. Elisabeth / Belüftung Alte Kapelle",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"de",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:503993,name:"GSE / Logistikhallen Herten",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"st",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:503994,name:"Sieverding / Zulufteinheit Schlachtung",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"sd",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:503995,name:"delo: Dettmer / 2.Digitaldruckmaschine Werk 2",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"ro",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:503996,name:"Freytag / Homann Bad Essen Neb. Verwaltungsgeb.",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"sd",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:503997,name:"MBN / Neubau CHC Elektrolyse Ostfriesland",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"ro",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:503998,name:"Pöppelmann / Umbau Luftauslass Halle 33",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"ta",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:503999,name:"Goldbeck / GI0527 Arrow Capital Bremen Halle 2",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"ma",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504000,name:"Nordfolien / Abluft Farblager 3",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"sd",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504001,name:"Internorm / Absaugung Nacharbeit",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"sd",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504002,name:"Oldb. Geflügel-spez. / San. Sozialräume Altbau",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"ro",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504003,name:"H. Bröring / Kompressorraum Belüftung Best 3",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"de",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504004,name:"Goldbeck / Prologis Berlin DC5",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"ma",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504005,name:"Goldbeck / GI0531 P3 Berlin Schönefeld",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"ma",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504006,name:"Raumedic / Samarium KAP204",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"ta",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504007,name:"DMK / Anpassung Lüftungssystem KDM",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"sd",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504008,name:"Freytag & v.d. Linde / Homann Bad Essen",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"ta",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504009,name:"Knaup / Umbau, Anschluss Friteuse Gartunnel",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"st",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504010,name:"Christl. Krankenhaus Quakenbrück / Belüftung HKL",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"lk",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504011,name:"Pöppelmann / Werk 2 Halle 41 Produktionsbüro",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"ta",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504012,name:"Sieverding / Abluft Prozesslüfter Heidemark",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"ma",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504013,name:"Oldb. Geflügelspez. / Belüftung Damen WC",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"ro",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504014,name:"REHAU Industries / Programmierung",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"ta",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504015,name:"P+S / Lieferung flexible Schläuche",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"sd",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504016,name:"Almirall Hermal / Umb. Reinraum Flupredniden",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"ro",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504017,name:"Waffelfabrik Meyer zu Venne / Lief. Übergang",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"aw",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504018,name:"Windel Group / Umbau FARÜCHOC",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"lk",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504019,name:"Biobrüterei Schwichteler / Ansaugkammer",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"st",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504020,name:"10. Nordteam / Athleticum Aust. Kühlregister",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"pro",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504021,name:"Oldb Geflügel / Belüftung  Umkleiden Techn Bestand",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"ro",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504022,name:"LWL Klinik / Kühlregister RLT Spülküche Haus 13",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"sd",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504023,name:"P+S / Lieferung Montageschienen",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"sd",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504024,name:"Dematic Limited Banbury / C4 Unizef",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"al",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504025,name:"REHAU / Dunnion 1 Aust. Außenluftkanäle",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"pro",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504026,name:"Goldbeck / Lieferung Dachdurchführungen",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"st",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504027,name:"Elektro Gartmann / adidas EFC Nutzung Bühne",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"ro",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504028,name:"Mondi / Laserabgsaugung",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"de",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504029,name:"Rehau / Rehau Visbek",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"ta",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504030,name:"Leffers / Umplanung Leffers Lippstadt",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"schw",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504031,name:"Aller-Weser-Klinik / Umb. Aufbereitungsraum Endoskopie",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"ma",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504032,name:"delo:Dettmer / Erw. Absaugung Folienschweißung",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"ro",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504033,name:"Sieverding / Neubau Feuerwehr Emstek",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"sd",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504034,name:"Goldbeck / GI0534 Prologis Herne",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"st",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504035,name:"Dematic Limiteds Banbury / C4-UNICEF",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"ro",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504036,name:"Raumedic / Differenzdurcktransmitter",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"ta",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504037,name:"Pöppelmann / Rep. Ventaflex System",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"ta",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504038,name:"Christl. Krankenhaus Quakenbrück / Erw. CT",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"lk",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504040,name:"Mondi / Druckausgleich Tunnel",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"de",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504041,name:"Heinrich Kühlmann / Neubau Werk 5 - Tofu",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"al",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504042,name:"Pöppelmann / Halle 25 Rohrsystem Absaugarm",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"ta",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504043,name:"Sieverding / Eventhalle Kalvelage Höltinghausen",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"sd",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504044,name:"Goldbeck / Segro Dortmund Log B - Lüft/Klima",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"st",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504045,name:"LK Nienburg / BBS Nienburg Sanierung D-Süd",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"lk",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504046,name:"Nordfolien / Übderdruckjalousien",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"sd",st:"",jr:0,lat:null,lng:null,sb:null},
+  {nr:504047,name:"Bädergesell. BHV/Nachrüstung Brandschutzklappen",ag:"",stadt:"",adr:"",gw:"",val:0,foto:"",desc:"",anlagen:"",pl:"st",st:"",jr:0,lat:null,lng:null,sb:null}
+];
+var PL={
+  "al":{name:"Arno Lehmann",email:"lehmann@airpool.de",tel:"",foto:""},
+  "ta":{name:"Stephan Tabeling",email:"tabeling@airpool.de",tel:"05491 9779-19",foto:"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5Ojf/2wBDAQoKCg0MDRoPDxo3JR8lNzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzf/wAARCAB4AHgDASIAAhEBAxEB/8QAHAABAAEFAQEAAAAAAAAAAAAAAAcCAwQFBgEI/8QANBAAAQMDAQQIBQQDAQAAAAAAAQACAwQFESEGEjFBBxMiUWFxkbEII0KBoRQyM8FiktFS/8QAGQEBAAMBAQAAAAAAAAAAAAAAAAEDBAIF/8QAHxEBAQACAgIDAQAAAAAAAAAAAAECEQMSBDETISJB/9oADAMBAAIRAxEAPwCcUREBERAVEsscMbpJXtYxoy5zjgAeJVm41sFuopqupduxRN3if6C+fdsLlXbU3F7jLK4Bu7HE1x3Rr3eS5yy06xxtTuNo7ISQLvQEjuqGf9V+ju9trnllHXU07h9McoJ9F80U+yd6IDmRSsbxBBwVdqW32hIe+CclnF2ufPI91x8lWfFX0+ihfYjpJqqSppqa9yumt8+GiZ+r4HcNTzb7KZwQ4Aggg8CF3jlKquNj1ERdIEREBERAREQEREEY9MV1fHLbrY1xbHI18sns3+1odj7UykpOul7c8rt4vPHGdAt/0z0DJILfVDO8HPa4+GAR7LHtkgpaKPLC4tYDujyWbkv6bPHk9ukpurEYwzIx3LAuMUDonb0ep54WLbr8KuR0FMz5oGTGeIWtq9qYzVmmMZe4Etdjg0hcWzTXpxW1FujoJw5rcRSP3iANPFTF0WXR1x2UiZLJvyUjzBknJ3Rq3P2I9FHm0McV0opOrwXBpOO5bjoLnex10pH51bHIB5ZH/F3xZfemTyMf7EtIiLSxiIiAiIgIiICIiDnNv6CKt2Zq3SNJfA3rIyOR5/jK4CezsucTXSOeYiwDcacDOOKlHaGJ89lrI42lznRHQcSo7opNx26M4HJUcvvbZ403K8tdugtNXC+GMNceyfJYVdY6WrqasPibI7rCXFvPnlX74+okAkppxG76hu5yB3dy19jkqoJJXVUznPkdwPIKvbVqa09dbWUEEj253nA4aTldD0PtZEbhGYgHlrHCTvGTkfY4WjuMhBy7AAOq7no6tTqK1vq3tA/V4fHrk7nEH7k59F1xz9KOfr1rrURFpYBERAREQEREBERAXA7a07qK6tq935NS3BdjQOAwfxg+q75YF9t4udqqKUgb7mkxk8nDgfVc549o748uuW0U1UEsnzRUTbpGkcIx+eaxoKSSJ7pnyVIHNspyrVRdq2haYjC4lpwccR4FaesvddWRuihYWtJ1cVl3Ho9vrTJu10aZHl5wzDjr/wCccVJfRhtdar7ZKWgp3GCtpYWsfSyvy7AGN5p+oe3NfP14r+se6mjk6xx/lk5HH0jwWLSTy0srJ6eV8UsZ3mSMcWuae8EK/ixsm2Lnylun2Ei+f7B0vbQUO624iG4xDT5jdx/+zf7CkOx9LGzlxAbWPlt0x5Ttyz/YaeuFaod6is0lXTVsLZ6OeKeJ3B8Tw5p+4V5AREQEREBERAWi2y2kpNmLFU19TLG2Vsbv08TjrLJjRoHPXGVjbfbWRbJWX9X1Ymqpn9XTxE4DnYzk+AGp9Oa+bdqL7cdoK19bdJ3Tyu7I5NjHc0cgg3ezV8luVPLHXSGWqY4l7nal4Jzn3Wsv93kZv0tP8vP7iOIHctBbax9BUmVg5EEZVp08lRIetO897sl3eVVOKd91dea9NT2v07cNB71fJAGM6ngFSwYC9OGneA1OmVcpXGDAAVQOFSOCpc7xQbO0Xy42SpFRa6yWmkHHcdo7zHA/dTN0ZdJMm0NWLReWRsri0uhmjG62bGpBHJ2NdNDgqBW9rgsyzXB1ovNFcIX9ulnZJ5gHUemQoo+ukVMb2vY17TlrhkHwRBUiIgIiIIY+IOc/qbJBnRrJ5MeOWBQ+P2471MHxCsb1tkkH7y2Zp8ssUQDgg13EnTGpV2njxICRjHevG6AjnvErIEj5pXyyuLnuOpPNShcyAqR2nnuGi8doMnkq427rdePEolU44wFSMOOePsqHHLgFVjTA0HMoKyd/TOG816GtLcNaNRhU8u5o716CXPxwaEo+tNnqyC4WKgq6R+9DLTsc08+HA+KLQ9EwYNgbVuTCXsvJx9JL3Et+yKB16IiAiIghn4hWOD7JJ9JEzfv2CoebwUtfEJK43CyxH9ohlcPMuaFEjeCJYbdXO8DhZMYw1WqeR0M/WMAy0nG8Mj0V0HCmoVcXAfcqpxwFbYTq48/ZeOdnmg8J+YF615cSc4aFbkOmnFVxns5QXAd52X6cwO5G9vhoz3VO4XHXhz8VdHDRBO/QJXMl2drqEH5lPVb5Gfpe0Y/LSi5HoJrjBtZPSZ7FTSO08WkEfguRQJ9REQEREEO/EQyIU1kmLfmB8w3v8cNOPXCho6AeSIiWG3+Rw8VeIzw5oimoXDjGFbcURBacVXTZI15HREQXw3XJK9JREHa9DlTFT7fUIlOOtjliaf8AItyPZERQP//Z"},
+  "fe":{name:"Valentin Feichtinger",email:"feichtinger@airpool.de",tel:"05491 9779-59",foto:""},
+  "pro":{name:"Magdalena Prokop",email:"prokop@airpool.de",tel:"05491 9779-35",foto:""},
+  "st":{name:"Thorsten Strategier",email:"strategier@airpool.de",tel:"05491 9779-27",foto:"data:image/jpeg;base64,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"},
+  "de":{name:"Jonas Decker",email:"decker@airpool.de",tel:"05491 9779-57",foto:""},
+  "aw":{name:"Lukas Awerin",email:"awerin@airpool.de",tel:"05491 9779-63",foto:""},
+  "be":{name:"Katharina Becker",email:"becker@airpool.de",tel:"05491 9779-58",foto:""},
+  "lk":{name:"Marion Lüking",email:"lueking@airpool.de",tel:"05491 9779-30",foto:"data:image/jpeg;base64,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"},
+  "ke":{name:"Luis Kempin",email:"kempin@airpool.de",tel:"05491 9779-61",foto:"data:image/jpeg;base64,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"},
+  "sd":{name:"Steffen Decker",email:"s.decker@airpool.de",tel:"05491 9779-64",foto:"data:image/jpeg;base64,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"},
+  "kl":{name:"Lars Klöppel",email:"kloeppel@airpool.de",tel:"05491 9779-49",foto:"data:image/jpeg;base64,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"},
+  "bue":{name:"Finn Büter",email:"bueter@airpool.de",tel:"05491 9779-17",foto:""},
+  "ro":{name:"Rainer Rolfes",email:"rolfes@airpool.de",tel:"05491 9779-26",foto:"data:image/jpeg;base64,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"},
+  "tk":{name:"Tim Kramer",email:"t.kramer@airpool.de",tel:"05491 9779-69",foto:""},
+  "schw":{name:"Markus Schwarte",email:"schwarte@airpool.de",tel:"05491 9779-34",foto:"data:image/jpeg;base64,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"},
+  "re":{name:"Nadja Reichert",email:"reichert@airpool.de",tel:"05491 9779-45",foto:""},
+  "koe":{name:"Tom Köhn",email:"koehn@airpool.de",tel:"05491 9779-60",foto:""},
+  "ma":{name:"Daniel Machner",email:"machner@airpool.de",tel:"05491 9779-553",foto:"data:image/jpeg;base64,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"},
+  "nb":{name:"Nicolas Brakmann",email:"brakmann@airpool.de",tel:"05491 9779-554",foto:"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5Ojf/2wBDAQoKCg0MDRoPDxo3JR8lNzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzf/wAARCAB4AHgDASIAAhEBAxEB/8QAHAABAAIDAQEBAAAAAAAAAAAAAAMGBAUHAgEI/8QAMxAAAQMDAgQEBQMEAwAAAAAAAQACAwQFERIhBjFBURMiYXEHMkKBoRSRsRVSwdEkQ/D/xAAZAQEAAwEBAAAAAAAAAAAAAAAAAQMEAgX/xAAeEQEBAQADAQADAQAAAAAAAAAAAQIDESESEyIxYf/aAAwDAQACEQMRAD8A7iiIgIiICKKrqIqSmlqZ3aYomF73dgOa45xT8T62td4NohdBA15GvUdUoxsduX5XOtTLrObXV7je7dbonvqaqIOaD5A8FxPbC0dR8QLPC1paJn7AuGAC3PTc81waKpra1zIg4yz+IXDfd3PABHXfqtlZ44aiec1DZZGSljnxRO5luevTfdU3lq2ccfoahu9vr9P6Wqie5wBDdW+4zyWcvz7b5pYZ5odUjWSbsgkcNbTnYN9Djquk8JcXTVT4qCpaJ5yNgwgPH+CB+66zy+9Vzrj87i8oiK5UIiICIiAiIgIiIKD8Yrncrdw41lDobBUuMUzy7zbjZuOx3yR29Vw+CeZ0ggIjezPQkFo9xzXZ/jJC+qgs1M04jfUOLttxgDf9iVSIeHYYKmd4LnB+zQfpWXm11Wrgz20VTUfo6bNIAwxkZ09T2P2WJZa40xc1zHgSnfHM+3b3V/tXC9J4P/Ij8R5OcuOVsIOFbbJOJXQZc3cAHAVP141fi9US4RRw07azxZo6xgzGzSXnHqeqtFJxJSwQQXSkowyvEnmONuW/uOXsrNLw1QzM0Ni0OPJw5t9QVUeLOFLhZ4YqqlmFQzVgh+3/ALPdJe6r5MTMdkstxiutuiqonMJc0aww5DXY3H5Wcqb8Kad8XCwklhdG6Wd7vN1HIfxj7K5Ldm2z1g1134IiLpAiIgIiICIiDnvxLmbLd7JS6hhrpXvDSCRsMDHqqRXcRuhlf4VAHRg4D3y4z6qy8UUodxjcZHs1PY2N7Dj5QWBu3rjKqVy4NqKyQylrJQ7BLnz4xjttt9lk3Zdet3HjWc/q21i4qhqS6KVghkAyGueMH2WwPGVuoZvDqDK8g/8ASwuWB8OOGWRXmqqJCx7WMDG6Rluc+YbrB4h4YukVbPV0viMaJ5dX6YZczJy1xbz5HOy4+Z32u+tfP+uiWO9227xg0U51dnt0lT8QNE1tfG4ZPMbdQqLw/RXeOlD55oasAaWSsYY5Y3nl03GcequV1pKqSKliNW8hrHOleWAufjHIDG+fsosk/iu93+rNYqc0lno4CMFsTcj15lZ6xbXVMrbdTVMbHMZLG1zWu5gELKW6fzxg1LLZRERSgREQEREBERBzjjyoFFeJnsI1ywx/Y7rnldWVNXKYGyyNH1ta4j8BWr4zzyUN4pJRgRywN37lrjn8ELm7Wi5XLxmzOY0YIAdgPHXKybn7Vu4d/rIt9j4sutvmOima5nyMjbEWsI6DbK397vN0ZHRXgRNpXkeHUshkLsjPl2I9+nVYNhsFskdEWGrZqa/JZNkZ20j+VDxRQXa3FkNNVultkh0PjncJJM5+k9ANlW0Wde2L9ZLpTV0bHyvL5cZBdgY9gF7u1JNV1EDqd7mSQEPG5wRk5GOqqZrKeifT+drZWsy4g88DdXnhZ7a+CWvJc4Ok0MB6BoAzj3ypzLvxVveeO/UbulhbBTxQsGGxsDQPYKVEW6ePPt7vYiIiBERAREQEREHM/jxbX1PDFNXRM1OpKjzkDcMcMH7ZwuH26r8OoGsgMA0j1X61rqSCvo5qSqYJIZmFj2kcwV+WONeF6zhi8zUkoLo24dHKOTmnl91XvMrvGrG7smWV2tlRIIQC8s1kD7LMv1+llnjEcwGkEsaTtgHHPqf9KgQ1sobp1O3IGxWTTslqamP5pHgBrRjsqvx++r/y2zqN5RV8lXVta3xJJi7S1reZJ5AL9H8OUP8ATbFQ0hOXRwtDz3dzP5JXKPhrwk2hmZc7kNVXkujjzsz1Pquw0krXRhmfMPyp49Z+rI55c6+ZayERFoZxERAREQEREBF5c5rBlxwFiTVzR8m/uotkGVJI2Nup5wFyTjauhuF/rYJo2kRtawMcOYxkH8lX2sqnOdu7PVUziSz09zlZO6R0FVGNLZmDOpv9rh1H8Kndup4t47M31z2m4at808moua36WtPIqxWy00Vvlb4MLdYAy4nJJCnpOF5fH1G6Qtbnn4Tif2z/AJVutfDFAwh8881W7s7yN/Yb/lcfG9L/AMnHn0sHi1EjWwMc8j5j0HuVdaSnEIBedUnfoPZQUkbIo2xwRsjjHJrRgBZrMgKzHDM+1Vy8935PIkRec4X0HKuUPqIiAiIgKKonbAzU4+wUqr99qSXuY09dKjV6hHyqq3VDxhx0Hc+y8uJDc9VDDjBPbYKYMLtyq3TFe0kqKS3+O0kEg+yzXR7ZA6rJpm4GFMiLWqp7PpIJlZ9o91uqOmijaPKXOHV3+lKG9lI1q7kQ9gnoMKQEqMEBSdFI+k5KNcM7KNxIjLup5LHhlJla3vlx9goGxByvqgjkBJAO/ZSsdqz3BwVI9IiIPhOASeQVKqJzU1/htdqeTr059eaIuNJjZRNjYNPiNLmjffksiJzXjyZcP7jyREhUmjuvbAAURdITNIUjRnqiKR9LM7qOKQiQRO5nkiIJKjlpHsFgQ5dUTOb8oGkIigerXMZqioJ+k4WwicNR9URBOiIpH//Z"}
+};
+var SCOL={"In Bearbeitung":"#dc0a2d","Abgeschlossen":"#16a34a","In Planung":"#00234b","":"#999999"};
+var SBCL={"In Bearbeitung":"sb-b","Abgeschlossen":"sb-a","In Planung":"sb-p","":"sb-d"};
+var SBLB={"In Bearbeitung":"In Bearbeitung","Abgeschlossen":"Abgeschlossen","In Planung":"In Planung","":"Kein Status"};
+var lfo={},lav={},ael=null,api=null,mks=[];
+var currentList=[],currentOi=-1,clusterOf={};
+
+// ── MULTI-SELECT FILTER ──
+var fG=[],fS=[],fY=[],fQ="",cst="light";
+
+function msSetup(btnId,dropId,values,onchange){
+  var btn=document.getElementById(btnId);
+  var drop=document.getElementById(dropId);
+  var sel=[];
+  var items=[];
+  // Suchfeld oben im Panel
+  var srchwrap=document.createElement("div");srchwrap.style.cssText="position:relative;margin-bottom:5px";
+  var srch=document.createElement("input");srch.type="text";srch.placeholder="Suchen...";
+  srch.style.cssText="width:100%;padding:5px 22px 5px 8px;font-size:12px;border:1.5px solid #e5e7eb;border-radius:7px;font-family:inherit;outline:none;color:#374151;box-sizing:border-box";
+  srch.addEventListener("focus",function(){this.style.borderColor="#00234b";});
+  srch.addEventListener("blur",function(){this.style.borderColor="#e5e7eb";});
+  var srchclr=document.createElement("button");srchclr.innerHTML="&#10005;";
+  srchclr.style.cssText="position:absolute;right:5px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#9ca3af;font-size:11px;display:none;padding:0;font-family:inherit";
+  srchwrap.appendChild(srch);srchwrap.appendChild(srchclr);drop.appendChild(srchwrap);
+  var itemsWrap=document.createElement("div");itemsWrap.style.cssText="max-height:200px;overflow-y:auto";
+  drop.appendChild(itemsWrap);
+  [...new Set(values)].sort(function(a,b){return String(a).localeCompare(String(b),"de");}).forEach(function(v){
+    if(!v&&v!==0)return;
+    var lab=document.createElement("label");lab.className="ms-item";
+    var cb=document.createElement("input");cb.type="checkbox";cb.value=String(v);
+    cb.addEventListener("change",function(){
+      if(this.checked){if(sel.indexOf(String(v))<0)sel.push(String(v));}
+      else{sel=sel.filter(function(x){return x!==String(v);});}
+      updBtn();onchange(sel);
+    });
+    lab.appendChild(cb);lab.appendChild(document.createTextNode(String(v)));
+    itemsWrap.appendChild(lab);
+    items.push({cb:cb,v:String(v),lab:lab});
+  });
+  srch.addEventListener("input",function(e){e.stopPropagation();var q=this.value.toLowerCase();srchclr.style.display=q?"inline":"none";items.forEach(function(it){it.lab.style.display=it.v.toLowerCase().indexOf(q)>=0?"flex":"none";});});
+  srch.addEventListener("click",function(e){e.stopPropagation();});
+  srchclr.addEventListener("click",function(e){e.stopPropagation();srch.value="";srchclr.style.display="none";items.forEach(function(it){it.lab.style.display="flex";});});
+  var clr=document.createElement("button");clr.className="ms-clear";clr.textContent="Auswahl aufheben";
+  clr.onclick=function(e){e.stopPropagation();sel=[];items.forEach(function(i){i.cb.checked=false;});updBtn();onchange([]);};
+  drop.appendChild(clr);
+  function updBtn(){
+    if(sel.length===0){btn.innerHTML='Alle <span class="da">&#9660;</span>';btn.classList.remove("on");}
+    else{btn.innerHTML=sel.join(", ")+'<span class="da">&#9660;</span>';btn.classList.add("on");}
+  }
+  btn.addEventListener("click",function(e){e.stopPropagation();
+    document.querySelectorAll(".ms-drop").forEach(function(d){if(d!==drop)d.classList.remove("open");});
+    drop.classList.toggle("open");
+    if(drop.classList.contains("open")){setTimeout(function(){srch.focus();},50);}
+  });
+  return {getSel:function(){return sel;}};
+}
+document.addEventListener("click",function(){document.querySelectorAll(".ms-drop").forEach(function(d){d.classList.remove("open");});});
+
+var gws=[];DATA.forEach(function(d){if(d.gw)d.gw.split(/[+,\/]/).forEach(function(g){var t=g.trim();if(t&&gws.indexOf(t)<0)gws.push(t);});});
+var statuses=["In Bearbeitung","In Planung","Abgeschlossen"];
+var years=[...new Set(DATA.map(function(d){return d.jr;}).filter(Boolean))];
+
+var msG=msSetup("dg-btn","dg-drop",gws,function(v){fG=v;draw();});
+var msS=msSetup("ds-btn","ds-drop",statuses,function(v){fS=v;draw();});
+var msY=msSetup("dy-btn","dy-drop",years,function(v){fY=v;draw();});
+function nm(s){return(s||"").toLowerCase().replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue").replace(/ß/g,"ss");}
+function mt(d){
+  if(!d.lat||!d.lng)return false;
+  if(fG.length>0){var gwt=d.gw||"";var match=fG.some(function(g){return nm(gwt).indexOf(nm(g))>=0;});if(!match)return false;}
+  if(fS.length>0&&fS.indexOf(d.st||"")<0)return false;
+  if(fY.length>0&&fY.indexOf(String(d.jr))<0)return false;
+  if(fQ.length>0){
+    var plname=PL[d.pl||""]?PL[d.pl].name:"";
+    var sbname=d.sb?d.sb.name:"";
+    var haystack=nm([d.name,String(d.nr),d.ag,d.stadt,d.adr,d.gw,d.desc,String(d.jr),plname,sbname].join(" "));
+    var needles=nm(fQ).split(/\s+/).filter(function(t){return t.length>0;});
+    for(var i=0;i<needles.length;i++){if(haystack.indexOf(needles[i])<0)return false;}
+  }
+  return true;
+}
+
+// MAPBOX
+function setGermanLabels(){
+  var layers=["country-label","state-label","settlement-label","settlement-subdivision-label","airport-label","poi-label","road-label","waterway-label","natural-label"];
+  layers.forEach(function(l){try{map.setLayoutProperty(l,"text-field",["coalesce",["get","name_de"],["get","name"]]);}catch(e){}});
+}
+mapboxgl.accessToken="pk.eyJ1IjoibHVjYW11Z2EiLCJhIjoiY21wODdkMGxjMGVwMzJyc2FlNGkxeWRpMSJ9.TWHhvROJW73VShZi-BAtsw";
+var map=new mapboxgl.Map({container:"map",style:"mapbox://styles/mapbox/light-v11",center:[10.45,51.16],zoom:5.2,attributionControl:false});
+map.addControl(new mapboxgl.NavigationControl({showCompass:false}),"top-left");
+map.addControl(new mapboxgl.AttributionControl({compact:true}));
+map.dragRotate.disable();map.touchZoomRotate.disableRotation();
+map.on("load",function(){
+  setGermanLabels();
+  var cg=document.querySelector(".mapboxgl-ctrl-top-left .mapboxgl-ctrl-group");
+  if(cg){var hb=document.createElement("button");hb.title="Deutschland Übersicht";hb.innerHTML='<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="#444" stroke="none"/></svg>';hb.style.cssText="width:29px;height:29px;padding:0;border:none;border-top:1px solid #ddd;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;";hb.onclick=function(){rv();};cg.appendChild(hb);}
+  draw();
+  syncPanelHeight();
+});
+window.addEventListener("resize",syncPanelHeight);
+
+function fe(v){if(!v)return"-";return v>=1000000?(v/1000000).toFixed(1)+" M EUR":Math.round(v/1000)+" K EUR";}
+// Globaler Tooltip-Container
+var _tt=null,_ttTimer=null;
+function getTooltip(){
+  if(!_tt){
+    _tt=document.createElement("div");_tt.className="pin-tooltip";
+    document.querySelector(".mapbox").appendChild(_tt);
+  }
+  return _tt;
+}
+function showTooltip(d,pinEl){
+  clearTimeout(_ttTimer);
+  var tt=getTooltip();
+  var foto=lfo[d.nr]||d.foto||"";
+  var imgHtml=foto&&foto.length>8
+    ?'<img class="pin-tooltip-img" src="'+foto+'" alt="" onerror="this.parentElement.innerHTML=\'<div class=pin-tooltip-img-ph>Kein Bild</div>\'">'
+    :'<div class="pin-tooltip-img-ph">Kein Bild</div>';
+  var stCol=SCOL[d.st||""]||"#999";
+  var stLbl=SBLB[d.st||""]||"Kein Status";
+  tt.innerHTML=imgHtml+'<div class="pin-tooltip-body"><div class="pin-tooltip-name">'+d.name+'</div>'
+    +'<div class="pin-tooltip-sub"><span class="pin-tooltip-st" style="background:'+stCol+'"></span>'+stLbl+'</div></div>';
+  var rect=pinEl.getBoundingClientRect();
+  var mapRect=document.querySelector(".mapbox").getBoundingClientRect();
+  tt.style.left=(rect.left-mapRect.left+rect.width/2)+"px";
+  tt.style.top=(rect.top-mapRect.top)+"px";
+  tt.style.transform="translate(-50%, calc(-100% - 10px))";
+  tt.classList.add("show");
+}
+function hideTooltip(){
+  _ttTimer=setTimeout(function(){if(_tt)_tt.classList.remove("show");},120);
+}
+function mkEl(d){
+  var e=document.createElement("div");
+  e.className="pin";
+  e.style.background=SCOL[d.st||""]||"#6b7280";
+  e.addEventListener("mouseenter",function(){showTooltip(d,e);});
+  e.addEventListener("mouseleave",function(){hideTooltip();});
+  return e;
+}
+function rv(){
+  map.stop();
+  document.getElementById("panel-wrap").classList.remove("show");
+  if(ael){ael.classList.remove("act");ael=null;}
+  if(api){api.classList.remove("act");api=null;}
+  currentOi=-1;
+  map.resize();
+  map.flyTo({center:[10.45,51.16],zoom:5.2,speed:0.9,curve:1.2,padding:{top:0,bottom:0,left:0,right:0}});
+}
+function flyToPin(lng,lat){
+  map.flyTo({center:[lng,lat],zoom:15,speed:0.9,curve:1.4,essential:true,padding:{top:0,bottom:0,left:0,right:0}});
+}
+
+function syncHeights(){
+  var mb=document.querySelector(".mapbox");
+  var pw=document.getElementById("panel-wrap");
+  var sb=document.getElementById("sidebar-el");
+  if(!mb)return;
+  // Fixed map height based on viewport, set once
+  var h=mb.offsetHeight||600;
+  if(pw)pw.style.height=(h+44)+"px";
+  // Sidebar list fills remaining space inside sidebar
+  if(sb){
+    var sh=sb.querySelector(".sh");
+    var ss=sb.querySelector(".ss");
+    var pl=sb.querySelector(".pl");
+    var used=(sh?sh.offsetHeight:0)+(ss?ss.offsetHeight:0);
+    if(pl)pl.style.maxHeight=(h-used)+"px";
+  }
+  map.resize();
+}
+function syncPanelHeight(){syncHeights();}
+
+// ── Cluster-Erkennung: gruppiert Projekte mit gleicher Adresse oder gleichen Koordinaten ──
+function buildClusters(list){
+  var clusters=[];
+  var used=[];
+  list.forEach(function(d,i){
+    if(used.indexOf(i)>=0)return;
+    var grp=[d];
+    used.push(i);
+    list.forEach(function(d2,j){
+      if(j<=i||used.indexOf(j)>=0)return;
+      var sameAdr=(d.adr&&d2.adr&&d.adr.trim()===d2.adr.trim());
+      var sameLng=(d.lat&&d.lng&&d2.lat&&d2.lng&&d.lat===d2.lat&&d.lng===d2.lng);
+      if(sameAdr||sameLng){grp.push(d2);used.push(j);}
+    });
+    clusters.push(grp);
+  });
+  return clusters;
+}
+
+function draw(){
+  mks.forEach(function(m){m.mk.remove();});mks=[];
+  if(ael){ael.classList.remove("act");ael=null;}
+  document.getElementById("panel-wrap").classList.remove("show");
+  currentOi=-1;
+  var list=DATA.filter(mt).sort(function(a,b){return a.name.localeCompare(b.name,"de");});
+  currentList=list;
+  var clusters=buildClusters(list);
+  // Lookup: DATA-Index → Cluster-Gruppe (global für Pfeil-Navigation)
+  clusterOf={};
+  clusters.forEach(function(grp){grp.forEach(function(d){clusterOf[DATA.indexOf(d)]=grp;});});
+  var pl=document.getElementById("pl");pl.innerHTML="";
+  list.forEach(function(d,idx){
+    var oi=DATA.indexOf(d);
+    var grp=clusterOf[oi]||[d];
+    var isCluster=(grp.length>1);
+    var dv=document.createElement("div");dv.className="pi";
+    var badge=isCluster?'<span class="pi-cluster-badge">\u2022\u2022 Cluster</span>':'';
+    dv.innerHTML='<div class="pi-n">'+d.name+badge+'</div><div class="pi-m"><span class="pk '+(SBCL[d.st||""]||"k-d")+'">'+(d.st||"-")+'</span><span class="pi-c">'+d.stadt+'</span></div>';
+    dv.onclick=function(){
+      if(api)api.classList.remove("act");api=dv;dv.classList.add("act");
+      var me2=mks.find(function(m){return m.d===d;});
+      showProject(d,me2?me2.el:null);
+    };
+    pl.appendChild(dv);
+    if(!d.lat||!d.lng)return;
+    // Cluster-Pin nur für erstes Projekt der Gruppe setzen
+    var isFirst=(grp[0]===d);
+    if(!isFirst)return;
+    var el;
+    if(isCluster){
+      el=document.createElement("div");
+      el.className="pin-cluster";
+      el.setAttribute("data-count",grp.length);
+      el.textContent=grp.length;
+      // Tooltip für Cluster: Projektnamen auflisten
+      (function(grpRef,elRef){
+        elRef.addEventListener("mouseenter",function(){
+          clearTimeout(_ttTimer);
+          var tt=getTooltip();
+          var grpSorted=grpRef.slice().sort(function(a,b){return a.nr-b.nr;});
+          var foto=lfo[grpSorted[0].nr]||grpSorted[0].foto||"";
+          var imgHtml=foto&&foto.length>8
+            ?'<img class="pin-tooltip-img" src="'+foto+'" alt="" onerror="this.parentElement.innerHTML=\'<div class=pin-tooltip-img-ph>Kein Bild</div>\'">'
+            :'<div class="pin-tooltip-img-ph">Kein Bild</div>';
+          var names=grpSorted.map(function(p){return '<div style="font-size:11px;color:#374151;padding:2px 0;border-bottom:1px solid #f0f0f0">'+p.name+'</div>';}).join("");
+          tt.innerHTML=imgHtml+'<div class="pin-tooltip-body"><div class="pin-tooltip-name" style="margin-bottom:6px">Cluster \u00b7 '+grpRef.length+' Projekte</div>'+names+'</div>';
+          var rect=elRef.getBoundingClientRect();
+          var mapRect=document.querySelector(".mapbox").getBoundingClientRect();
+          tt.style.left=(rect.left-mapRect.left+rect.width/2)+"px";
+          tt.style.top=(rect.top-mapRect.top)+"px";
+          tt.style.transform="translate(-50%, calc(-100% - 10px))";
+          tt.classList.add("show");
+        });
+        elRef.addEventListener("mouseleave",function(){hideTooltip();});
+      })(grp,el);
+    }else{
+      el=mkEl(d);
+    }
+    var mk=new mapboxgl.Marker({element:el,anchor:"center"}).setLngLat([d.lng,d.lat]).addTo(map);
+    el.addEventListener("click",function(e){
+      e.stopPropagation();
+      var its=pl.querySelectorAll(".pi");
+      if(api)api.classList.remove("act");
+      // Aktiviere erstes Sidebar-Element der Gruppe
+      var firstIdx=list.indexOf(grp[0]);
+      if(firstIdx>=0){api=its[firstIdx];if(api)api.classList.add("act");}
+      if(isCluster){opCluster(grp,el);}else{op(d,el);}
+    });
+    // Alle Projekte der Gruppe auf diesen Marker mappen
+    grp.forEach(function(gd){
+      mks.push({mk:mk,d:gd,el:el,oi:DATA.indexOf(gd)});
+    });
+  });
+  document.getElementById("shc").textContent=list.length+" Projekt"+(list.length!==1?"e":"");
+  document.getElementById("s1").textContent=list.length;
+  document.getElementById("s2").textContent=new Set(list.map(function(d){return d.stadt;}).filter(Boolean)).size;
+  document.getElementById("s4").textContent=new Set(list.map(function(d){return d.pl;}).filter(Boolean)).size;
+  document.getElementById("nores").classList[list.length===0?"add":"remove"]("show");
+}
+
+function fillPanel(d){
+  // pb-Inhalt wiederherstellen falls vorher Cluster-Tabs drin waren
+  var pbEl=document.getElementById("panel").querySelector(".pb");
+  if(pbEl.querySelector(".ctabs")){
+    pbEl.innerHTML='<div class="tgs"><span class="sbg" id="ps"></span><span class="gtg" id="pg"></span><span class="jtg" id="pj"></span></div>'
+      +'<h3 id="pn"></h3><div class="plc">&#128205; <span id="plo"></span></div>'
+      +'<div class="pgr"><div class="pc2"><div class="lb">Kom-Nr.</div><div class="vl" id="pnr"></div></div>'
+      +'<div class="pc2"><div class="lb">Auftraggeber</div><div class="vl" id="pa"></div></div>'
+      +'<div class="pc2"><div class="lb">Gewerk</div><div class="vl" id="pgw"></div></div></div>'
+      +'<div class="pds" id="pd"></div>'
+      +'<div class="panlagen" id="panlagen" style="display:none"><div class="panlagen-title">&#9881; Anlagen</div><ul class="panlagen-list" id="panlagen-list"></ul></div>'
+      +'<div class="fh" id="fh"></div>'
+      +'<div class="plcard" id="plcard"><div class="plav" id="plav">?</div>'
+      +'<div class="pli"><div class="pln" id="pln"></div><div class="plr">Projektleiter</div><div class="plco" id="plco"></div></div></div>'
+      +'<div class="sbcard" id="sbcard"><div class="sbav">SB</div>'
+      +'<div class="sbli"><div class="sbln" id="sbln"></div><div class="sblr">Sachbearbeiter</div><div class="sbco" id="sbco"></div></div></div>';
+  }
+  var sb=document.getElementById("ps");sb.textContent=SBLB[d.st||""];sb.className="sbg "+(SBCL[d.st||""]||"sb-d");
+  document.getElementById("pg").textContent=d.gw||"-";document.getElementById("pgw").textContent=d.gw||"-";
+  document.getElementById("pj").textContent=d.jr?""+d.jr:"";
+  document.getElementById("pn").textContent=d.name;document.getElementById("plo").textContent=d.adr||d.stadt;
+  document.getElementById("pnr").textContent=d.nr;
+  document.getElementById("pa").textContent=d.ag||"-";document.getElementById("pd").textContent=d.desc||"";
+  var panlagenEl=document.getElementById("panlagen");
+  var panlagenList=document.getElementById("panlagen-list");
+  if(d.anlagen&&d.anlagen.trim()){
+    var items=d.anlagen.split("\n").map(function(s){return s.trim();}).filter(Boolean);
+    panlagenList.innerHTML=items.map(function(s){return "<li>"+s+"</li>";}).join("");
+    panlagenEl.style.display="block";
+  }else{panlagenEl.style.display="none";}
+  var iw=document.getElementById("pim");var fh=document.getElementById("fh");fh.innerHTML="";
+  var fs=lfo[d.nr]||d.foto||"";
+  if(fs&&fs.length>8){var ii=/\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i.test(fs)||fs.startsWith("data:");if(ii){iw.className="pim has";iw.innerHTML='<img src="'+fs+'" alt="Bild" onerror="this.parentElement.className=\'pim\';this.parentElement.innerHTML=\'<span>Bild nicht ladbar</span>\'">';}else{iw.className="pim";iw.innerHTML='<span>Webseite</span>';fh.innerHTML='<a href="'+fs+'" target="_blank" rel="noopener">&#8599; Projektseite</a>';}}else{iw.className="pim";iw.innerHTML="<span>Kein Bild</span>";}
+  var pk=(d.pl||"");var pd=PL[pk]||{name:pk||"-",email:"",tel:"",foto:""};
+  var av=document.getElementById("plav");var as=lav[pk]||pd.foto||"";
+  if(as&&as.length>8){av.innerHTML='<img src="'+as+'" alt="'+pd.name+'" onerror="this.parentElement.textContent=\''+pk+'\'">';}else{av.innerHTML="";av.textContent=pk||"?";}
+  document.getElementById("pln").textContent=pd.name;
+  var co=document.getElementById("plco");co.innerHTML="";
+  if(pd.email)co.innerHTML+='<a href="mailto:'+pd.email+'">&#9993; '+pd.email+'</a>';
+  if(pd.tel)co.innerHTML+='<a href="tel:'+pd.tel.replace(/ /g,"")+'">&#128222; '+pd.tel+'</a>';
+  document.getElementById("plcard").style.display="flex";
+  var sb2=d.sb||null;var sbc=document.getElementById("sbcard");
+  if(sb2){
+    document.getElementById("sbln").textContent=sb2.name;
+    var sco=document.getElementById("sbco");sco.innerHTML="";
+    if(sb2.email)sco.innerHTML+='<a href="mailto:'+sb2.email+'">&#9993; '+sb2.email+'</a>';
+    if(sb2.tel)sco.innerHTML+='<a href="tel:'+sb2.tel.replace(/ /g,"")+'">&#128222; '+sb2.tel+'</a>';
+    var sbavEl=sbc.querySelector(".sbav");
+    var sbFoto=(sb2.kuerzel&&PL[sb2.kuerzel])?PL[sb2.kuerzel].foto:"";
+    if(sbFoto&&sbFoto.length>8){sbavEl.innerHTML='<img src="'+sbFoto+'" alt="'+sb2.name+'">';}
+    else{sbavEl.innerHTML="";sbavEl.textContent=sb2.name.substring(0,2);}
+    sbc.style.display="flex";
+  }else{sbc.style.display="none";}
+}
+function fillClusterPanel(grp,activeD){
+  // Chronologisch nach Projektnummer sortieren
+  grp=grp.slice().sort(function(a,b){return a.nr-b.nr;});
+  var d0=grp[0];
+  // Bild wie bei Einzelprojekt
+  var iw=document.getElementById("pim");var fh=document.getElementById("fh");fh.innerHTML="";
+  var fs=lfo[d0.nr]||d0.foto||"";
+  if(fs&&fs.length>8){var ii=/\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i.test(fs)||fs.startsWith("data:");if(ii){iw.className="pim has";iw.innerHTML='<img src="'+fs+'" alt="Bild" onerror="this.parentElement.className=\'pim\';this.parentElement.innerHTML=\'<span>Bild nicht ladbar</span>\'">';}else{iw.className="pim";iw.innerHTML='<span>Webseite</span>';fh.innerHTML='<a href="'+fs+'" target="_blank" rel="noopener">&#8599; Projektseite</a>';}}else{iw.className="pim";iw.innerHTML="<span>Kein Bild</span>";}
+  // pb komplett neu aufbauen
+  var pbEl=document.getElementById("panel").querySelector(".pb");
+  pbEl.innerHTML="";
+  // Tabs-Leiste
+  var activeIdx=0;
+  if(activeD){grp.forEach(function(d,i){if(d.nr===activeD.nr)activeIdx=i;});}
+  var tabsEl=document.createElement("div");tabsEl.className="ctabs";
+  tabsEl.style.cssText="margin:0 -18px 14px;padding:0 18px";
+  grp.forEach(function(d,i){
+    var t=document.createElement("div");t.className="ctab"+(i===activeIdx?" act":"");
+    t.textContent=d.nr+"\u00b7"+d.name.split("/")[0].trim();
+    t.onclick=(function(idx){return function(){
+      tabsEl.querySelectorAll(".ctab").forEach(function(x,j){x.classList.toggle("act",j===idx);});
+      pbEl.querySelectorAll(".ctab-pane").forEach(function(x,j){x.classList.toggle("act",j===idx);});
+    };})(i);
+    tabsEl.appendChild(t);
+  });
+  var tAll=document.createElement("div");tAll.className="ctab";
+  tAll.innerHTML="&#9881; Alle Anlagen";
+  tAll.onclick=function(){
+    tabsEl.querySelectorAll(".ctab").forEach(function(x){x.classList.remove("act");});
+    tAll.classList.add("act");
+    pbEl.querySelectorAll(".ctab-pane").forEach(function(x){x.classList.remove("act");});
+    pbEl.querySelector(".ctab-pane-all").classList.add("act");
+  };
+  tabsEl.appendChild(tAll);
+  pbEl.appendChild(tabsEl);
+  // Ein Pane pro Projekt — gleiche Struktur wie Einzelpanel
+  grp.forEach(function(d,i){
+    var pane=document.createElement("div");pane.className="ctab-pane"+(i===activeIdx?" act":"");
+    var stCls=SBCL[d.st||""]||"sb-d";var stLbl=SBLB[d.st||""]||"Kein Status";
+    var pk=d.pl||"";var pdPL=PL[pk]||{name:pk||"-",email:"",tel:"",foto:""};
+    var avAs=lav[pk]||pdPL.foto||"";
+    var avHtml=avAs&&avAs.length>8?'<img src="'+avAs+'" alt="'+pdPL.name+'" onerror="this.parentElement.textContent=\''+pk+'\'">':pk||"?";
+    var plCoHtml="";
+    if(pdPL.email)plCoHtml+='<a href="mailto:'+pdPL.email+'">&#9993; '+pdPL.email+'</a>';
+    if(pdPL.tel)plCoHtml+='<a href="tel:'+pdPL.tel.replace(/ /g,"")+'">&#128222; '+pdPL.tel+'</a>';
+    var sb2=d.sb||null;var sbHtml="";
+    if(sb2){
+      var sbFoto=(sb2.kuerzel&&PL[sb2.kuerzel])?PL[sb2.kuerzel].foto:"";
+      var sbAvHtml=sbFoto&&sbFoto.length>8?'<img src="'+sbFoto+'" alt="'+sb2.name+'">':sb2.name.substring(0,2);
+      var sbCoHtml="";
+      if(sb2.email)sbCoHtml+='<a href="mailto:'+sb2.email+'">&#9993; '+sb2.email+'</a>';
+      if(sb2.tel)sbCoHtml+='<a href="tel:'+sb2.tel.replace(/ /g,"")+'">&#128222; '+sb2.tel+'</a>';
+      sbHtml='<div class="sbcard" style="display:flex;margin-top:10px;border-top:1px dashed #e5e7eb;padding-top:10px;gap:13px;align-items:flex-start">'
+        +'<div class="sbav" style="overflow:hidden">'+sbAvHtml+'</div>'
+        +'<div class="sbli"><div class="sbln">'+sb2.name+'</div><div class="sblr">Sachbearbeiter</div><div class="sbco">'+sbCoHtml+'</div></div></div>';
+    }
+    var anlagenHtml="";
+    if(d.anlagen&&d.anlagen.trim()){
+      var its=d.anlagen.split("\n").map(function(s){return s.trim();}).filter(Boolean);
+      anlagenHtml='<div class="panlagen" style="display:block;margin-top:12px;padding-top:12px;border-top:1px solid #f3f4f6">'
+        +'<div class="panlagen-title">&#9881; Anlagen</div>'
+        +'<ul class="panlagen-list">'+its.map(function(s){return "<li>"+s+"</li>";}).join("")+'</ul></div>';
+    }
+    pane.innerHTML='<div class="tgs"><span class="sbg '+stCls+'">'+stLbl+'</span><span class="gtg">'+(d.gw||"-")+'</span>'+(d.jr?'<span class="jtg">'+d.jr+'</span>':"")+'</div>'
+      +'<h3>'+d.name+'</h3>'
+      +'<div class="plc">&#128205; '+d.adr+'</div>'
+      +'<div class="pgr">'
+        +'<div class="pc2"><div class="lb">Kom-Nr.</div><div class="vl">'+d.nr+'</div></div>'
+        +'<div class="pc2"><div class="lb">Auftraggeber</div><div class="vl">'+(d.ag||"-")+'</div></div>'
+        +'<div class="pc2"><div class="lb">Gewerk</div><div class="vl">'+(d.gw||"-")+'</div></div>'
+      +'</div>'
+      +'<div class="pds">'+(d.desc||"")+'</div>'
+      +anlagenHtml
+      +'<div class="plcard" style="display:flex">'
+        +'<div class="plav" style="overflow:hidden">'+avHtml+'</div>'
+        +'<div class="pli"><div class="pln">'+pdPL.name+'</div><div class="plr">Projektleiter</div><div class="plco">'+plCoHtml+'</div></div>'
+      +'</div>'
+      +sbHtml;
+    pbEl.appendChild(pane);
+  });
+  // Alle-Anlagen-Pane
+  var allPane=document.createElement("div");allPane.className="ctab-pane ctab-pane-all";
+  var allItems='<div class="call-lbl">&#9881; Alle Anlagen <span class="call-badge">'+grp.length+' Projekte</span></div><ul class="panlagen-list">';
+  grp.forEach(function(d){
+    allItems+='<li class="call-proj-sep">'+d.nr+' \u2014 '+d.name+'</li>';
+    if(d.anlagen&&d.anlagen.trim()){
+      d.anlagen.split("\n").map(function(s){return s.trim();}).filter(Boolean).forEach(function(s){allItems+='<li>'+s+'</li>';});
+    }else{allItems+='<li style="color:#9ca3af;font-style:italic">Keine Anlagen eingetragen</li>';}
+  });
+  allItems+='</ul>';
+  allPane.innerHTML=allItems;
+  pbEl.appendChild(allPane);
+}
+function opCluster(grp,el){
+  // Öffnet Cluster mit erstem Projekt als Startpunkt
+  var grpSorted=grp.slice().sort(function(a,b){return a.nr-b.nr;});
+  showProject(grpSorted[0],el);
+}
+
+// Einzige Funktion für alle Navigation (Pfeil, Sidebar, Pin, Cluster)
+function showProject(d,el){
+  // Panel-Struktur zurücksetzen falls Cluster-Tabs drin
+  var panel=document.getElementById("panel");
+  var pbEl=panel.querySelector(".pb");
+  if(pbEl.querySelector(".ctabs")){
+    pbEl.innerHTML='<div class="tgs"><span class="sbg" id="ps"></span><span class="gtg" id="pg"></span><span class="jtg" id="pj"></span></div>'
+      +'<h3 id="pn"></h3><div class="plc">&#128205; <span id="plo"></span></div>'
+      +'<div class="pgr"><div class="pc2"><div class="lb">Kom-Nr.</div><div class="vl" id="pnr"></div></div>'
+      +'<div class="pc2"><div class="lb">Auftraggeber</div><div class="vl" id="pa"></div></div>'
+      +'<div class="pc2"><div class="lb">Gewerk</div><div class="vl" id="pgw"></div></div></div>'
+      +'<div class="pds" id="pd"></div>'
+      +'<div class="panlagen" id="panlagen" style="display:none"><div class="panlagen-title">&#9881; Anlagen</div><ul class="panlagen-list" id="panlagen-list"></ul></div>'
+      +'<div class="fh" id="fh"></div>'
+      +'<div class="plcard" id="plcard"><div class="plav" id="plav">?</div>'
+      +'<div class="pli"><div class="pln" id="pln"></div><div class="plr">Projektleiter</div><div class="plco" id="plco"></div></div></div>'
+      +'<div class="sbcard" id="sbcard"><div class="sbav">SB</div>'
+      +'<div class="sbli"><div class="sbln" id="sbln"></div><div class="sblr">Sachbearbeiter</div><div class="sbco" id="sbco"></div></div></div>';
+  }
+  // Marker-Highlight
+  if(ael)ael.classList.remove("act");
+  ael=el||null;
+  if(ael)ael.classList.add("act");
+  // Prüfe ob Cluster
+  var oi=DATA.indexOf(d);
+  var grp=clusterOf[oi]||null;
+  if(grp&&grp.length>1){
+    fillClusterPanel(grp,d);
+  }else{
+    fillPanel(d);
+  }
+  syncPanelHeight();
+  document.getElementById("panel-wrap").classList.add("show");
+  currentOi=currentList.indexOf(d);
+  updNav();
+  panel.scrollTop=0;
+  if(d.lat&&d.lng){map.resize();setTimeout(function(){flyToPin(d.lng,d.lat);},50);}
+}
+
+function updNav(){
+  var tot=currentList.length;var idx=currentOi;
+  document.getElementById("pnav-info").textContent=(idx>=0?(idx+1)+" / "+tot:"");
+  document.getElementById("pnav-prev").disabled=(idx<=0);
+  document.getElementById("pnav-next").disabled=(idx>=tot-1);
+}
+function op(d,el){showProject(d,el);}
+document.getElementById("pcls").onclick=function(){rv();};
+
+// Pfeil-Navigation
+document.getElementById("pnav-prev").onclick=function(){
+  if(currentOi>0){
+    var d=currentList[currentOi-1];
+    var me2=mks.find(function(m){return m.d===d;});
+    var its=document.getElementById("pl").querySelectorAll(".pi");
+    if(api)api.classList.remove("act");api=its[currentOi-1];if(api)api.classList.add("act");
+    showProject(d,me2?me2.el:null);
+  }
+};
+document.getElementById("pnav-next").onclick=function(){
+  if(currentOi<currentList.length-1){
+    var d=currentList[currentOi+1];
+    var me2=mks.find(function(m){return m.d===d;});
+    var its=document.getElementById("pl").querySelectorAll(".pi");
+    if(api)api.classList.remove("act");api=its[currentOi+1];if(api)api.classList.add("act");
+    showProject(d,me2?me2.el:null);
+  }
+};
+
+
+// Stil-Toggle ohne Panel zu schliessen
+function redrawPins(){mks.forEach(function(m){m.mk.remove();});mks=[];var list=currentList;var pl=document.getElementById("pl");list.forEach(function(d,idx){if(!d.lat||!d.lng)return;var el=mkEl(d);var mk=new mapboxgl.Marker({element:el,anchor:"center"}).setLngLat([d.lng,d.lat]).addTo(map);el.addEventListener("click",function(e){e.stopPropagation();var its=pl.querySelectorAll(".pi");if(api)api.classList.remove("act");api=its[idx];if(api)api.classList.add("act");op(d,el);});mks.push({mk:mk,d:d,el:el,oi:DATA.indexOf(d)});});}
+document.getElementById("bn").onclick=function(){if(cst==="light")return;cst="light";document.getElementById("bn").classList.add("on");document.getElementById("bsat").classList.remove("on");map.setStyle("mapbox://styles/mapbox/light-v11");map.once("styledata",function(){setGermanLabels();redrawPins();});};
+document.getElementById("bsat").onclick=function(){if(cst==="satellite")return;cst="satellite";document.getElementById("bsat").classList.add("on");document.getElementById("bn").classList.remove("on");map.setStyle("mapbox://styles/mapbox/satellite-streets-v12");map.once("styledata",function(){setGermanLabels();redrawPins();});};
+var si=document.getElementById("sq"),scl=document.getElementById("scl");
+si.addEventListener("input",function(){fQ=this.value;scl.style.display=fQ.trim()?"block":"none";draw();});
+scl.onclick=function(){si.value="";fQ="";this.style.display="none";draw();};
+
+// ── KINO-MODUS ───────────────────────────────────────────────────────────
+var kinoMap=null,kinoIdx=0,kinoTimer=null,kinoPaused=false,kinoRunning=false;
+var KINO_MS=6000;
+
+function kinoFillPL(d){
+  var ki=document.getElementById("ki-img");
+  var fs=lfo[d.nr]||d.foto||"";
+  if(fs&&fs.length>8&&(/\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i.test(fs)||fs.startsWith("data:"))){
+    ki.className="kino-img has";ki.innerHTML='<img src="'+fs+'" alt="Projektbild" onerror="this.parentElement.className=\'kino-img\';this.parentElement.innerHTML=\'\'">';
+  }else{ki.className="kino-img";ki.innerHTML="";}
+  var pk=(d.pl||"");var pd=PL[pk]||{name:pk,email:"",tel:"",foto:""};
+  var av=document.getElementById("ki-av");var as=lav[pk]||pd.foto||"";
+  if(as&&as.length>8){av.innerHTML='<img src="'+as+'" alt="'+pd.name+'">';}else{av.innerHTML="";av.textContent=pk||"?";}
+  document.getElementById("ki-pln").textContent=pd.name;
+  var co=document.getElementById("ki-plco");co.innerHTML="";
+  if(pd.email)co.innerHTML+='<a href="mailto:'+pd.email+'">&#9993; '+pd.email+'</a>';
+  if(pd.tel)co.innerHTML+='<a href="tel:'+pd.tel.replace(/ /g,"")+'">&#128222; '+pd.tel+'</a>';
+  var sbw=document.getElementById("ki-sb-wrap");
+  var sb2=d.sb||null;
+  if(sb2&&sb2.name){
+    sbw.style.display="flex";
+    document.getElementById("ki-sbn").textContent=sb2.name;
+    var sbav=document.getElementById("ki-sbav");sbav.innerHTML="";
+    var sbFotoKino=(sb2.kuerzel&&PL[sb2.kuerzel])?PL[sb2.kuerzel].foto:"";
+    if(sbFotoKino&&sbFotoKino.length>8){sbav.innerHTML='<img src="'+sbFotoKino+'" alt="'+sb2.name+'">';}
+    else{sbav.textContent=sb2.name.split(" ").map(function(w){return w[0];}).join("").substring(0,2);}
+    var sbco=document.getElementById("ki-sbco");sbco.innerHTML="";
+    if(sb2.email)sbco.innerHTML+='<a href="mailto:'+sb2.email+'">&#9993; '+sb2.email+'</a>';
+    if(sb2.tel)sbco.innerHTML+='<a href="tel:'+sb2.tel.replace(/ /g,"")+'">&#128222; '+sb2.tel+'</a>';
+  }else{sbw.style.display="none";}
+}
+
+function kinoShow(d){
+  var list=currentList.length>0?currentList:DATA;
+  var idx=list.indexOf(d);
+  document.getElementById("kino-count").textContent=(idx+1)+" / "+list.length;
+  var tags='<span class="sbg '+(SBCL[d.st||""]||"sb-d")+'">'+(SBLB[d.st||""])+'</span>';
+  if(d.gw)tags+='<span class="gtg">'+d.gw+'</span>';
+  if(d.jr)tags+='<span class="jtg">'+d.jr+'</span>';
+  document.getElementById("ki-tags").innerHTML=tags;
+  document.getElementById("ki-title").textContent=d.name;
+  document.getElementById("ki-loc").textContent=d.adr||d.stadt;
+  document.getElementById("ki-nr").textContent=d.nr;
+  document.getElementById("ki-ag").textContent=d.ag||"-";
+  document.getElementById("ki-gw").textContent=d.gw||"-";
+  document.getElementById("ki-desc").textContent=d.desc||"";
+  var kiA=document.getElementById("ki-anlagen"),kiAL=document.getElementById("ki-anlagen-list");
+  if(d.anlagen&&d.anlagen.trim()){kiAL.innerHTML=d.anlagen.split("\n").map(function(s){return "<li>"+s.trim()+"</li>";}).filter(Boolean).join("");kiA.style.display="block";}else{kiA.style.display="none";}
+  kinoFillPL(d);
+  if(d.lat&&d.lng&&kinoMap){
+    // Alle Pins auf Kino-Karte zeichnen
+    if(window._kinoMarkers){window._kinoMarkers.forEach(function(m){m.remove();});}
+    window._kinoMarkers=[];
+    var kList=currentList.length>0?currentList:DATA;
+    kList.forEach(function(proj){
+      if(!proj.lat||!proj.lng)return;
+      var el=document.createElement("div");
+      el.style.cssText="width:22px;height:22px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);background:"+(SCOL[proj.st||""]||"#6b7280");
+      if(proj===d)el.classList.add("kino-pin-active");
+      var mk=new mapboxgl.Marker({element:el,anchor:"center"}).setLngLat([proj.lng,proj.lat]).addTo(kinoMap);
+      window._kinoMarkers.push(mk);
+    });
+    var doFly=function(){
+      // Schritt 1: Rauszoomen auf Deutschland
+      kinoMap.flyTo({center:[10.45,51.16],zoom:5.2,speed:1.0,curve:1.2,essential:true});
+      kinoMap.once("moveend",function(){
+        if(kinoPaused)return;
+        // Schritt 2: Reinzoomen auf das Projekt
+        setTimeout(function(){
+          if(kinoPaused)return;
+          kinoMap.flyTo({center:[d.lng,d.lat],zoom:15,speed:0.8,curve:1.6,essential:true});
+          kinoMap.once("moveend",function(){
+            if(kinoPaused)return;
+            // Schritt 3: 2 Sekunden stehen bleiben
+            clearTimeout(kinoTimer);
+            kinoTimer=setTimeout(function(){
+              var list=currentList.length>0?currentList:DATA;
+              kinoIdx=(kinoIdx+1)%list.length;
+              kinoShow(list[kinoIdx]);
+            },2000);
+          });
+        },400);
+      });
+    };
+    if(kinoMap.loaded()){doFly();}
+    else{kinoMap.once("load",doFly);}
+  }
+
+}
+
+function kinoTick(){/* Timing wird durch moveend in kinoShow gesteuert */}
+
+function kinoStart(){
+  var list=currentList.length>0?currentList:DATA.filter(mt).sort(function(a,b){return a.name.localeCompare(b.name,"de");});
+  if(!list||list.length===0)return;
+  currentList=list;
+  kinoIdx=currentOi>=0?currentOi:0;
+  kinoRunning=true;kinoPaused=false;
+  document.getElementById("kino-overlay").classList.add("show");
+  document.getElementById("kino-btn").classList.add("running");
+  document.getElementById("kino-btn").textContent="&#9646; Stopp";
+  if(!kinoMap){
+    kinoMap=new mapboxgl.Map({container:"kino-map",style:cst==="satellite"?"mapbox://styles/mapbox/satellite-streets-v12":"mapbox://styles/mapbox/light-v11",center:[10.45,51.16],zoom:5.2,interactive:false,attributionControl:false});
+  } else {
+    kinoMap.setStyle(cst==="satellite"?"mapbox://styles/mapbox/satellite-streets-v12":"mapbox://styles/mapbox/light-v11");
+  }
+  kinoShow(list[kinoIdx]);
+  kinoTick();
+}
+
+// Manuell zu Projekt springen - zeigt es, wartet 2s, macht dann automatisch weiter
+var _kinoBusy=false;
+function kinoJumpTo(d){
+  clearTimeout(kinoTimer);
+  _kinoBusy=true;
+  kinoMap.off("moveend"); // alle alten moveend-Listener entfernen
+  // Info sofort befüllen
+  var list=currentList.length>0?currentList:DATA;
+  var idx=list.indexOf(d);
+  document.getElementById("kino-count").textContent=(idx+1)+" / "+list.length;
+  var tags='<span class="sbg '+(SBCL[d.st||""]||"sb-d")+'">'+(SBLB[d.st||""])+'</span>';
+  if(d.gw)tags+='<span class="gtg">'+d.gw+'</span>';
+  if(d.jr)tags+='<span class="jtg">'+d.jr+'</span>';
+  document.getElementById("ki-tags").innerHTML=tags;
+  document.getElementById("ki-title").textContent=d.name;
+  document.getElementById("ki-loc").textContent=d.adr||d.stadt;
+  document.getElementById("ki-nr").textContent=d.nr;
+  document.getElementById("ki-ag").textContent=d.ag||"-";document.getElementById("ki-gw").textContent=d.gw||"-";
+  document.getElementById("ki-desc").textContent=d.desc||"";
+  var kiA2=document.getElementById("ki-anlagen"),kiAL2=document.getElementById("ki-anlagen-list");
+  if(d.anlagen&&d.anlagen.trim()){kiAL2.innerHTML=d.anlagen.split("\n").map(function(s){return "<li>"+s.trim()+"</li>";}).filter(Boolean).join("");kiA2.style.display="block";}else{kiA2.style.display="none";}
+  kinoFillPL(d);
+  // Marker neu setzen
+  if(window._kinoMarkers){window._kinoMarkers.forEach(function(m){m.remove();});}
+  window._kinoMarkers=[];
+  var kList=currentList.length>0?currentList:DATA;
+  kList.forEach(function(proj){if(!proj.lat||!proj.lng)return;var el=document.createElement("div");el.style.cssText="width:22px;height:22px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);background:"+(SCOL[proj.st||""]||"#999999");if(proj===d)el.classList.add("kino-pin-active");var mk=new mapboxgl.Marker({element:el,anchor:"center"}).setLngLat([proj.lng,proj.lat]).addTo(kinoMap);window._kinoMarkers.push(mk);});
+  if(d.lat&&d.lng){
+    // Direkt auf das Projekt einzoomen (kein Raus-Zoom beim manuellen Sprung)
+    kinoMap.off("moveend");
+    kinoMap.flyTo({center:[d.lng,d.lat],zoom:15,speed:1.2,curve:1.4,essential:true});
+    kinoMap.once("moveend",function(){
+      _kinoBusy=false;
+      kinoHighlightList(kinoIdx);
+      if(kinoPaused)return;
+      // 2 Sekunden anzeigen, dann automatisch weiter
+      clearTimeout(kinoTimer);
+      kinoTimer=setTimeout(function(){
+        if(kinoPaused||!kinoRunning)return;
+        var list2=currentList.length>0?currentList:DATA;
+        kinoIdx=(kinoIdx+1)%list2.length;
+        kinoShow(list2[kinoIdx]);
+      },2000);
+    });
+  }
+}
+
+function kinoStop(){clearTimeout(kinoTimer);kinoRunning=false;kinoPaused=false;_kinoBusy=false;if(kinoMap)kinoMap.off("moveend");document.getElementById("kino-overlay").classList.remove("show");document.getElementById("kino-btn").classList.remove("running");document.getElementById("kino-btn").innerHTML="&#127916; Kino";}
+
+document.getElementById("kino-btn").onclick=function(){if(kinoRunning){kinoStop();}else{kinoStart();}};
+document.getElementById("kino-close").onclick=kinoStop;
+document.getElementById("kino-next").onclick=function(){clearTimeout(kinoTimer);var list=currentList.length>0?currentList:DATA;kinoIdx=(kinoIdx+1)%list.length;kinoShow(list[kinoIdx]);kinoTick();};
+document.getElementById("kino-prev").onclick=function(){clearTimeout(kinoTimer);var list=currentList.length>0?currentList:DATA;kinoIdx=(kinoIdx-1+list.length)%list.length;kinoShow(list[kinoIdx]);kinoTick();};
+document.addEventListener("keydown",function(e){if(!kinoRunning)return;if(e.key==="Escape")kinoStop();});
+</script>
+  <div id="sv-content" style="flex:1;display:flex;flex-direction:column">
+    <div class="sv-note" id="sv-note" style="display:none">
+      <div style="font-size:48px">&#128248;</div>
+      <div>Für diese Adresse ist kein Street View verfügbar.</div>
+      <a id="sv-gmaps-link" href="#" target="_blank" rel="noopener">In Google Maps öffnen ↗</a>
+    </div>
+    <iframe id="sv-frame" src="" allowfullscreen style="display:none"></iframe>
+  </div>
+</div>
+</body>
+</html>
