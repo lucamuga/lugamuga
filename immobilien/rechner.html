@@ -1,0 +1,353 @@
+<title>Hauskauf-Rechner Damme</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --bg: #F3F3F1;
+    --surface: #FFFFFF;
+    --ink: #1C2430;
+    --muted: #5B6470;
+    --line: #DEDCD7;
+    --accent: #9E3B24;
+    --accent-soft: #F5E6E0;
+    --good: #2E7A4B;
+    --good-soft: #E3F1E8;
+    --warn: #9A620F;
+    --warn-soft: #F8EDD8;
+    --bad: #B3362F;
+    --bad-soft: #F8E1DF;
+    --input: #FAFAF8;
+    --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+    --body: "Public Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #14181E; --surface: #1D232B; --ink: #ECEDEE; --muted: #9AA3AD; --line: #2E353F;
+      --accent: #E28163; --accent-soft: #3A2620;
+      --good: #63C48F; --good-soft: #1C3226; --warn: #E3AE52; --warn-soft: #36291A; --bad: #F07E74; --bad-soft: #3B2221;
+      --input: #181D24;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #14181E; --surface: #1D232B; --ink: #ECEDEE; --muted: #9AA3AD; --line: #2E353F;
+    --accent: #E28163; --accent-soft: #3A2620;
+    --good: #63C48F; --good-soft: #1C3226; --warn: #E3AE52; --warn-soft: #36291A; --bad: #F07E74; --bad-soft: #3B2221;
+    --input: #181D24;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 56px; }
+  header { display: grid; gap: 10px; margin-bottom: 22px; }
+  .eyebrow { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+  h1 { font-family: var(--display); font-size: clamp(28px, 4vw, 40px); line-height: 1.1; margin: 0; text-wrap: balance; }
+  .lede { color: var(--muted); max-width: 68ch; margin: 0; }
+  .presets { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+  .chip { font: inherit; font-size: 13px; font-weight: 600; padding: 7px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+  .chip:hover { border-color: var(--accent); color: var(--accent); }
+  .chip:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 24px; align-items: start; }
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+
+  .inputs { display: grid; gap: 16px; }
+  fieldset { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); margin: 0; padding: 14px 16px 16px; }
+  legend { font-family: var(--display); font-weight: 700; font-size: 16px; padding: 0 6px; margin-left: -6px; }
+  .fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 14px; }
+  @media (max-width: 480px) { .fields { grid-template-columns: 1fr; } }
+  .field { display: grid; gap: 4px; align-content: start; min-width: 0; }
+  .field label { font-size: 13px; font-weight: 600; }
+  .field .hint { font-size: 12px; color: var(--muted); }
+  .inbox { display: flex; align-items: center; border: 1px solid var(--line); border-radius: 7px; background: var(--input); }
+  .inbox:focus-within { border-color: var(--accent); }
+  .inbox input { flex: 1; width: 100%; min-width: 0; font: inherit; font-variant-numeric: tabular-nums; border: 0; background: transparent; color: var(--ink); padding: 8px 10px; }
+  .inbox input:focus-visible { outline: none; }
+  .inbox span { padding-right: 10px; color: var(--muted); font-size: 13px; white-space: nowrap; }
+
+  .results { display: grid; gap: 16px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); }
+  @media (max-width: 900px) { .results { position: static; } }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; }
+  .hero { display: grid; gap: 6px; }
+  .hero .label { font-size: 13px; color: var(--muted); font-weight: 600; }
+  .big { font-family: var(--display); font-size: clamp(34px, 5vw, 46px); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+  .sub { color: var(--muted); font-size: 13px; }
+  .pill { display: inline-block; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; letter-spacing: .02em; }
+  .pill.good { background: var(--good-soft); color: var(--good); }
+  .pill.warn { background: var(--warn-soft); color: var(--warn); }
+  .pill.bad { background: var(--bad-soft); color: var(--bad); }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+
+  .kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  @media (max-width: 560px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .kpi { background: var(--surface); padding: 12px 14px; display: grid; gap: 4px; align-content: start; }
+  .kpi .k { font-size: 12px; color: var(--muted); font-weight: 600; }
+  .kpi .v { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  .target { border-left: 3px solid var(--accent); background: var(--accent-soft); border-radius: 0 10px 10px 0; padding: 14px 16px; display: grid; gap: 4px; }
+  .target strong { font-size: 20px; font-variant-numeric: tabular-nums; }
+
+  h2 { font-family: var(--display); font-size: 17px; margin: 0 0 10px; }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  td { padding: 7px 0; border-bottom: 1px solid var(--line); }
+  td:last-child { text-align: right; font-weight: 600; white-space: nowrap; padding-left: 12px; }
+  tr.total td { border-bottom: 0; border-top: 2px solid var(--ink); font-weight: 700; padding-top: 9px; }
+  .pos { color: var(--good); } .neg { color: var(--bad); }
+  .muted { color: var(--muted); }
+  .seller-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 10px; }
+  @media (max-width: 560px) { .seller-grid { grid-template-columns: 1fr; } }
+  .seller-grid div { display: grid; gap: 2px; }
+  .seller-grid .k { font-size: 12px; color: var(--muted); font-weight: 600; }
+  .seller-grid .v { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .note { font-size: 12.5px; color: var(--muted); margin: 0; }
+  details { font-size: 13px; color: var(--muted); }
+  details summary { cursor: pointer; font-weight: 600; color: var(--ink); }
+  details ul { margin: 8px 0 0; padding-left: 18px; display: grid; gap: 4px; }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Kapitalanlage · Verkauf mit Rückmietung · Damme / Kreis Vechta</div>
+    <h1>Hauskauf-Rechner Damme</h1>
+    <p class="lede">Trag die Daten eines Hauses ein und sieh sofort Cashflow, Kaufpreisfaktor und Rendite. Der Rechner zeigt auch, bis zu welchem Kaufpreis sich das Haus trägt und wie lange der Erlös des Verkäufers für die Miete reicht. Vorbelegt ist ein Beispielhaus aus Damme. Das sind keine echten Objektdaten.</p>
+    <div class="presets" role="group" aria-label="Beispiele laden">
+      <button class="chip" type="button" data-preset="efh">Beispiel: Einfamilienhaus, Bj. 1975</button>
+      <button class="chip" type="button" data-preset="abschlag">Beispiel: mit 15 % Abschlag</button>
+      <button class="chip" type="button" data-preset="einlieger">Beispiel: mit Einliegerwohnung</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <form class="inputs" id="form" autocomplete="off"></form>
+
+    <div class="results" aria-live="polite">
+      <div class="card hero">
+        <span class="label">Cashflow nach Steuern · pro Monat (1. Jahr)</span>
+        <div class="row"><span class="big" id="cfNach">–</span><span class="pill" id="cfPill">–</span></div>
+        <span class="sub" id="cfSub">–</span>
+      </div>
+
+      <div class="kpis">
+        <div class="kpi"><span class="k">Kaufpreisfaktor</span><span class="v" id="faktor">–</span><span class="pill" id="faktorPill">–</span></div>
+        <div class="kpi"><span class="k">Bruttomietrendite</span><span class="v" id="brutto">–</span></div>
+        <div class="kpi"><span class="k">Nettomietrendite</span><span class="v" id="netto">–</span></div>
+        <div class="kpi"><span class="k">EK-Rendite*</span><span class="v" id="ekr">–</span></div>
+      </div>
+
+      <div class="target">
+        <span class="sub">Maximaler Kaufpreis für Cashflow ≥ 0 € nach Steuern (bei gleichem Eigenkapital)</span>
+        <strong id="maxPreis">–</strong>
+        <span class="sub" id="maxPreisSub">–</span>
+      </div>
+
+      <div class="card">
+        <h2>Monatliche Rechnung</h2>
+        <table><tbody id="breakdown"></tbody></table>
+      </div>
+
+      <div class="card">
+        <h2>Sicht des Verkäufers</h2>
+        <div class="seller-grid">
+          <div><span class="k">Erlös für den Verkäufer</span><span class="v" id="sErloes">–</span></div>
+          <div><span class="k">Seine Miete pro Jahr</span><span class="v" id="sMiete">–</span></div>
+          <div><span class="k">So lange reicht das Geld</span><span class="v" id="sJahre">–</span></div>
+        </div>
+        <p class="note" id="sText">–</p>
+      </div>
+
+      <details>
+        <summary>Annahmen und Grenzen des Rechners</summary>
+        <ul>
+          <li>Rate = Annuität aus Zins + anfänglicher Tilgung. Die Zinsen gelten fürs 1. Jahr (vereinfacht: Darlehen × Zinssatz).</li>
+          <li>Abschreibung (AfA) = Gebäudeanteil von Kaufpreis und Nebenkosten × AfA-Satz. Sofort-Investitionen werden hier vereinfacht mit abgeschrieben.</li>
+          <li>*Eigenkapitalrendite = (Cashflow nach Steuern + Tilgung im 1. Jahr) ÷ Eigenkapital, ohne Wertsteigerung.</li>
+          <li>Lebenserwartung: grobe Werte nach der Sterbetafel des Statistischen Bundesamts (Frauen, also der vorsichtigere, längere Wert).</li>
+          <li>Kaufpreisfaktor: bis 18 gut, 18–22 mittel, über 22 teuer. Das sind Faustregeln für ländliche Lagen.</li>
+          <li>Keine Steuer- oder Rechtsberatung. Vor einem Kauf Bank, Steuerberater und Notar einbeziehen.</li>
+        </ul>
+      </details>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const groups = [
+    { title: 'Objekt', fields: [
+      { id: 'preis', label: 'Kaufpreis', unit: '€', step: 1000 },
+      { id: 'flaeche', label: 'Wohnfläche (Verkäufer)', unit: 'm²', step: 1 },
+      { id: 'mieteQm', label: 'Kaltmiete Verkäufer', unit: '€/m²', step: 0.1, hint: 'Damme: ca. 7,15–9,90 €/m²' },
+      { id: 'sanierung', label: 'Sofort-Investitionen', unit: '€', step: 1000, hint: 'z. B. Heizung/GEG-Pflichten' },
+      { id: 'einlFl', label: 'Einliegerwohnung Fläche', unit: 'm²', step: 1, hint: '0, wenn keine vorhanden' },
+      { id: 'einlMiete', label: 'Einliegerwohnung Miete', unit: '€/Monat', step: 10 },
+    ]},
+    { title: 'Kaufnebenkosten', fields: [
+      { id: 'grest', label: 'Grunderwerbsteuer', unit: '%', step: 0.5, hint: 'Niedersachsen: 5 %' },
+      { id: 'notar', label: 'Notar & Grundbuch', unit: '%', step: 0.1 },
+      { id: 'makler', label: 'Makler', unit: '%', step: 0.1, hint: 'Bei Direktkauf 0 %' },
+    ]},
+    { title: 'Finanzierung', fields: [
+      { id: 'ek', label: 'Eigenkapital', unit: '€', step: 1000 },
+      { id: 'zins', label: 'Sollzins', unit: '%', step: 0.05, hint: 'Aktuelles Angebot der Bank' },
+      { id: 'tilgung', label: 'Anfängliche Tilgung', unit: '%', step: 0.25 },
+    ]},
+    { title: 'Laufende Kosten & Steuer', fields: [
+      { id: 'instand', label: 'Instandhaltung', unit: '€/m²/J.', step: 1, hint: 'Altbau: 12–18 €' },
+      { id: 'sonst', label: 'Nicht umlagefähige Kosten', unit: '€/Monat', step: 5, hint: 'Verwaltung, Bankgebühren' },
+      { id: 'ausfall', label: 'Mietausfall-Reserve', unit: '%', step: 0.5 },
+      { id: 'gebaeude', label: 'Gebäudeanteil', unit: '%', step: 1, hint: 'Rest = Grundstück' },
+      { id: 'afa', label: 'AfA-Satz', unit: '%', step: 0.5, hint: 'Baujahr 1925–2022: 2 %' },
+      { id: 'steuer', label: 'Persönlicher Steuersatz', unit: '%', step: 1, hint: 'Grenzsteuersatz' },
+    ]},
+    { title: 'Verkäufer', fields: [
+      { id: 'alter', label: 'Alter (jüngste Person)', unit: 'Jahre', step: 1 },
+      { id: 'sZins', label: 'Zins auf sein Kapital', unit: '% p. a.', step: 0.25, hint: 'Tagesgeld/Anleihen' },
+    ]},
+  ];
+
+  const base = { preis: 260000, flaeche: 125, mieteQm: 7.5, sanierung: 0, einlFl: 0, einlMiete: 0,
+    grest: 5, notar: 2, makler: 0, ek: 55000, zins: 3.8, tilgung: 2,
+    instand: 14, sonst: 20, ausfall: 2, gebaeude: 70, afa: 2, steuer: 30, alter: 75, sZins: 2.5 };
+  const presets = {
+    efh: base,
+    abschlag: Object.assign({}, base, { preis: 221000, ek: 47000 }),
+    einlieger: Object.assign({}, base, { preis: 330000, flaeche: 120, einlFl: 70, einlMiete: 520, ek: 70000 }),
+  };
+
+  const form = document.getElementById('form');
+  form.innerHTML = groups.map(g => `<fieldset><legend>${g.title}</legend><div class="fields">${g.fields.map(f => `
+    <div class="field"><label for="${f.id}">${f.label}</label>
+      <div class="inbox"><input id="${f.id}" type="number" inputmode="decimal" step="${f.step}" min="0"><span>${f.unit}</span></div>
+      ${f.hint ? `<span class="hint">${f.hint}</span>` : ''}</div>`).join('')}</div></fieldset>`).join('');
+  form.addEventListener('submit', e => e.preventDefault());
+
+  const ids = groups.flatMap(g => g.fields.map(f => f.id));
+  const KEY = 'hauskauf-rechner-damme-v1';
+
+  function load(values) { ids.forEach(id => { document.getElementById(id).value = values[id]; }); }
+  function read() { const v = {}; ids.forEach(id => { const n = parseFloat(document.getElementById(id).value); v[id] = isFinite(n) ? n : 0; }); return v; }
+
+  const eur = (n, d = 0) => n.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: d, minimumFractionDigits: d });
+  const pct = (n, d = 1) => (n * 100).toLocaleString('de-DE', { maximumFractionDigits: d, minimumFractionDigits: d }) + ' %';
+  const num = (n, d = 1) => n.toLocaleString('de-DE', { maximumFractionDigits: d, minimumFractionDigits: d });
+  const signed = n => (n > 0.5 ? '+' : '') + eur(n);
+
+  function calc(v) {
+    const mieteVerk = v.flaeche * v.mieteQm;
+    const kalt = mieteVerk + v.einlMiete;
+    const nk = v.preis * (v.grest + v.notar + v.makler) / 100;
+    const gesamt = v.preis + nk + v.sanierung;
+    const darlehen = Math.max(0, gesamt - v.ek);
+    const rate = darlehen * (v.zins + v.tilgung) / 100 / 12;
+    const zinsJ = darlehen * v.zins / 100;
+    const tilgJ = rate * 12 - zinsJ;
+    const ausfall = kalt * v.ausfall / 100;
+    const inst = (v.flaeche + v.einlFl) * v.instand / 12;
+    const cfVor = kalt - ausfall - rate - inst - v.sonst;
+    const afaJ = ((v.preis + nk) * v.gebaeude / 100 + v.sanierung) * v.afa / 100;
+    const ergebnis = (kalt - ausfall - inst - v.sonst) * 12 - zinsJ - afaJ;
+    const steuerJ = ergebnis * v.steuer / 100;
+    const cfNach = cfVor - steuerJ / 12;
+    const jahresMiete = kalt * 12;
+    return { mieteVerk, kalt, nk, gesamt, darlehen, rate, zinsJ, tilgJ, ausfall, inst, cfVor, afaJ, ergebnis, steuerJ, cfNach, jahresMiete,
+      faktor: jahresMiete > 0 ? v.preis / jahresMiete : Infinity,
+      brutto: v.preis > 0 ? jahresMiete / v.preis : 0,
+      netto: gesamt > 0 ? (kalt - ausfall - inst - v.sonst) * 12 / gesamt : 0,
+      ekr: v.ek > 0 ? (cfNach * 12 + tilgJ) / v.ek : NaN };
+  }
+
+  function maxPreis(v) {
+    const f = p => calc(Object.assign({}, v, { preis: p })).cfNach;
+    let lo = 0, hi = Math.max(v.preis * 3, 100000);
+    if (f(lo) < 0) return null;
+    if (f(hi) >= 0) return hi;
+    for (let i = 0; i < 60; i++) { const m = (lo + hi) / 2; if (f(m) >= 0) lo = m; else hi = m; }
+    return lo;
+  }
+
+  // Fernere Lebenserwartung, Frauen, gerundet (Sterbetafel Destatis 2021/23)
+  const LE = [[60, 25.0], [65, 20.9], [70, 16.9], [75, 13.2], [80, 9.8], [85, 6.9], [90, 4.6], [95, 3.0]];
+  function lebenserwartung(a) {
+    if (a <= LE[0][0]) return LE[0][1] + (LE[0][0] - a) * 0.9;
+    for (let i = 1; i < LE.length; i++) {
+      if (a <= LE[i][0]) { const [a0, e0] = LE[i - 1], [a1, e1] = LE[i]; return e0 + (e1 - e0) * (a - a0) / (a1 - a0); }
+    }
+    return LE[LE.length - 1][1];
+  }
+
+  function pill(el, cls, text) { el.className = 'pill ' + cls; el.textContent = text; }
+  function setText(id, t) { document.getElementById(id).textContent = t; }
+
+  function render() {
+    const v = read();
+    try { localStorage.setItem(KEY, JSON.stringify(v)); } catch (e) {}
+    const r = calc(v);
+
+    const cfEl = document.getElementById('cfNach');
+    cfEl.textContent = signed(r.cfNach);
+    cfEl.style.color = r.cfNach >= 0 ? 'var(--good)' : r.cfNach >= -150 ? 'var(--warn)' : 'var(--bad)';
+    const cp = document.getElementById('cfPill');
+    if (r.cfNach >= 0) pill(cp, 'good', 'Trägt sich selbst');
+    else if (r.cfNach >= -150) pill(cp, 'warn', 'Leichter Zuschuss nötig');
+    else pill(cp, 'bad', 'Deutlicher Zuschuss nötig');
+    setText('cfSub', `Vor Steuern: ${signed(r.cfVor)} · Darlehen: ${eur(r.darlehen)} · Tilgung baut ${eur(r.tilgJ / 12)} Vermögen pro Monat auf`);
+
+    setText('faktor', isFinite(r.faktor) ? num(r.faktor) : '–');
+    const fp = document.getElementById('faktorPill');
+    if (r.faktor <= 18) pill(fp, 'good', 'günstig'); else if (r.faktor <= 22) pill(fp, 'warn', 'mittel'); else pill(fp, 'bad', 'teuer');
+    setText('brutto', pct(r.brutto, 2));
+    setText('netto', pct(r.netto, 2));
+    setText('ekr', isFinite(r.ekr) ? pct(r.ekr) : '–');
+
+    const mp = maxPreis(v);
+    if (mp === null) {
+      setText('maxPreis', 'Nicht erreichbar');
+      setText('maxPreisSub', 'Selbst ohne Kaufpreis bleibt der Cashflow negativ. Prüf Miete, Kosten und Sofort-Investitionen.');
+    } else {
+      setText('maxPreis', eur(Math.floor(mp / 1000) * 1000));
+      const diff = mp - v.preis;
+      setText('maxPreisSub', diff >= 0
+        ? `Du liegst ${eur(diff)} darunter. Puffer vorhanden.`
+        : `Das sind ${eur(-diff)} (${pct(-diff / v.preis, 0)}) weniger als der eingegebene Preis. So viel Abschlag bräuchtest du.`);
+    }
+
+    const rows = [
+      ['Kaltmiete' + (v.einlMiete > 0 ? ' (inkl. Einliegerwohnung)' : ''), r.kalt],
+      ['Mietausfall-Reserve', -r.ausfall],
+      [`Kreditrate (${num(v.zins, 2)} % Zins + ${num(v.tilgung, 2)} % Tilgung)`, -r.rate],
+      ['Instandhaltungsrücklage', -r.inst],
+      ['Nicht umlagefähige Kosten', -v.sonst],
+      ['Cashflow vor Steuern', r.cfVor, 'sub'],
+      [r.steuerJ <= 0 ? 'Steuerersparnis (Verlust × Steuersatz)' : 'Steuer auf Überschuss', -r.steuerJ / 12],
+    ];
+    document.getElementById('breakdown').innerHTML = rows.map(([l, n, t]) =>
+      `<tr><td${t === 'sub' ? ' class="muted"' : ''}>${l}</td><td class="${n >= 0 ? 'pos' : 'neg'}">${signed(n)}</td></tr>`).join('') +
+      `<tr class="total"><td>Cashflow nach Steuern</td><td class="${r.cfNach >= 0 ? 'pos' : 'neg'}">${signed(r.cfNach)}</td></tr>`;
+
+    // Verkäufer
+    const P = v.preis, A = r.mieteVerk * 12, i = v.sZins / 100;
+    setText('sErloes', eur(P));
+    setText('sMiete', eur(A));
+    let jahre;
+    if (A <= 0) jahre = Infinity;
+    else if (i > 0 && A <= P * i) jahre = Infinity;
+    else jahre = i > 0 ? -Math.log(1 - i * P / A) / Math.log(1 + i) : P / A;
+    setText('sJahre', isFinite(jahre) ? num(jahre, 0) + ' Jahre' : 'unbegrenzt');
+    const L = lebenserwartung(v.alter);
+    const rest = i > 0 ? P * Math.pow(1 + i, L) - A * (Math.pow(1 + i, L) - 1) / i : P - A * L;
+    const ok = !isFinite(jahre) || jahre > L;
+    setText('sText', `Mit ${num(v.alter, 0)} Jahren liegt die durchschnittliche restliche Lebenserwartung bei etwa ${num(L, 0)} Jahren. ` +
+      (ok
+        ? `Das Geld reicht also sicher für die Miete. Nach ${num(L, 0)} Jahren wären rechnerisch noch etwa ${eur(Math.max(0, rest))} übrig, für Pflege, Familie oder das Erbe.`
+        : `Achtung: Das Geld reicht voraussichtlich nicht über die ganze Zeit. Sprich Miete oder Absicherung offen mit dem Verkäufer ab.`));
+  }
+
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+  load(saved && ids.every(id => id in saved) ? saved : base);
+  form.addEventListener('input', render);
+  document.querySelectorAll('[data-preset]').forEach(b => b.addEventListener('click', () => { load(presets[b.dataset.preset]); render(); }));
+  render();
+})();
+</script>
