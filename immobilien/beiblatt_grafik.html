@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+  @page { size: A4; margin: 0; }
+  :root { --ink:#1C2430; --muted:#5B6470; --line:#E3E0DB; --brick:#A4452C; --brick-soft:#F6E7E1; --green:#1F8A6A; --green-soft:#E2F2EC; --paper:#FFFFFF; --tint:#F7F6F3; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; background:var(--paper); }
+  body { width:794px; height:1123px; font-family:"Public Sans","Segoe UI",Arial,sans-serif; color:var(--ink); padding:32px 54px 24px; display:flex; flex-direction:column; gap:18px; }
+  .eyebrow { font-size:13px; letter-spacing:.1em; text-transform:uppercase; color:var(--brick); font-weight:700; }
+  h1 { font-family:"Bricolage Grotesque","Segoe UI",sans-serif; font-size:32px; line-height:1.1; margin:6px 0 0; }
+  .lede { font-size:17px; color:var(--muted); margin:4px 0 0; }
+  h2 { font-family:"Bricolage Grotesque","Segoe UI",sans-serif; font-size:20px; margin:0 0 8px; }
+
+  /* Ablauf */
+  .steps { display:grid; grid-template-columns:1fr 34px 1fr 34px 1fr; align-items:stretch; }
+  .step { background:var(--tint); border-radius:12px; padding:12px 12px 14px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:8px; }
+  .step svg.ic { width:52px; height:52px; }
+  .num { width:28px; height:28px; border-radius:50%; background:var(--brick); color:#fff; font-weight:700; font-size:15px; display:grid; place-items:center; }
+  .step b { font-size:17px; line-height:1.25; }
+  .step span { font-size:14px; color:var(--muted); line-height:1.4; }
+  .arrow { display:grid; place-items:center; color:var(--brick); }
+
+  /* Vorher / Nachher */
+  .compare { display:grid; grid-template-columns:1fr 1fr; border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  .col h3 { margin:0; padding:12px 18px; font-size:17px; }
+  .col.before h3 { background:var(--tint); color:var(--muted); }
+  .col.after h3 { background:var(--green-soft); color:#156B52; }
+  .col ul { list-style:none; margin:0; padding:6px 18px 12px; }
+  .col li { display:flex; gap:10px; align-items:flex-start; padding:6px 0; font-size:15px; line-height:1.35; border-bottom:1px solid var(--line); }
+  .col li:last-child { border-bottom:0; }
+  .col.after { border-left:1px solid var(--line); }
+  .col li svg { flex:0 0 20px; width:20px; height:20px; margin-top:1px; }
+
+  /* Balken */
+  .bar-wrap { display:flex; flex-direction:column; gap:10px; }
+  .bar-sub { font-size:15px; color:var(--muted); margin:-6px 0 4px; }
+  .bar { display:flex; gap:2px; height:48px; }
+  .seg { border-radius:4px; display:flex; align-items:center; padding:0 14px; color:#fff; font-weight:700; font-size:16px; }
+  .seg.rent { background:var(--brick); }
+  .seg.rest { background:var(--green); }
+  .scale { display:flex; justify-content:space-between; font-size:13px; color:var(--muted); font-variant-numeric:tabular-nums; }
+  .legend { display:flex; gap:22px; font-size:15px; }
+  .legend i { display:inline-block; width:14px; height:14px; border-radius:3px; margin-right:7px; vertical-align:-2px; }
+  .foot { font-size:12px; color:var(--muted); line-height:1.45; margin-top:auto; border-top:1px solid var(--line); padding-top:10px; }
+  .promise { background:var(--brick-soft); border-radius:12px; padding:11px 18px; font-size:15.5px; line-height:1.45; display:flex; gap:14px; align-items:center; }
+  .promise svg { flex:0 0 34px; }
+</style></head>
+<body>
+  <div>
+    <div class="eyebrow">Beiblatt zu meinem Schreiben</div>
+    <h1>Verkaufen und trotzdem zu Hause wohnen bleiben</h1>
+    <p class="lede">So funktioniert es, einfach erklärt.</p>
+  </div>
+
+  <section>
+    <h2>Der Ablauf in drei Schritten</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="num">1</div>
+        <svg class="ic" viewBox="0 0 52 52" fill="none" stroke="#A4452C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M10 22h24v10a10 10 0 0 1-10 10h-4a10 10 0 0 1-10-10z"/><path d="M34 25h3a5 5 0 0 1 0 10h-3"/><path d="M17 8c-2 3 2 5 0 9M24 8c-2 3 2 5 0 9"/><path d="M8 46h32"/>
+        </svg>
+        <b>Kennenlernen</b>
+        <span>Bei einer Tasse Kaffee, gern mit Ihrer Familie. Ganz unverbindlich.</span>
+      </div>
+      <div class="arrow"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13h16M15 7l6 6-6 6"/></svg></div>
+      <div class="step">
+        <div class="num">2</div>
+        <svg class="ic" viewBox="0 0 52 52" fill="none" stroke="#A4452C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M14 6h18l8 8v32H14z"/><path d="M32 6v8h8"/><path d="M20 22h14M20 28h14M20 34h8"/><path d="M29 41c2-3 4-3 5 0s3 1 4-1"/>
+        </svg>
+        <b>Fairer Preis beim Notar</b>
+        <span>Nach dem echten Wert. Ihr Wohnrecht wird vertraglich abgesichert.</span>
+      </div>
+      <div class="arrow"><svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13h16M15 7l6 6-6 6"/></svg></div>
+      <div class="step">
+        <div class="num">3</div>
+        <svg class="ic" viewBox="0 0 52 52" fill="none" stroke="#A4452C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M6 24 26 8l20 16"/><path d="M11 20v24h30V20"/><path d="M22 44V32h8v12"/><path d="M26 17.5c-1.6-1.8-4.6-.6-4.6 1.8 0 2.4 4.6 5 4.6 5s4.6-2.6 4.6-5c0-2.4-3-3.6-4.6-1.8z" fill="#A4452C" stroke="none"/>
+        </svg>
+        <b>Sie wohnen weiter</b>
+        <span>In Ihrem Zuhause, so lange Sie möchten. Mit dem Geld auf Ihrem Konto.</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Was sich für Sie ändert</h2>
+    <div class="compare">
+      <div class="col before">
+        <h3>Heute als Eigentümer</h3>
+        <ul>
+          <li><svg viewBox="0 0 20 20" fill="none" stroke="#8A919A" stroke-width="2" stroke-linecap="round"><circle cx="10" cy="10" r="8"/><path d="M6 10h8"/></svg>Ihr Vermögen steckt im Haus fest</li>
+          <li><svg viewBox="0 0 20 20" fill="none" stroke="#8A919A" stroke-width="2" stroke-linecap="round"><circle cx="10" cy="10" r="8"/><path d="M6 10h8"/></svg>Dach, Heizung, Fenster: Sie zahlen und organisieren</li>
+          <li><svg viewBox="0 0 20 20" fill="none" stroke="#8A919A" stroke-width="2" stroke-linecap="round"><circle cx="10" cy="10" r="8"/><path d="M6 10h8"/></svg>Neue Energievorschriften sind Ihre Sorge</li>
+          <li><svg viewBox="0 0 20 20" fill="none" stroke="#8A919A" stroke-width="2" stroke-linecap="round"><circle cx="10" cy="10" r="8"/><path d="M6 10h8"/></svg>Grundsteuer und Gebäudeversicherung zahlen Sie</li>
+          <li><svg viewBox="0 0 20 20" fill="none" stroke="#8A919A" stroke-width="2" stroke-linecap="round"><circle cx="10" cy="10" r="8"/><path d="M6 10h8"/></svg>Sie wohnen zu Hause, tragen aber alle Kosten und Risiken</li>
+        </ul>
+      </div>
+      <div class="col after">
+        <h3>Nach dem Verkauf an mich</h3>
+        <ul>
+          <li><svg viewBox="0 0 20 20" fill="none" stroke="#1F8A6A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="8"/><path d="m6.5 10.2 2.4 2.4 4.6-5"/></svg><span><b>Geld frei verfügbar:</b> für Sie und Ihre Familie</span></li>
+          <li><svg viewBox="0 0 20 20" fill="none" stroke="#1F8A6A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="8"/><path d="m6.5 10.2 2.4 2.4 4.6-5"/></svg><span><b>Reparaturen übernehme ich</b>, auch die Organisation</span></li>
+          <li><svg viewBox="0 0 20 20" fill="none" stroke="#1F8A6A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="8"/><path d="m6.5 10.2 2.4 2.4 4.6-5"/></svg><span><b>Vorschriften sind meine Aufgabe</b></span></li>
+          <li><svg viewBox="0 0 20 20" fill="none" stroke="#1F8A6A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="8"/><path d="m6.5 10.2 2.4 2.4 4.6-5"/></svg><span><b>Gebäudekosten trage ich</b>, Sie zahlen eine faire Miete</span></li>
+          <li><svg viewBox="0 0 20 20" fill="none" stroke="#1F8A6A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="8"/><path d="m6.5 10.2 2.4 2.4 4.6-5"/></svg><span><b>Sie wohnen weiter zu Hause</b>, abgesichert</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="bar-wrap">
+    <h2>Reicht das Geld für die Miete? Ein Beispiel</h2>
+    <p class="bar-sub">Haus für 260.000 €, Miete 940 € im Monat, 13 Jahre lang (durchschnittliche Lebenserwartung mit 75)</p>
+    <div class="bar" role="img" aria-label="Von 260.000 Euro gehen etwa 146.600 Euro in 13 Jahren Miete, etwa 113.400 Euro bleiben übrig.">
+      <div class="seg rent" style="flex:146640">Miete 13 Jahre: ca. 146.600 €</div>
+      <div class="seg rest" style="flex:113360">Bleibt: ca. 113.400 €</div>
+    </div>
+    <div class="scale"><span>0 €</span><span>130.000 €</span><span>260.000 €</span></div>
+    <div class="legend"><span><i style="background:var(--brick)"></i>Für die Miete</span><span><i style="background:var(--green)"></i>Bleibt für Sie und Ihre Familie, dazu kommen noch Zinsen</span></div>
+  </section>
+
+  <div class="promise">
+    <svg width="34" height="34" viewBox="0 0 34 34" fill="none" stroke="#A4452C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3 5 8v8c0 8 5 13 12 15 7-2 12-7 12-15V8z"/><path d="m12 17 3.5 3.5L23 13"/></svg>
+    <div><b>Mein Versprechen:</b> kein Makler, keine Besichtigungen, kein Druck. Alles läuft über den Notar, und Ihre Familie kann jederzeit dabei sein.</div>
+  </div>
+
+  <div class="foot">Die Zahlen sind ein vereinfachtes Beispiel ohne Zinsen auf das Guthaben. Kaufpreis und Miete werden für jedes Haus individuell nach dem tatsächlichen Wert und dem örtlichen Mietspiegel festgelegt.</div>
+</body></html>
