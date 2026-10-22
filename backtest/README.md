@@ -45,7 +45,9 @@ datetime,open,high,low,close,volume
 - Zeitstempel ohne Zeitzone werden als New-York-Zeit gelesen. Andernfalls `--source-tz UTC` (o. ä.) angeben.
   Unix-Timestamps werden automatisch erkannt.
 - Overnight-Bars werden verworfen, es bleiben nur 09:30–16:00 ET übrig.
-- `--resample 5min` aggregiert 1m-Daten zu 5m-Bars.
+- Standardmäßig läuft die Strategie auf **5-Minuten-Kerzen** (`--timeframe 5m`). 1m-Daten werden automatisch
+  zu 5m zusammengefasst. Mit `--timeframe 1m` oder `15m` lässt sich das ändern. Auf 5m ist die 10:00-Range genau die
+  10:00-Kerze, der Einstieg erfolgt nach einem Schlusskurs über/unter dieser Kerze (bis zur 10:10-Kerze).
 
 **News-Tage (optional):** Eine CSV, deren erste Spalte die Daten mit einem 10:00-ET-Release enthält, z. B. aus dem
 Wirtschaftskalender von Investing.com oder ForexFactory. Mit `--news-dates news.csv` werden die Ergebnisse nach News-Tag
@@ -62,19 +64,30 @@ python backtest/run_backtest.py --synthetic
 # Echte NQ-Daten (Zeitstempel in UTC)
 python backtest/run_backtest.py --csv data/nq_1m.csv --source-tz UTC
 
+# Nur der letzte Monat (30 Kalendertage bis zum letzten Tag in den Daten) oder ein fester Zeitraum
+python backtest/run_backtest.py --csv data/nq_1m.csv --last-days 30
+python backtest/run_backtest.py --csv data/nq_1m.csv --from 2026-09-01 --to 2026-09-30
+
 # MNQ, Fade-Variante, 50-%-Ziel, nur an News-Tagen
 python backtest/run_backtest.py --csv data/nq_1m.csv --tick-value 0.5 --commission 1.5 \
     --mode fade --target retrace --news-dates data/news.csv --news-only
 
-# QQQ via yfinance (nur auf dem eigenen Rechner, kurze Historie)
-python backtest/run_backtest.py --yfinance QQQ --interval 5m --tick-size 0.01 --tick-value 0.01 --commission 0
+# QQQ via yfinance (nur auf dem eigenen Rechner, 5m-Daten der letzten ~60 Tage), letzter Monat, 100 Aktien pro Trade
+python backtest/run_backtest.py --yfinance QQQ --last-days 30 --tick-size 0.01 --tick-value 1 --commission 0
 
 # Tests
 python -m pytest backtest/tests
 ```
 
-Ausgabe: Zusammenfassung (Trefferquote, Ø R, Expectancy, Profit Factor, Max Drawdown, Sharpe), Aufschlüsselung nach
-Wochentag, Richtung und News-Tag, `results/trades.csv` und `results/equity.png`.
+Ausgabe:
+
+- Konsole: Zusammenfassung (Trefferquote, Ø R, Expectancy, Profit Factor, Max Drawdown, Sharpe) und Aufschlüsselung nach
+  Monat, Wochentag, Richtung und News-Tag.
+- `results/report.md`: Monatsübersicht mit Kennzahlen und allen Trades als Tabelle.
+- `results/charts/JJJJ-MM-TT.png`: **5-Minuten-Kerzenchart je Trade** (09:30–12:00) mit Opening Drive, 10:00-Range,
+  Einstieg, Stop, Ziel und Exit. Abschalten mit `--no-charts`.
+- `results/equity.png`: kumulierter P&L mit den Tagesergebnissen als Balken.
+- `results/trades.csv`: alle Trades als Rohdaten.
 
 ### Zufalls-Baseline
 

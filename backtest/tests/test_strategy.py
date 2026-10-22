@@ -92,3 +92,12 @@ def test_loader_converts_utc_and_keeps_rth_only(tmp_path):
     assert bars.index[0].time() == time(9, 30)  # 14:30 UTC = 09:30 EST
     assert bars.index[-1].time() == time(15, 55)
     assert (bars.index.minute % 5 == 0).all()
+
+
+def test_five_minute_run_writes_report_and_charts(tmp_path):
+    from backtest import run_backtest
+
+    assert run_backtest.main(["--synthetic", "--last-days", "10", "--baseline-runs", "5", "--out", str(tmp_path)]) == 0
+    assert (tmp_path / "report.md").read_text().startswith("# 10:00-ET-Reversal")
+    assert (tmp_path / "equity.png").exists()
+    assert list((tmp_path / "charts").glob("*.png"))

@@ -40,15 +40,16 @@ def summary(trades: pd.DataFrame, trading_days: int | None = None) -> dict:
 
 
 def breakdown(trades: pd.DataFrame) -> dict[str, pd.DataFrame]:
-    """Win rate, average R and P&L grouped by weekday, direction and news day."""
+    """Win rate, average R and P&L grouped by month, weekday, direction and news day."""
     if trades.empty:
         return {}
     df = trades.assign(
         weekday=pd.to_datetime(trades["date"]).dt.weekday.map(lambda i: WEEKDAYS[i]),
+        month=pd.to_datetime(trades["date"]).dt.strftime("%Y-%m"),
         win=trades["pnl_usd"] > 0,
     )
     out = {}
-    for key in ("weekday", "direction", "news_day"):
+    for key in ("month", "weekday", "direction", "news_day"):
         if key not in df:
             continue
         g = df.groupby(key)

@@ -2,8 +2,9 @@
 
 Examples:
     python backtest/run_backtest.py --csv data/nq_1m.csv --source-tz UTC
+    python backtest/run_backtest.py --csv data/nq_1m.csv --last-days 30
     python backtest/run_backtest.py --synthetic --mode fade --target retrace
-    python backtest/run_backtest.py --yfinance QQQ --interval 5m --tick-size 0.01 --tick-value 0.01
+    python backtest/run_backtest.py --yfinance QQQ --last-days 30 --tick-size 0.01 --tick-value 1 --commission 0
 """
 
 from __future__ import annotations
@@ -11,13 +12,15 @@ from __future__ import annotations
 import argparse
 import os
 import sys
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import pandas as pd  # noqa: E402
 
 from backtest import data_loader, engine, metrics, synthetic  # noqa: E402
+
+TIMEFRAMES = {"1m": None, "5m": "5min", "15m": "15min"}
 from backtest.strategy import Params  # noqa: E402
 
 
@@ -39,8 +42,10 @@ def parse_args(argv=None) -> argparse.Namespace:
     src.add_argument("--yfinance", metavar="SYMBOL", help="download via yfinance (short history only)")
     src.add_argument("--synthetic", action="store_true", help="made-up demo data")
     ap.add_argument("--source-tz", default=data_loader.NY_TZ, help="timezone of naive CSV timestamps")
-    ap.add_argument("--interval", default="1m", help="yfinance interval")
-    ap.add_argument("--resample", help="pandas rule, e.g. 5min")
+    ap.add_argument("--timeframe", choices=list(TIMEFRAMES), default="5m", help="bar size the strategy runs on")
+    ap.add_argument("--from", dest="start", type=date.fromisoformat, help="first session, YYYY-MM-DD")
+    ap.add_argument("--to", dest="end", type=date.fromisoformat, help="last session, YYYY-MM-DD")
+    ap.add_argument("--last-days", type=int, help="only the last N calendar days of the data, e.g. 30")
 
     ap.add_argument("--mode", choices=["break", "fade"], default="break")
     ap.add_argument("--min-drive", type=float, default=0.20, help="min opening drive in percent")
@@ -63,21 +68,32 @@ def parse_args(argv=None) -> argparse.Namespace:
     ap.add_argument("--max-gap", type=float, help="skip days gapping more than this percent")
 
     ap.add_argument("--baseline-runs", type=int, default=200)
+    ap.add_argument("--no-charts", action="store_true", help="skip the per-trade candlestick charts")
     ap.add_argument("--out", default="results")
     return ap.parse_args(argv)
 
 
 def main(argv=None) -> int:
     a = parse_args(argv)
+    rule = TIMEFRAMES[a.timeframe]
     if a.csv:
-        bars = data_loader.load_csv(a.csv, source_tz=a.source_tz, resample=a.resample)
+        bars = data_loader.load_csv(a.csv, source_tz=a.source_tz, resample=rule)
     elif a.yfinance:
-        bars = data_loader.load_yfinance(a.yfinance, interval=a.interval)
+        bars = data_loader.load_yfinance(a.yfinance, interval=a.timeframe)
     else:
-        bars = synthetic.make_dataset()
+        bars = data_loader.normalize(synthetic.make_dataset(), resample=rule)
         print("WARNING: synthetic data - results demonstrate the code, not the market.\n")
-    if a.resample and not a.csv:
-        bars = data_loader.normalize(bars, resample=a.resample)
+
+    start = a.start
+    if a.last_days:
+        start = max(start or date.min, bars.index[-1].date() - timedelta(days=a.last_days - 1))
+    if start:
+        bars = bars[bars.index.date >= start]
+    if a.end:
+        bars = bars[bars.index.date <= a.end]
+    if bars.empty:
+        print("No bars in the selected period.")
+        return 1
 
     params = Params(
         mode=a.mode,
@@ -98,7 +114,7 @@ def main(argv=None) -> int:
     )
 
     n_days = len(set(bars.index.date))
-    print(f"Data: {n_days} sessions, {bars.index[0]} -> {bars.index[-1]}")
+    print(f"Data: {n_days} sessions on {a.timeframe} bars, {bars.index[0]} -> {bars.index[-1]}")
     print(f"Params: {params}\n")
 
     trades = engine.run(bars, params, costs, filters)
@@ -126,23 +142,47 @@ def main(argv=None) -> int:
     trades_path = os.path.join(a.out, "trades.csv")
     trades.to_csv(trades_path, index=False)
     print(f"\nTrades written to {trades_path}")
+    report_path = os.path.join(a.out, "report.md")
+    with open(report_path, "w") as fh:
+        fh.write(_report(trades, stats, a, bars))
+    print(f"Report written to {report_path}")
     try:
-        import matplotlib
-
-        matplotlib.use("Agg")
-        import matplotlib.pyplot as plt
-
-        fig, ax = plt.subplots(figsize=(10, 4))
-        ax.plot(pd.to_datetime(trades["date"]), trades["pnl_usd"].cumsum())
-        ax.set_title("10:00 ET reversal - cumulative P&L ($)")
-        ax.grid(alpha=0.3)
-        fig.tight_layout()
-        chart = os.path.join(a.out, "equity.png")
-        fig.savefig(chart, dpi=120)
-        print(f"Equity curve written to {chart}")
+        from backtest import charts
     except ImportError:
-        print("matplotlib not installed - skipping equity chart")
+        print("matplotlib not installed - skipping charts")
+        return 0
+    period = f"{bars.index[0].date()} - {bars.index[-1].date()}"
+    equity_path = os.path.join(a.out, "equity.png")
+    charts.equity_chart(trades, equity_path, f"10:00-ET-Reversal ({a.timeframe}) {period}: kumulierter P&L")
+    print(f"Equity curve written to {equity_path}")
+    if not a.no_charts:
+        paths = charts.write_all(bars, trades, params, a.out)
+        print(f"{len(paths)} trade charts written to {os.path.join(a.out, 'charts')}")
     return 0
+
+
+def _report(trades: pd.DataFrame, stats: dict, a: argparse.Namespace, bars: pd.DataFrame) -> str:
+    cols = ["date", "direction", "drive_pct", "entry_time", "entry_price", "stop", "target",
+            "exit_time", "exit_price", "exit_reason", "r_multiple", "pnl_usd"]
+    table = trades[cols].copy()
+    table["entry_time"] = pd.to_datetime(table["entry_time"]).dt.strftime("%H:%M")
+    table["exit_time"] = pd.to_datetime(table["exit_time"]).dt.strftime("%H:%M")
+    table = table.round({"entry_price": 2, "stop": 2, "target": 2, "exit_price": 2, "r_multiple": 2, "pnl_usd": 0})
+    lines = [
+        f"# 10:00-ET-Reversal: {bars.index[0].date()} bis {bars.index[-1].date()} ({a.timeframe})",
+        "",
+        "| Kennzahl | Wert |",
+        "|---|---|",
+        *[f"| {k} | {v} |" for k, v in stats.items()],
+        "",
+        "## Trades",
+        "",
+        "| " + " | ".join(cols) + " |",
+        "|" + "---|" * len(cols),
+        *["| " + " | ".join(str(v) for v in row) + " |" for row in table.itertuples(index=False)],
+        "",
+    ]
+    return "\n".join(lines)
 
 
 if __name__ == "__main__":
