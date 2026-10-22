@@ -55,6 +55,10 @@ def parse_args(argv=None) -> argparse.Namespace:
     ap.add_argument("--stop-buffer", type=float, default=0.0, help="percent beyond the drive extreme")
     ap.add_argument("--target", choices=["r", "retrace"], default="r")
     ap.add_argument("--target-r", type=float, default=2.0)
+    ap.add_argument("--drive-adr-min", type=float, default=0.0, help="drive >= x * 14-day avg daily range")
+    ap.add_argument("--vwap-confirm", action="store_true", help="enter only on the trade's side of VWAP")
+    ap.add_argument("--breakeven-r", type=float, default=0.0, help="stop to entry after x R in favour")
+    ap.add_argument("--max-risk", type=float, default=0.0, help="skip stops wider than x percent")
 
     ap.add_argument("--tick-size", type=float, default=0.25)
     ap.add_argument("--tick-value", type=float, default=5.0, help="NQ 5.0, MNQ 0.5")
@@ -104,6 +108,10 @@ def main(argv=None) -> int:
         target=a.target,
         target_r=a.target_r,
         exit_time=a.exit_time,
+        drive_adr_min=a.drive_adr_min,
+        vwap_confirm=a.vwap_confirm,
+        breakeven_r=a.breakeven_r,
+        max_risk_pct=a.max_risk,
     )
     costs = engine.Costs(a.tick_size, a.tick_value, a.slippage_ticks, a.commission, a.contracts)
     filters = engine.Filters(

@@ -101,3 +101,48 @@ def test_five_minute_run_writes_report_and_charts(tmp_path):
     assert (tmp_path / "report.md").read_text().startswith("# 10:00-ET-Reversal")
     assert (tmp_path / "equity.png").exists()
     assert list((tmp_path / "charts").glob("*.png"))
+
+
+def test_breakeven_moves_stop_to_entry():
+    # Short reaches 1.3R, then the market chops around just below the entry and pokes above it.
+    day = make_day(DAY, drive_pct=0.5, after_pct=-1.0)
+    sig = generate_signal(day, Params())
+    i = day.index.get_loc(sig.entry_time)
+    e, r = sig.entry_price, sig.risk
+    later = day.index[i + 2:]
+    day.loc[later, ["open", "close"]] = e - 0.2 * r
+    day.loc[later, "high"], day.loc[later, "low"] = e + 0.5 * r, e - 0.3 * r
+    day.iloc[i + 1, day.columns.get_loc("low")] = e - 1.3 * r
+    plain = engine.run(day, Params(), NO_COSTS).iloc[0]
+    be = engine.run(day, Params(breakeven_r=1.0), NO_COSTS).iloc[0]
+    assert be.exit_reason == "breakeven" and be.r_multiple == pytest.approx(0.0)
+    assert plain.exit_reason == "time" and plain.r_multiple == pytest.approx(0.2)
+
+
+def test_max_risk_filter_skips_wide_stops():
+    day = make_day(DAY, drive_pct=0.5, after_pct=-1.0)
+    sig = generate_signal(day, Params())
+    risk_pct = sig.risk / sig.entry_price * 100
+    assert generate_signal(day, Params(max_risk_pct=risk_pct / 2)) is None
+    assert generate_signal(day, Params(max_risk_pct=risk_pct * 2)) is not None
+
+
+def test_adr_filter_needs_history_and_size():
+    day = make_day(DAY, drive_pct=0.5, after_pct=-1.0)
+    p = Params(drive_adr_min=0.5)
+    assert generate_signal(day, p, adr_pct=None) is None
+    assert generate_signal(day, p, adr_pct=0.8) is not None  # drive 0.5% >= 0.5 * 0.8%
+    assert generate_signal(day, p, adr_pct=1.2) is None  # drive 0.5% < 0.5 * 1.2%
+
+
+def test_walk_forward_rejects_random_walk():
+    from backtest import optimize, synthetic
+
+    bars = data_loader.normalize(synthetic.random_walk(days=330, seed=3), resample="5min")
+    params = [Params(), Params(mode="fade", target="retrace"), Params(min_drive_pct=0.5, target_r=3.0)]
+    costs = engine.Costs()
+    results = optimize.backtest_all(bars, params, costs, workers=1)
+    folds, oos, base = optimize.walk_forward(bars, params, results, costs, 6, 3, 10, 20)
+    assert len(folds) >= 3
+    passed, _ = optimize.verdict(oos, folds, base)
+    assert not passed

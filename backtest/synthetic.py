@@ -68,3 +68,32 @@ def make_dataset(
         frames.append(df)
         price = float(df["close"].iloc[-1])
     return pd.concat(frames)
+
+
+def random_walk(days: int = 500, seed: int = 0, start: str = "2024-01-02", vol_pct: float = 0.06) -> pd.DataFrame:
+    """1-minute sessions from a driftless random walk: no strategy should find an edge here.
+
+    Each bar's open, high, low and close come from 6 sub-steps of the walk.
+    """
+    rng = np.random.default_rng(seed)
+    price = 18000.0
+    frames = []
+    for d in pd.bdate_range(start, periods=days):
+        idx = pd.date_range(f"{d.date()} 09:30", f"{d.date()} 15:59", freq="1min", tz=NY_TZ)
+        steps = rng.normal(0, vol_pct / 100 / np.sqrt(6), (len(idx), 6))
+        path = price * np.exp(np.cumsum(steps.ravel())).reshape(len(idx), 6)
+        open_ = np.concatenate([[price], path[:-1, -1]])
+        frames.append(
+            pd.DataFrame(
+                {
+                    "open": open_,
+                    "high": np.maximum(path.max(axis=1), open_),
+                    "low": np.minimum(path.min(axis=1), open_),
+                    "close": path[:, -1],
+                    "volume": rng.integers(500, 1500, len(idx)).astype(float),
+                },
+                index=pd.DatetimeIndex(idx, name="datetime"),
+            )
+        )
+        price = float(path[-1, -1])
+    return pd.concat(frames)

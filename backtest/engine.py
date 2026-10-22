@@ -32,20 +32,29 @@ class Filters:
 
 
 def simulate_exit(day: pd.DataFrame, sig: Signal, p: Params) -> tuple[pd.Timestamp, float, str]:
-    """Walk bars from the entry bar on. If stop and target fall in the same bar, assume the stop."""
+    """Walk bars from the entry bar on. If stop and target fall in the same bar, assume the stop.
+
+    With `p.breakeven_r`, the stop moves to entry from the bar after price first reached that many R.
+    """
     t = day.index.time
     window = day[(day.index >= sig.entry_time) & (t < p.exit_time)]
+    stop, reason = sig.stop, "stop"
+    trigger = sig.entry_price + sig.direction * p.breakeven_r * sig.risk if p.breakeven_r else None
     for ts, bar in window.iterrows():
         if sig.direction == 1:
-            if bar["low"] <= sig.stop:
-                return ts, min(sig.stop, bar["open"]), "stop"
+            if bar["low"] <= stop:
+                return ts, min(stop, bar["open"]), reason
             if bar["high"] >= sig.target:
                 return ts, max(sig.target, bar["open"]), "target"
+            if trigger is not None and bar["high"] >= trigger:
+                stop, reason, trigger = sig.entry_price, "breakeven", None
         else:
-            if bar["high"] >= sig.stop:
-                return ts, max(sig.stop, bar["open"]), "stop"
+            if bar["high"] >= stop:
+                return ts, max(stop, bar["open"]), reason
             if bar["low"] <= sig.target:
                 return ts, min(sig.target, bar["open"]), "target"
+            if trigger is not None and bar["low"] <= trigger:
+                stop, reason, trigger = sig.entry_price, "breakeven", None
     last = window.iloc[-1]
     return window.index[-1], float(last["close"]), "time"
 
@@ -75,6 +84,9 @@ def _trade_record(day: pd.DataFrame, sig: Signal, p: Params, c: Costs) -> dict:
     }
 
 
+ADR_DAYS = 14
+
+
 def iter_days(bars: pd.DataFrame):
     for date, day in bars.groupby(bars.index.date):
         yield date, day
@@ -89,10 +101,13 @@ def run(
     """Run the strategy over every session in `bars` and return one row per trade."""
     rows = []
     prev_close = None
+    ranges: list[float] = []  # daily (high - low) / close in percent, for the average daily range
     for date, day in iter_days(bars):
         day_open, day_close = day["open"].iloc[0], day["close"].iloc[-1]
         gap_pct = None if prev_close is None else (day_open - prev_close) / prev_close * 100.0
         prev_close = day_close
+        adr_pct = float(np.mean(ranges[-ADR_DAYS:])) if len(ranges) >= ADR_DAYS else None
+        ranges.append((day["high"].max() - day["low"].min()) / day_close * 100.0)
 
         is_news = date in f.news_dates
         if date.weekday() not in f.weekdays or (f.news_only and not is_news):
@@ -100,7 +115,7 @@ def run(
         if f.max_gap_pct is not None and gap_pct is not None and abs(gap_pct) > f.max_gap_pct:
             continue
 
-        sig = generate_signal(day, p)
+        sig = generate_signal(day, p, adr_pct)
         if sig is None:
             continue
         row = _trade_record(day, sig, p, c)

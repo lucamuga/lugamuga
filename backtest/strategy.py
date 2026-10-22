@@ -21,6 +21,11 @@ class Params:
     target: str = "r"  # "r": target_r multiples of risk; "retrace": 50% retracement of the drive
     target_r: float = 2.0
     exit_time: time = time(11, 30)  # flat at the close of the last bar before this time
+    # Candidate improvements, all off by default (0 / False):
+    drive_adr_min: float = 0.0  # drive must also be >= this fraction of the 14-day average daily range
+    vwap_confirm: bool = False  # entry bar must open on the trade's side of the session VWAP
+    breakeven_r: float = 0.0  # move the stop to entry once price has gone this many R in favour
+    max_risk_pct: float = 0.0  # skip trades whose stop is further than this percent from entry
 
 
 @dataclass(frozen=True)
@@ -47,10 +52,23 @@ def opening_drive_pct(day: pd.DataFrame) -> float | None:
     return (drive["close"].iloc[-1] - first_open) / first_open * 100.0
 
 
-def generate_signal(day: pd.DataFrame, p: Params = Params()) -> Signal | None:
-    """Return the day's trade setup, using only bars up to and including the entry bar."""
+def session_vwap(bars: pd.DataFrame) -> float | None:
+    vol = bars["volume"]
+    if vol.sum() <= 0:
+        return None
+    typical = (bars["high"] + bars["low"] + bars["close"]) / 3
+    return float((typical * vol).sum() / vol.sum())
+
+
+def generate_signal(day: pd.DataFrame, p: Params = Params(), adr_pct: float | None = None) -> Signal | None:
+    """Return the day's trade setup, using only bars up to and including the entry bar.
+
+    `adr_pct` is the average daily range (percent) of the sessions before this one.
+    """
     drive_pct = opening_drive_pct(day)
     if drive_pct is None or abs(drive_pct) < p.min_drive_pct:
+        return None
+    if p.drive_adr_min and (adr_pct is None or abs(drive_pct) < p.drive_adr_min * adr_pct):
         return None
     direction = -1 if drive_pct > 0 else 1
 
@@ -90,6 +108,12 @@ def generate_signal(day: pd.DataFrame, p: Params = Params()) -> Signal | None:
     risk = (entry_price - stop) * direction
     if risk <= 0:
         return None
+    if p.max_risk_pct and risk / entry_price * 100.0 > p.max_risk_pct:
+        return None
+    if p.vwap_confirm:
+        vwap = session_vwap(before)
+        if vwap is not None and (entry_price - vwap) * direction <= 0:
+            return None
 
     if p.target == "r":
         target = entry_price + direction * p.target_r * risk

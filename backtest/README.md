@@ -121,6 +121,38 @@ auf den eigenen Kursdaten, man braucht also keinen Datenexport.
 Abweichung zum Python-Backtest: Das 2R-Ziel wird beim Signal mit dem Schlusskurs geschätzt und nach dem Fill auf den
 echten Einstiegskurs korrigiert. Nur innerhalb der Einstiegskerze kann sich das minimal unterscheiden.
 
+## Verbesserungen suchen: Walk-Forward-Optimierung
+
+`optimize.py` testet 288 Varianten der Strategie. Variiert werden:
+
+- Einstieg Ausbruch/Fade
+- Mindestbewegung 0,15/0,3/0,5 %
+- Ziel 1,5R/2R/3R/50 %-Retracement
+- VWAP-Bestätigung
+- Break-even-Stop nach 1R
+- Zeit-Exit 11:30/12:30
+- Mindestbewegung relativ zur durchschnittlichen Tagesrange
+
+Damit nicht einfach die Variante gewinnt, die zufällig am besten in die Vergangenheit passt, läuft der Test **Walk-Forward**:
+
+1. Auf 12 Monaten die beste Variante auswählen.
+2. Sie auf den folgenden 3 Monaten handeln, die sie noch nie gesehen hat.
+3. Das Fenster um 3 Monate verschieben und wiederholen.
+
+Nur diese ungesehenen Trades zählen. Eine Variante gilt erst als robust, wenn sie **alle** Kriterien erfüllt: mindestens
+100 Trades, Profit Factor ≥ 1,2, Ø R ≥ 0,05, mindestens 60 % der Testphasen im Plus und besser als 95 % der
+Zufalls-Richtungs-Läufe.
+
+```bash
+python backtest/optimize.py --csv data/nq_1m.csv --source-tz UTC   # braucht mehrere Jahre Daten
+python backtest/optimize.py --random-walk                          # Gegenprobe: muss durchfallen
+```
+
+Gegenprobe auf einem reinen Zufallsmarkt (750 Tage Random Walk): Die beste Variante im Rückblick hatte einen Profit
+Factor von **1,94**. Im Walk-Forward blieben davon 1,09 übrig, nur 38 % der Testphasen waren im Plus, und in 60 % der
+Zufallsläufe war das Ergebnis gleich gut oder besser. Ergebnis: **nicht robust**. Genau so sieht Überoptimierung aus,
+und genau deshalb zählt nur das Walk-Forward-Ergebnis.
+
 ## Fallstricke
 
 - **Overfitting:** Je mehr Parameter man optimiert, desto schöner sieht der Backtest aus und desto schlechter läuft es live.
