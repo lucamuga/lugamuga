@@ -95,6 +95,18 @@ Für jeden Trade wird dieselbe Einstiegszeit mit demselben Risiko-Ziel-Verhältn
 Richtung**, und das 200-mal. Wenn die Strategie nicht klar besser abschneidet als die meisten dieser Läufe (`runs >= strategy`
 sollte unter ca. 5 % liegen), kommt der „Vorteil“ eher vom Markttrend oder vom Zufall als vom 10-Uhr-Muster.
 
+## Excel-Journal (ohne Programmieren)
+
+`excel/10-Uhr-Reversal-Journal.xlsx` ist eine Vorlage zum Ausfüllen. Pro Handelstag trägst du ein paar Kurse aus dem
+5-Minuten-Chart ein (Open 09:30, Close der 09:55-Kerze, Tageshoch/-tief bis zum Einstieg, Hoch/Tief der 10:00-Kerze,
+Einstiegskurs) und wählst, ob zuerst Ziel oder Stop erreicht wurde oder um 11:30 glattgestellt wurde (Zeit). Excel
+berechnet Richtung, Stop, Ziel, Gewinn/Verlust in $ und R, Drawdown und eine Übersicht nach Monat, Wochentag und
+Richtung. Die Handelstage vom 22.09. bis 21.10.2026 sind schon eingetragen. Für einen anderen Zeitraum:
+
+```bash
+python backtest/make_excel_template.py --from 2026-11-01 --to 2026-11-30 --out journal-november.xlsx
+```
+
 ## Fallstricke
 
 - **Overfitting:** Je mehr Parameter man optimiert, desto schöner sieht der Backtest aus und desto schlechter läuft es live.
