@@ -1,0 +1,183 @@
+//@version=6
+// Nasdaq 10:00 ET Reversal – gleiche Regeln wie backtest/strategy.py
+// 1. Morgen-Bewegung 09:30–10:00 New York (Open 09:30 → letzter Close vor 10:00) muss >= Mindestbewegung sein.
+// 2. Gehandelt wird dagegen: nach Anstieg Short, nach Fall Long.
+// 3. Einstieg "Ausbruch": eine Kerze schließt zwischen 10:05 und 10:15 außerhalb der 10:00-Range → Einstieg zum Open der nächsten Kerze.
+//    Einstieg "Fade 10:00": direkt zum Open der 10:00-Kerze.
+// 4. Stop = Tageshoch (Short) / Tagestief (Long) bis zum Einstieg. Ziel = 2R oder 50 % Retracement. Zeit-Exit 11:30.
+// Gedacht für NQ1!/MNQ1!/QQQ auf dem 5-Minuten-Chart (1–5 Minuten funktionieren).
+// Kein Anlageratschlag.
+strategy("Nasdaq 10:00 Reversal", shorttitle = "10AM Reversal", overlay = true,
+     initial_capital = 50000, default_qty_type = strategy.fixed, default_qty_value = 1,
+     commission_type = strategy.commission.cash_per_contract, commission_value = 2.0, slippage = 1,
+     max_labels_count = 500)
+
+// ───────── Eingaben ─────────
+const string GR = "Regeln"
+mode       = input.string("Ausbruch", "Einstieg", options = ["Ausbruch", "Fade 10:00"], group = GR,
+     tooltip = "Ausbruch: Close außerhalb der 10:00-Range, Einstieg nächste Kerze. Fade: Einstieg sofort zum 10:00-Open.")
+minDrive   = input.float(0.20, "Mindestbewegung 09:30–10:00 (%)", minval = 0.0, step = 0.05, group = GR)
+rangeLen   = input.int(5, "10:00-Range Länge (Minuten)", minval = 1, group = GR)
+setupLen   = input.int(15, "Letzter Einstieg (Minuten nach 10:00)", minval = 1, group = GR)
+targetType = input.string("R-Vielfaches", "Ziel", options = ["R-Vielfaches", "50% Retracement"], group = GR)
+targetR    = input.float(2.0, "Ziel in R", minval = 0.1, step = 0.25, group = GR)
+stopBuf    = input.float(0.0, "Stop-Puffer (%)", minval = 0.0, step = 0.01, group = GR)
+exitHour   = input.int(11, "Zeit-Exit Stunde (NY)", minval = 10, maxval = 15, inline = "ex", group = GR)
+exitMinute = input.int(30, "Minute", minval = 0, maxval = 59, inline = "ex", group = GR)
+
+const string GF = "Filter"
+fromDate = input.time(timestamp("22 Sep 2026 00:00 -0400"), "Von", group = GF)
+toDate   = input.time(timestamp("31 Dec 2099 00:00 -0500"), "Bis", group = GF)
+useMon   = input.bool(true, "Mo", inline = "wd", group = GF)
+useTue   = input.bool(true, "Di", inline = "wd", group = GF)
+useWed   = input.bool(true, "Mi", inline = "wd", group = GF)
+useThu   = input.bool(true, "Do", inline = "wd", group = GF)
+useFri   = input.bool(true, "Fr", inline = "wd", group = GF)
+
+const string GV = "Anzeige"
+showLevels = input.bool(true, "Range, Stop und Ziel zeichnen", group = GV)
+showTable  = input.bool(true, "Info-Tabelle", group = GV)
+
+// ───────── Zeit (immer New York, auch wenn der Chart eine andere Zeitzone zeigt) ─────────
+const string TZ = "America/New_York"
+const int OPEN_M = 9 * 60 + 30
+const int TEN_M  = 10 * 60
+
+if not timeframe.isintraday or timeframe.in_seconds() > 300
+    runtime.error("Bitte einen 1- bis 5-Minuten-Chart verwenden.")
+
+tfMin    = timeframe.in_seconds() / 60.0
+nyMin    = hour(time, TZ) * 60 + minute(time, TZ)
+barEnd   = nyMin + tfMin
+rangeEnd = TEN_M + rangeLen
+setupEnd = TEN_M + setupLen
+exitM    = exitHour * 60 + exitMinute
+
+dow   = dayofweek(time, TZ)
+dayOk = time >= fromDate and time <= toDate and
+     ((dow == dayofweek.monday and useMon) or (dow == dayofweek.tuesday and useTue) or
+      (dow == dayofweek.wednesday and useWed) or (dow == dayofweek.thursday and useThu) or
+      (dow == dayofweek.friday and useFri))
+
+inDrive      = nyMin >= OPEN_M and nyMin < TEN_M
+newDay       = inDrive and not inDrive[1]
+lastDriveBar = inDrive and barEnd >= TEN_M
+inRange10    = nyMin >= TEN_M and nyMin < rangeEnd
+inSetup      = nyMin >= rangeEnd and nyMin < setupEnd
+
+// ───────── Tageszustand ─────────
+var float driveOpen = na
+var float driveHi   = na
+var float driveLo   = na
+var float dayHi     = na
+var float dayLo     = na
+var float drivePct  = na
+var int   dir       = 0     // +1 Long, -1 Short, 0 kein Trade
+var float rngHi     = na
+var float rngLo     = na
+var bool  traded    = false
+var float stopPx    = na
+var float tgtPx     = na
+var string status   = "-"
+
+if newDay
+    driveOpen := open
+    driveHi   := high
+    driveLo   := low
+    dayHi     := high
+    dayLo     := low
+    drivePct  := na
+    dir       := 0
+    rngHi     := na
+    rngLo     := na
+    traded    := false
+    stopPx    := na
+    tgtPx     := na
+    status    := "Morgen-Bewegung läuft"
+else if not na(driveOpen) and not traded
+    dayHi := math.max(dayHi, high)
+    dayLo := math.min(dayLo, low)
+    if inDrive
+        driveHi := math.max(driveHi, high)
+        driveLo := math.min(driveLo, low)
+
+if lastDriveBar and not na(driveOpen)
+    drivePct := (close - driveOpen) / driveOpen * 100
+    dir      := math.abs(drivePct) >= minDrive ? (drivePct > 0 ? -1 : 1) : 0
+    status   := dir == 0 ? "kein Trade (Bewegung zu klein)" : "warte auf Signal"
+    if dayOk
+        label.new(bar_index, dir == 1 ? low : high,
+             (drivePct > 0 ? "+" : "") + str.tostring(drivePct, "#.##") + " %" + (dir == 1 ? "\n→ Long?" : dir == -1 ? "\n→ Short?" : ""),
+             style = dir == 1 ? label.style_label_up : label.style_label_down,
+             color = color.new(color.gray, 30), textcolor = color.white, size = size.small)
+
+if inRange10
+    rngHi := na(rngHi) ? high : math.max(rngHi, high)
+    rngLo := na(rngLo) ? low : math.min(rngLo, low)
+
+// ───────── Signal ─────────
+signal = false
+if dayOk and dir != 0 and not traded and strategy.position_size == 0
+    if mode == "Fade 10:00"
+        signal := lastDriveBar
+    else if inSetup and not na(rngHi)
+        signal := (dir == 1 and close > rngHi) or (dir == -1 and close < rngLo)
+
+if signal
+    estEntry = close   // Einstieg erfolgt zum Open der nächsten Kerze; Ziel wird nach dem Fill korrigiert
+    buf      = estEntry * stopBuf / 100
+    stopLvl  = dir == 1 ? dayLo - buf : dayHi + buf
+    risk     = (estEntry - stopLvl) * dir
+    extreme  = dir == 1 ? driveLo : driveHi
+    tgt      = targetType == "R-Vielfaches" ? estEntry + dir * targetR * risk : extreme + 0.5 * (driveOpen - extreme)
+    if risk > 0 and (tgt - estEntry) * dir > 0
+        id = dir == 1 ? "Long" : "Short"
+        strategy.entry(id, dir == 1 ? strategy.long : strategy.short)
+        strategy.exit("Exit", from_entry = id, stop = stopLvl, limit = tgt, comment_profit = "Ziel", comment_loss = "Stop")
+        alert("10:00 Reversal: " + id + "-Signal auf " + syminfo.ticker + ", Stop " + str.tostring(stopLvl, format.mintick),
+             alert.freq_once_per_bar_close)
+        traded := true
+        stopPx := stopLvl
+        tgtPx  := tgt
+        status := (dir == 1 ? "Long" : "Short") + " aktiv"
+    else
+        status := "kein Trade (Stop/Ziel ungültig)"
+
+// Ziel auf den tatsächlichen Einstiegskurs setzen (nur R-Ziel hängt vom Einstieg ab)
+if strategy.position_size != 0 and strategy.position_size[1] == 0 and targetType == "R-Vielfaches"
+    entryPx = strategy.position_avg_price
+    tgtPx  := entryPx + dir * targetR * math.abs(entryPx - stopPx)
+    strategy.exit("Exit", from_entry = dir == 1 ? "Long" : "Short", stop = stopPx, limit = tgtPx,
+         comment_profit = "Ziel", comment_loss = "Stop")
+
+// Zeit-Exit: am Ende der Kerze, die um 11:30 schließt
+if strategy.position_size != 0 and barEnd >= exitM
+    strategy.close_all(comment = "Zeit", immediately = true)
+
+if traded and strategy.position_size == 0 and strategy.position_size[1] != 0
+    status := "Trade beendet"
+
+// ───────── Zeichnen ─────────
+bgcolor(showLevels and inDrive and dayOk ? color.new(color.blue, 93) : na, title = "Morgen-Bewegung")
+showRange = showLevels and dayOk and nyMin >= TEN_M and nyMin < setupEnd
+plot(showRange ? rngHi : na, "10:00-Range Hoch", color.new(color.blue, 0), 1, plot.style_linebr)
+plot(showRange ? rngLo : na, "10:00-Range Tief", color.new(color.blue, 0), 1, plot.style_linebr)
+inTrade = strategy.position_size != 0 or (strategy.position_size[1] != 0)
+plot(showLevels and inTrade ? stopPx : na, "Stop", color.red, 2, plot.style_linebr)
+plot(showLevels and inTrade ? tgtPx : na, "Ziel", color.green, 2, plot.style_linebr)
+
+var table info = table.new(position.top_right, 2, 4, bgcolor = color.new(color.black, 25), border_width = 1)
+if showTable and barstate.islast
+    table.cell(info, 0, 0, "Morgen-Bewegung", text_color = color.white, text_size = size.small)
+    table.cell(info, 1, 0, na(drivePct) ? "-" : (drivePct > 0 ? "+" : "") + str.tostring(drivePct, "#.##") + " %",
+         text_color = color.white, text_size = size.small)
+    table.cell(info, 0, 1, "Richtung", text_color = color.white, text_size = size.small)
+    table.cell(info, 1, 1, dir == 1 ? "Long" : dir == -1 ? "Short" : "-",
+         text_color = dir == 1 ? color.lime : dir == -1 ? color.red : color.white, text_size = size.small)
+    table.cell(info, 0, 2, "Status", text_color = color.white, text_size = size.small)
+    table.cell(info, 1, 2, status, text_color = color.white, text_size = size.small)
+    table.cell(info, 0, 3, "Stop / Ziel", text_color = color.white, text_size = size.small)
+    table.cell(info, 1, 3, na(stopPx) ? "-" : str.tostring(stopPx, format.mintick) + " / " + str.tostring(tgtPx, format.mintick),
+         text_color = color.white, text_size = size.small)
+
+// Alarme: TradingView → Alarm erstellen → Bedingung "Nasdaq 10:00 Reversal" → "nur alert()-Funktionsaufrufe".

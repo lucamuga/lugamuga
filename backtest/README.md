@@ -107,6 +107,20 @@ Richtung. Die Handelstage vom 22.09. bis 21.10.2026 sind schon eingetragen. Für
 python backtest/make_excel_template.py --from 2026-11-01 --to 2026-11-30 --out journal-november.xlsx
 ```
 
+## TradingView (Pine Script)
+
+`tradingview/10_uhr_reversal.pine` enthält dieselben Regeln als TradingView-Strategie. TradingView rechnet damit
+auf den eigenen Kursdaten, man braucht also keinen Datenexport.
+
+1. TradingView öffnen, `NQ1!`, `MNQ1!` oder `QQQ` auf dem **5-Minuten-Chart** laden.
+2. Unten **Pine-Editor** öffnen, den Inhalt der Datei komplett einfügen, **Zum Chart hinzufügen**.
+3. Unten den **Strategietester** öffnen: Übersicht, Performance und Liste der Trades. Den Zeitraum stellt man in den
+   Einstellungen der Strategie unter Filter → Von/Bis ein (Standard: ab 22.09.2026, also der letzte Monat).
+4. Kontraktanzahl, Kommission (Standard 2 $ pro Seite) und Slippage (1 Tick) unter Einstellungen → Eigenschaften.
+
+Abweichung zum Python-Backtest: Das 2R-Ziel wird beim Signal mit dem Schlusskurs geschätzt und nach dem Fill auf den
+echten Einstiegskurs korrigiert. Nur innerhalb der Einstiegskerze kann sich das minimal unterscheiden.
+
 ## Fallstricke
 
 - **Overfitting:** Je mehr Parameter man optimiert, desto schöner sieht der Backtest aus und desto schlechter läuft es live.
