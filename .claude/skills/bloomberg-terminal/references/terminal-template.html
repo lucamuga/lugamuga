@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="de" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MKT Terminal</title>
+<style>
+  :root, [data-theme="dark"] {
+    --bg:#121212; --surface:#1e1e1e; --header:#000; --text:#fff; --text-2:#888;
+    --accent:#ff9900; --value:#f5f5b8; --pos:#4caf50; --neg:#f44336;
+    --border:#333; --flash:#713f12;
+  }
+  [data-theme="light"] {
+    --bg:#f0f0f0; --surface:#e0e0e0; --header:#d0d0d0; --text:#000; --text-2:#555;
+    --accent:#ff9900; --value:#8b7500; --pos:#2e7d32; --neg:#c62828;
+    --border:#ccc; --flash:#fde047;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text);
+         font:12px/1.4 "Courier New", ui-monospace, monospace; }
+  .bar { display:flex; flex-wrap:wrap; gap:4px; align-items:center;
+         background:var(--surface); padding:4px 8px; border-bottom:1px solid var(--border); }
+  .btn { height:24px; padding:0 8px; font:inherit; font-size:11px; border:1px solid #404040;
+         border-radius:0; cursor:pointer; color:#fff; }
+  .red { background:#dc2626; } .green { background:#16a34a; }
+  .amber { background:#f59e0b; color:#000; }
+  .status { margin-left:auto; display:flex; gap:8px; align-items:center; color:var(--text-2); }
+  .dot { width:8px; height:8px; border-radius:50%; background:#22c55e; }
+  .wrap { overflow-x:auto; }
+  svg { display:block; margin-left:auto; }
+  table { width:100%; border-collapse:separate; border-spacing:0; font-variant-numeric:tabular-nums; }
+  th, td { padding:4px 8px; border-bottom:1px solid var(--border); white-space:nowrap; text-align:right; }
+  th { background:var(--surface); color:var(--text-2); font-weight:normal; }
+  th:first-child, td:first-child { position:sticky; left:0; text-align:left; width:140px; background:var(--bg); }
+  th:first-child { background:var(--surface); }
+  .num { color:var(--text-2); margin-right:8px; } .sym { color:var(--accent); }
+  .val { color:var(--value); } .pos { color:var(--pos); } .neg { color:var(--neg); }
+  .section td { color:var(--accent); font-weight:bold; text-align:left; }
+  .flash { background:var(--flash) !important; transition:background .5s; }
+  @media (max-width:640px){ .hide-sm { display:none; } }
+  dialog { background:var(--surface); color:var(--text); border:2px solid var(--border); border-radius:0; font:inherit; }
+</style>
+</head>
+<body>
+<div class="bar">
+  <button class="btn red" id="stop">STOP</button>
+  <button class="btn green" id="live">LIVE</button>
+  <button class="btn amber" id="help">HELP</button>
+  <button class="btn amber" id="theme">LIGHT</button>
+  <div class="status"><span class="dot" id="dot"></span><span id="age">0s</span><span id="clock"></span></div>
+</div>
+<div class="wrap">
+<table>
+  <thead><tr><th>Market</th><th>2Day</th><th>Value</th><th>Net Chg</th><th>%Chg</th><th class="hide-sm">Time</th></tr></thead>
+  <tbody id="rows"></tbody>
+</table>
+</div>
+<dialog id="dlg">
+  <b>Keyboard Shortcuts</b>
+  <table style="margin-top:8px"><tbody>
+    <tr><td>Ctrl+L</td><td>Live an/aus</td></tr>
+    <tr><td>Ctrl+R</td><td>Einmal aktualisieren</td></tr>
+    <tr><td>T</td><td>Theme wechseln</td></tr>
+    <tr><td>?</td><td>Diese Hilfe</td></tr>
+    <tr><td>Esc</td><td>Schließen</td></tr>
+  </tbody></table>
+</dialog>
+<script>
+// Simulierte Daten – durch eigene API-Route ersetzen.
+const data = {
+  "Americas": [["INDU",42000],["SPX",5800],["CCMP",18500],["SPTSX",24000]],
+  "EMEA": [["UKX",8200],["DAX",19300],["CAC",7500],["SMI",12000]],
+  "Asia/Pacific": [["NKY",39000],["HSI",20500],["AS51",8200]]
+};
+const state = {};
+for (const [region, items] of Object.entries(data))
+  for (const [sym, v] of items) state[sym] = { region, open:v, value:v, hist:[v] };
+
+const fmt = (n, sign) => (sign && n > 0 ? "+" : "") + n.toFixed(2);
+function spark(hist, up) {
+  const w = 80, h = 20, min = Math.min(...hist), max = Math.max(...hist), r = max - min || 1;
+  const pts = hist.map((v, i) => `${(i / Math.max(hist.length - 1, 1)) * w},${h - 2 - (v - min) / r * (h - 4)}`).join(" ");
+  return `<svg width="${w}" height="${h}"><polyline fill="none" stroke-width="1" stroke="var(${up ? "--pos" : "--neg"})" points="${pts}"/></svg>`;
+}
+function render(changed = new Set()) {
+  let html = "", i = 0, s = 0;
+  for (const region of Object.keys(data)) {
+    html += `<tr class="section"><td colspan="6">${++s}) ${region}</td></tr>`;
+    for (const [sym] of data[region]) {
+      const d = state[sym], chg = d.value - d.open, pct = chg / d.open * 100, cls = chg >= 0 ? "pos" : "neg";
+      const f = changed.has(sym) ? " flash" : "";
+      html += `<tr><td><span class="num">${++i}</span><span class="sym">${sym}</span></td>
+        <td>${spark(d.hist, chg >= 0)}</td><td class="val${f}">${d.value.toFixed(2)}</td>
+        <td class="${cls}${f}">${fmt(chg, true)}</td><td class="${cls}${f}">${fmt(pct, true)}%</td>
+        <td class="hide-sm" style="color:var(--text-2)">${new Date().toLocaleTimeString()}</td></tr>`;
+    }
+  }
+  document.getElementById("rows").innerHTML = html;
+}
+let last = Date.now(), timer = null;
+function tick() {
+  const changed = new Set();
+  for (const [sym, d] of Object.entries(state)) {
+    if (Math.random() < 0.4) {
+      d.value *= 1 + (Math.random() - 0.5) * 0.004;
+      d.hist = [...d.hist.slice(-29), d.value];
+      changed.add(sym);
+    }
+  }
+  last = Date.now(); render(changed);
+}
+const start = () => { if (!timer) timer = setInterval(tick, 1500); };
+const stop = () => { clearInterval(timer); timer = null; };
+setInterval(() => {
+  const age = Math.floor((Date.now() - last) / 1000);
+  document.getElementById("age").textContent = age + "s";
+  document.getElementById("dot").style.background = age > 60 ? "#ef4444" : age > 30 ? "#eab308" : "#22c55e";
+  document.getElementById("clock").textContent = new Date().toLocaleTimeString();
+}, 1000);
+const toggleTheme = () => {
+  const r = document.documentElement, light = r.dataset.theme === "dark";
+  r.dataset.theme = light ? "light" : "dark";
+  document.getElementById("theme").textContent = light ? "DARK" : "LIGHT";
+};
+document.getElementById("live").onclick = start;
+document.getElementById("stop").onclick = stop;
+document.getElementById("help").onclick = () => dlg.showModal();
+document.getElementById("theme").onclick = toggleTheme;
+addEventListener("keydown", e => {
+  if (e.target.matches("input,textarea,select")) return;
+  if (e.ctrlKey && e.key.toLowerCase() === "l") { e.preventDefault(); timer ? stop() : start(); }
+  else if (e.ctrlKey && e.key.toLowerCase() === "r") { e.preventDefault(); tick(); }
+  else if (!e.ctrlKey && e.key.toLowerCase() === "t") toggleTheme();
+  else if (e.key === "?") dlg.showModal();
+});
+render(); start();
+</script>
+</body>
+</html>
