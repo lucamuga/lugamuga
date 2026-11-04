@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MKT Terminal</title>
+<style>
+  /* Layout: full-width terminal bands (function bar, filter bar, view, status line), dense monospace table inside */
+  :root {
+    --bg:#121212; --surface:#1e1e1e; --header:#000; --text:#f2f2f2; --text-2:#8a8a8a;
+    --accent:#ff9900; --value:#f5f5b8; --pos:#4caf50; --neg:#f44336;
+    --border:#333; --flash:#713f12; --btn-red:#c62828; --btn-green:#2e7d32;
+    --btn-amber:#f59e0b; --btn-text:#fff; --btn-amber-text:#000; --spark-prev:#666;
+    --mono:"IBM Plex Mono","Courier New",ui-monospace,monospace;
+    color-scheme: dark;
+  }
+  @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) {
+    --bg:#f0f0f0; --surface:#e0e0e0; --header:#d0d0d0; --text:#111; --text-2:#555;
+    --accent:#c26f00; --value:#7a6500; --pos:#2e7d32; --neg:#c62828;
+    --border:#c4c4c4; --flash:#fde047; --spark-prev:#999; color-scheme: light; } }
+  :root[data-theme="light"] {
+    --bg:#f0f0f0; --surface:#e0e0e0; --header:#d0d0d0; --text:#111; --text-2:#555;
+    --accent:#c26f00; --value:#7a6500; --pos:#2e7d32; --neg:#c62828;
+    --border:#c4c4c4; --flash:#fde047; --spark-prev:#999; color-scheme: light; }
+
+  * { box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font:12px/1.45 var(--mono); }
+  .band { padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px));
+          padding-block:4px; border-bottom:1px solid var(--border); display:flex; flex-wrap:wrap; gap:4px; align-items:center; }
+  .top { background:var(--header); padding-block:6px; }
+  .brand { color:var(--accent); font-weight:700; letter-spacing:.08em; margin-right:12px; }
+  .sim { border:1px solid var(--accent); color:var(--accent); padding:0 6px; font-size:10px; letter-spacing:.1em; }
+  .fn, .filters { background:var(--surface); }
+  .btn { height:24px; padding:0 8px; font:inherit; font-size:11px; border:1px solid #404040; border-radius:0;
+         cursor:pointer; color:var(--btn-text); display:inline-flex; align-items:center; gap:4px; }
+  .btn:focus-visible, select:focus-visible, input:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
+  .btn kbd { font:inherit; opacity:.7; font-size:10px; }
+  .red { background:var(--btn-red); } .green { background:var(--btn-green); }
+  .amber { background:var(--btn-amber); color:var(--btn-amber-text); }
+  .btn[aria-pressed="true"] { box-shadow:inset 0 -2px 0 var(--accent); filter:brightness(1.15); }
+  .status { margin-left:auto; display:flex; gap:10px; align-items:center; color:var(--text-2); flex-wrap:wrap; }
+  .dot { width:8px; height:8px; border-radius:50%; background:var(--pos); }
+  .pulse { animation:pulse 1.2s infinite; }
+  @keyframes pulse { 50% { opacity:.35; } }
+  .filters { color:var(--accent); gap:14px; font-size:12px; }
+  .filters label { display:inline-flex; gap:5px; align-items:center; cursor:pointer; }
+  .filters select { font:inherit; font-weight:700; color:var(--accent); background:var(--bg); border:1px solid var(--border); border-radius:0; padding:1px 4px; }
+  .filters input[type=checkbox] { appearance:none; width:11px; height:11px; border:1px solid var(--text-2); border-radius:0; margin:0; display:grid; place-content:center; }
+  .filters input[type=checkbox]:checked { background:var(--text-2); }
+
+  main { padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); padding-block:8px 16px; }
+  .view-title { color:var(--accent); font-weight:700; letter-spacing:.06em; margin:4px 0 8px; display:flex; gap:12px; flex-wrap:wrap; align-items:baseline; }
+  .view-title small { color:var(--text-2); font-weight:400; letter-spacing:0; }
+  .scroll { overflow-x:auto; border:1px solid var(--border); }
+  table { width:100%; border-collapse:separate; border-spacing:0; font-variant-numeric:tabular-nums; }
+  th, td { padding:3px 8px; border-bottom:1px solid var(--border); white-space:nowrap; text-align:right; }
+  th { background:var(--surface); color:var(--text-2); font-weight:400; position:sticky; top:0; }
+  th:first-child, td:first-child { position:sticky; left:0; text-align:left; min-width:150px; background:var(--bg); z-index:1; }
+  th:first-child { background:var(--surface); z-index:2; }
+  td.l, th.l { text-align:left; }
+  .num { color:var(--text-2); display:inline-block; width:2.2em; }
+  .star { background:none; border:0; padding:0 6px 0 0; font:inherit; color:var(--text-2); cursor:pointer; }
+  .star[aria-pressed="true"] { color:var(--accent); }
+  .star:focus-visible { outline:2px solid var(--accent); }
+  .sym { color:var(--accent); }
+  .name { color:var(--text-2); }
+  .val { color:var(--value); } .pos { color:var(--pos); } .neg { color:var(--neg); } .dim { color:var(--text-2); }
+  .section td { color:var(--accent); font-weight:700; text-align:left; background:var(--bg); }
+  td.flash { background:var(--flash) !important; }
+  td { transition:background-color .5s; }
+  svg.spark { display:block; margin-left:auto; }
+  tr.pick { cursor:pointer; } tr.pick:hover td { background:var(--surface); }
+
+  .split { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:12px; }
+  .split > div { min-width:0; }
+  .panel-h { padding:4px 8px; background:var(--surface); border:1px solid var(--border); border-bottom:0; font-weight:700; }
+  .news { border:1px solid var(--border); }
+  .news-item { display:grid; grid-template-columns:72px 70px 1fr; gap:8px; padding:4px 8px; border-bottom:1px solid var(--border); }
+  .news-item.new { background:var(--flash); transition:background-color 1.5s; }
+  .news-item .src { color:var(--accent); }
+  .heat { display:grid; grid-template-columns:repeat(auto-fill, minmax(120px, 1fr)); gap:2px; }
+  .tile { padding:8px; border:1px solid var(--border); display:grid; gap:2px; min-height:64px; }
+  .tile b { color:var(--accent); }
+  .legend { display:flex; gap:6px; align-items:center; color:var(--text-2); margin-top:8px; flex-wrap:wrap; }
+  .legend span.sw { width:22px; height:10px; display:inline-block; border:1px solid var(--border); }
+  .foot { color:var(--text-2); font-size:11px; gap:16px; background:var(--surface); border-top:1px solid var(--border); }
+  .foot b { color:var(--text); font-weight:400; }
+  .note { color:var(--text-2); font-size:11px; margin-top:8px; max-width:70ch; }
+
+  dialog { background:var(--surface); color:var(--text); border:2px solid var(--border); border-radius:0; font:inherit; padding:12px 14px; max-width:min(420px, calc(100vw - 32px)); }
+  dialog::backdrop { background:rgb(0 0 0 / .55); }
+  dialog table td { text-align:left; position:static; min-width:0; background:transparent; }
+  dialog .head { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; color:var(--accent); font-weight:700; }
+  @media (max-width:640px) { .hide-sm { display:none; } .news-item { grid-template-columns:60px 1fr; } .news-item .src { display:none; } }
+  @media (max-width:900px) { .hide-md { display:none; } }
+  @media (prefers-reduced-motion: reduce) { .pulse { animation:none; } td, .news-item.new { transition:none; } }
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&display=swap">
+<style>body{margin:0}[hidden]{display:none!important}</style>
+</head>
+<body>
+
+<div class="band top">
+  <span class="brand">MKT TERMINAL</span>
+  <span class="sim" title="Alle Kurse und Meldungen werden im Browser erzeugt">SIMULIERTE DATEN</span>
+  <div class="status">
+    <span id="mkt">MARKT OFFEN</span>
+    <span id="clock">--:--:--</span>
+  </div>
+</div>
+
+<div class="band fn" role="toolbar" aria-label="Funktionen">
+  <button class="btn green" data-view="market" aria-pressed="true">MKT <kbd>1</kbd></button>
+  <button class="btn green" data-view="news" aria-pressed="false">NEWS <kbd>2</kbd></button>
+  <button class="btn green" data-view="movers" aria-pressed="false">GMOV <kbd>3</kbd></button>
+  <button class="btn green" data-view="vol" aria-pressed="false">GVOL <kbd>4</kbd></button>
+  <button class="btn amber" id="b-help">HELP <kbd>?</kbd></button>
+  <button class="btn amber" id="b-theme">THEME <kbd>T</kbd></button>
+  <div class="status">
+    <button class="btn amber" id="b-refr">REFR</button>
+    <button class="btn red" id="b-live">STOP</button>
+    <span class="dot pulse" id="dot" aria-hidden="true"></span>
+    <span id="age">0s</span>
+    <span id="src">SIM · 1,5s</span>
+  </div>
+</div>
+
+<div class="band filters">
+  <label for="f-list">Liste
+    <select id="f-list">
+      <option value="all">Standard</option>
+      <option value="watch">★ Meine Watchlist</option>
+      <option value="Americas">Americas</option>
+      <option value="EMEA">EMEA</option>
+      <option value="Asia/Pacific">Asia/Pacific</option>
+    </select>
+  </label>
+  <label for="f-movers"><input type="checkbox" id="f-movers"> Nur Movers (|%Chg| ≥ 0,5)</label>
+  <label for="f-ytd"><input type="checkbox" id="f-ytd" checked> %Ytd</label>
+  <label for="f-spark"><input type="checkbox" id="f-spark" checked> 2Day</label>
+</div>
+
+<main>
+  <section id="v-market">
+    <div class="view-title">WORLD EQUITY INDICES <small id="count"></small></div>
+    <div class="scroll"><table>
+      <thead><tr>
+        <th>Market</th><th class="l hide-md">Name</th><th class="c-spark hide-sm">2Day</th><th>Value</th><th>Net Chg</th><th>%Chg</th>
+        <th class="hide-sm">High</th><th class="hide-sm">Low</th><th class="c-ytd hide-md">%Ytd</th><th class="hide-sm">Time</th>
+      </tr></thead>
+      <tbody id="rows"></tbody>
+    </table></div>
+    <p class="note">Klick auf eine Zeile öffnet die Volatilitätsansicht mit diesem Index markiert. Graue Linie: Vortag, farbige Linie: heute.</p>
+  </section>
+
+  <section id="v-news" hidden>
+    <div class="view-title">TOP NEWS <small>aus den simulierten Kursbewegungen erzeugt, neueste oben</small></div>
+    <div class="news" id="news"></div>
+  </section>
+
+  <section id="v-movers" hidden>
+    <div class="view-title">GLOBAL MOVERS <small>sortiert nach %Chg seit Eröffnung</small></div>
+    <div class="split">
+      <div><div class="panel-h pos">▲ GEWINNER</div><div class="scroll"><table><thead><tr><th>Market</th><th>Value</th><th>%Chg</th></tr></thead><tbody id="gain"></tbody></table></div></div>
+      <div><div class="panel-h neg">▼ VERLIERER</div><div class="scroll"><table><thead><tr><th>Market</th><th>Value</th><th>%Chg</th></tr></thead><tbody id="lose"></tbody></table></div></div>
+    </div>
+  </section>
+
+  <section id="v-vol" hidden>
+    <div class="view-title">INTRADAY VOLATILITY <small>Tagesspanne (High − Low) in % der Eröffnung</small></div>
+    <div class="heat" id="heat"></div>
+    <div class="legend"><span>niedrig</span><span class="sw" style="background:color-mix(in srgb, var(--accent) 8%, var(--bg))"></span><span class="sw" style="background:color-mix(in srgb, var(--accent) 35%, var(--bg))"></span><span class="sw" style="background:color-mix(in srgb, var(--accent) 65%, var(--bg))"></span><span class="sw" style="background:var(--accent)"></span><span>hoch</span></div>
+  </section>
+</main>
+
+<div class="band foot">
+  <span><b>1–4</b> Ansicht</span><span><b>Ctrl+L</b> Live</span><span><b>Ctrl+R</b> Tick</span><span><b>W</b> Watchlist</span><span><b>T</b> Theme</span><span><b>?</b> Hilfe</span>
+</div>
+
+<dialog id="dlg" aria-labelledby="dlg-h">
+  <div class="head"><span id="dlg-h">KEYBOARD SHORTCUTS</span><button class="btn amber" id="dlg-x">ESC</button></div>
+  <table><tbody>
+    <tr><td><b>1</b></td><td>Marktübersicht</td></tr>
+    <tr><td><b>2</b></td><td>News</td></tr>
+    <tr><td><b>3</b></td><td>Gewinner und Verlierer</td></tr>
+    <tr><td><b>4</b></td><td>Volatilität</td></tr>
+    <tr><td><b>Ctrl+L</b></td><td>Live-Updates an/aus</td></tr>
+    <tr><td><b>Ctrl+R</b></td><td>Einen Tick erzeugen</td></tr>
+    <tr><td><b>W</b></td><td>Watchlist ein/aus</td></tr>
+    <tr><td><b>T</b></td><td>Dunkel/Hell wechseln</td></tr>
+    <tr><td><b>?</b></td><td>Diese Hilfe</td></tr>
+    <tr><td><b>Esc</b></td><td>Schließen</td></tr>
+  </tbody></table>
+</dialog>
+
+<script>
+// Startwerte sind gerundete Beispielwerte, keine Marktdaten. Alles danach ist ein Random Walk.
+const UNIVERSE = {
+  "Americas": [["INDU","Dow Jones Industrial",42000,-1.2],["SPX","S&P 500",5800,0.4],["CCMP","Nasdaq Composite",18500,0.9],["SPTSX","S&P/TSX Composite",24300,-0.3],["MEXBOL","S&P/BMV IPC",52000,-2.1],["IBOV","Ibovespa",128000,-4.0]],
+  "EMEA": [["DAX","DAX 40",19300,12.4],["UKX","FTSE 100",8200,6.1],["CAC","CAC 40",7500,-0.8],["SMI","Swiss Market",12000,7.5],["AEX","AEX",880,11.2],["IBEX","IBEX 35",11700,14.3],["FTSEMIB","FTSE MIB",34000,10.1]],
+  "Asia/Pacific": [["NKY","Nikkei 225",39000,16.0],["HSI","Hang Seng",20500,19.8],["SHCOMP","Shanghai Comp.",3300,10.4],["AS51","S&P/ASX 200",8200,8.9],["KOSPI","KOSPI",2600,-2.5],["SENSEX","BSE Sensex",80000,11.0]]
+};
+const S = {}; const order = [];
+const rnd = (a, b) => a + Math.random() * (b - a);
+for (const [region, list] of Object.entries(UNIVERSE)) for (const [sym, name, v, ytd] of list) {
+  const prev = []; let x = v * rnd(0.985, 1.015);
+  for (let i = 0; i < 30; i++) { x *= 1 + rnd(-0.0025, 0.0025); prev.push(x); }
+  prev[29] = v;
+  S[sym] = { sym, name, region, open:v, value:v, high:v, low:v, prev, today:[v], ytdBase:v / (1 + ytd / 100), time:new Date() };
+  order.push(sym);
+}
+// Watchlist: pro Betrachter im Browser gespeichert; ohne Speicher gilt die Vorgabe.
+const WATCH_KEY = "mkt-terminal-watchlist";
+const WATCH = (() => {
+  try { const v = JSON.parse(localStorage.getItem(WATCH_KEY)); if (Array.isArray(v)) return new Set(v.filter(s => s in S)); } catch (e) {}
+  return new Set(["DAX", "SPX", "NKY"]);
+})();
+function toggleWatch(s) {
+  WATCH.has(s) ? WATCH.delete(s) : WATCH.add(s);
+  try { localStorage.setItem(WATCH_KEY, JSON.stringify([...WATCH])); } catch (e) {}
+  render();
+}
+const ui = { view:"market", live:true, last:Date.now(), changed:new Set(), highlight:null };
+const $ = id => document.getElementById(id);
+const sgn = (n, d = 2) => { const r = Number(n.toFixed(d)); return (r > 0 ? "+" : r < 0 ? "−" : "") + Math.abs(r).toFixed(d); };
+const fmt = n => n.toLocaleString("de-DE", { minimumFractionDigits:2, maximumFractionDigits:2 });
+const pct = d => (d.value - d.open) / d.open * 100;
+const cls = n => Number(n.toFixed(2)) > 0 ? "pos" : Number(n.toFixed(2)) < 0 ? "neg" : "dim";
+const t = d => d.toLocaleTimeString("de-DE");
+
+function spark(d) {
+  const w = 84, h = 20, all = [...d.prev, ...d.today], min = Math.min(...all), max = Math.max(...all), r = max - min || 1;
+  const y = v => (h - 2 - (v - min) / r * (h - 4)).toFixed(1);
+  const half = w / 2;
+  const p1 = d.prev.map((v, i) => `${(i / (d.prev.length - 1) * half).toFixed(1)},${y(v)}`).join(" ");
+  const n = Math.max(d.today.length - 1, 1);
+  const p2 = d.today.map((v, i) => `${(half + i / Math.max(n, 29) * half).toFixed(1)},${y(v)}`).join(" ");
+  const c = pct(d) >= 0 ? "var(--pos)" : "var(--neg)";
+  return `<svg class="spark" width="${w}" height="${h}" aria-hidden="true"><polyline fill="none" stroke="var(--spark-prev)" stroke-width="1" points="${p1}"/><polyline fill="none" stroke="${c}" stroke-width="1" points="${p2}"/></svg>`;
+}
+const F = k => ui.changed.has(k) ? " flash" : "";
+
+function visible() {
+  const list = $("f-list").value, movers = $("f-movers").checked;
+  return order.filter(s => (list === "all" || (list === "watch" ? WATCH.has(s) : S[s].region === list)) && (!movers || Math.abs(pct(S[s])) >= 0.5));
+}
+function renderMarket() {
+  const syms = new Set(visible()), showSpark = $("f-spark").checked, showYtd = $("f-ytd").checked;
+  document.querySelectorAll(".c-spark").forEach(e => e.hidden = !showSpark);
+  document.querySelectorAll(".c-ytd").forEach(e => e.hidden = !showYtd);
+  let html = "", n = 0, sec = 0, shown = 0;
+  for (const region of Object.keys(UNIVERSE)) {
+    sec++;
+    const rows = UNIVERSE[region].map(r => r[0]).filter(s => syms.has(s));
+    if (!rows.length) continue;
+    html += `<tr class="section"><td colspan="10">${sec}) ${region}</td></tr>`;
+    for (const s of rows) {
+      const d = S[s], c = d.value - d.open, p = pct(d), ytd = (d.value / d.ytdBase - 1) * 100, ch = F(s);
+      n++; shown++;
+      const on = WATCH.has(s);
+      html += `<tr class="pick" data-sym="${s}"><td><button class="star" data-star="${s}" aria-pressed="${on}" title="${on ? "Von Watchlist entfernen" : "Zur Watchlist hinzufügen"}" aria-label="${s} ${on ? "von Watchlist entfernen" : "zur Watchlist hinzufügen"}">${on ? "★" : "☆"}</button><span class="num">${n})</span><span class="sym">${s}</span></td>
+        <td class="l name hide-md">${d.name}</td>
+        ${showSpark ? `<td class="hide-sm">${spark(d)}</td>` : ""}
+        <td class="val${ch}">${fmt(d.value)}</td><td class="${cls(c)}${ch}">${sgn(c)}</td><td class="${cls(p)}${ch}">${sgn(p)}%</td>
+        <td class="hide-sm dim">${fmt(d.high)}</td><td class="hide-sm dim">${fmt(d.low)}</td>
+        ${showYtd ? `<td class="hide-md ${cls(ytd)}">${sgn(ytd)}%</td>` : ""}
+        <td class="hide-sm val">${t(d.time)}</td></tr>`;
+    }
+  }
+  const empty = $("f-list").value === "watch" && !WATCH.size
+    ? "Deine Watchlist ist leer. Liste „Standard“ wählen und bei einem Index auf ☆ klicken."
+    : "Kein Index erfüllt den Filter. Filter „Nur Movers“ abwählen oder eine andere Liste wählen.";
+  $("rows").innerHTML = html || `<tr><td colspan="10" class="dim">${empty}</td></tr>`;
+  $("count").textContent = `${shown} von ${order.length} Indizes · ${WATCH.size} auf der Watchlist`;
+}
+function renderMovers() {
+  const all = order.map(s => S[s]).sort((a, b) => pct(b) - pct(a));
+  const row = d => `<tr><td><span class="sym">${d.sym}</span> <span class="name hide-sm">${d.region}</span></td><td class="val${F(d.sym)}">${fmt(d.value)}</td><td class="${cls(pct(d))}${F(d.sym)}">${sgn(pct(d))}%</td></tr>`;
+  $("gain").innerHTML = all.slice(0, 6).map(row).join("");
+  $("lose").innerHTML = all.slice(-6).reverse().map(row).join("");
+}
+function renderVol() {
+  const ranges = order.map(s => ({ d:S[s], r:(S[s].high - S[s].low) / S[s].open * 100 })).sort((a, b) => b.r - a.r);
+  const max = Math.max(...ranges.map(x => x.r), 0.05);
+  $("heat").innerHTML = ranges.map(({ d, r }) => {
+    const k = Math.round(8 + r / max * 92), dark = k > 55;
+    const ring = ui.highlight === d.sym ? "outline:2px solid var(--text);outline-offset:-2px;" : "";
+    return `<div class="tile" style="background:color-mix(in srgb, var(--accent) ${k}%, var(--bg));${ring}${dark ? "color:#111;" : ""}">
+      <b style="${dark ? "color:#111" : ""}">${d.sym}</b><span>${r.toFixed(2)}% Spanne</span><span class="${dark ? "" : cls(pct(d))}">${sgn(pct(d))}% Chg</span></div>`;
+  }).join("");
+}
+const news = [];
+function addNews(text, sym) {
+  news.unshift({ time:new Date(), text, src: sym ? S[sym].region.split("/")[0].toUpperCase().slice(0, 5) : "MKT", fresh:true });
+  if (news.length > 40) news.pop();
+}
+function renderNews() {
+  $("news").innerHTML = news.map(n => `<div class="news-item${n.fresh ? " new" : ""}"><span class="dim">${t(n.time)}</span><span class="src">${n.src}</span><span>${n.text}</span></div>`).join("") || `<div class="news-item"><span class="dim">—</span><span></span><span class="dim">Noch keine Meldungen. Live-Updates laufen lassen oder Ctrl+R drücken.</span></div>`;
+  news.forEach(n => n.fresh = false);
+}
+function render() {
+  ({ market:renderMarket, news:renderNews, movers:renderMovers, vol:renderVol })[ui.view]();
+}
+let tickCount = 0;
+function tick() {
+  ui.changed = new Set(); const now = new Date();
+  for (const s of order) {
+    if (Math.random() > 0.35) continue;
+    const d = S[s];
+    d.value *= 1 + rnd(-0.0022, 0.0023);
+    d.high = Math.max(d.high, d.value); d.low = Math.min(d.low, d.value);
+    d.today.push(d.value); if (d.today.length > 120) d.today.shift();
+    d.time = now; ui.changed.add(s);
+  }
+  tickCount++;
+  if (tickCount % 6 === 0) {
+    const ranked = order.map(s => S[s]).sort((a, b) => pct(b) - pct(a));
+    const pick = Math.random() < 0.5 ? ranked[0] : ranked[ranked.length - 1];
+    const p = pct(pick);
+    addNews(`${pick.sym} ${p >= 0 ? "steigt" : "fällt"} um ${Math.abs(p).toFixed(2).replace(".", ",")}% und ist ${p >= 0 ? "stärkster" : "schwächster"} Index im Tagesverlauf`, pick.sym);
+  }
+  if (tickCount % 10 === 0) {
+    const regs = Object.keys(UNIVERSE).map(r => [r, UNIVERSE[r].reduce((a, x) => a + pct(S[x[0]]), 0) / UNIVERSE[r].length]);
+    const [r, avg] = regs.sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))[0];
+    addNews(`${r}: Indizes im Schnitt ${sgn(avg).replace(".", ",")}% seit Eröffnung`, null);
+  }
+  ui.last = Date.now(); render();
+  setTimeout(() => { ui.changed = new Set(); }, 600);
+}
+let timer = null;
+function setLive(on) {
+  ui.live = on; clearInterval(timer); timer = on ? setInterval(tick, 1500) : null;
+  const b = $("b-live"); b.textContent = on ? "STOP" : "LIVE"; b.className = "btn " + (on ? "red" : "green");
+  $("src").textContent = on ? "SIM · 1,5s" : "SIM · pausiert";
+}
+function setView(v) {
+  ui.view = v;
+  for (const id of ["market", "news", "movers", "vol"]) $("v-" + id).hidden = id !== v;
+  document.querySelectorAll("[data-view]").forEach(b => b.setAttribute("aria-pressed", b.dataset.view === v));
+  render();
+}
+function toggleTheme() {
+  const r = document.documentElement;
+  const isLight = r.dataset.theme ? r.dataset.theme === "light" : matchMedia("(prefers-color-scheme: light)").matches;
+  r.dataset.theme = isLight ? "dark" : "light";
+}
+const openHelp = () => { if (!$("dlg").open) $("dlg").showModal(); };
+
+document.querySelectorAll("[data-view]").forEach(b => b.onclick = () => setView(b.dataset.view));
+$("b-live").onclick = () => setLive(!ui.live);
+$("b-refr").onclick = tick;
+$("b-help").onclick = openHelp;
+$("dlg-x").onclick = () => $("dlg").close();
+$("b-theme").onclick = toggleTheme;
+["f-list", "f-movers", "f-ytd", "f-spark"].forEach(id => $(id).onchange = render);
+$("rows").onclick = e => { const st = e.target.closest("[data-star]"); if (st) { toggleWatch(st.dataset.star); return; } const tr = e.target.closest("tr.pick"); if (tr) { ui.highlight = tr.dataset.sym; setView("vol"); } };
+addEventListener("keydown", e => {
+  if (e.target.matches("input,select,textarea")) return;
+  const k = e.key.toLowerCase();
+  if (e.ctrlKey && k === "l") { e.preventDefault(); setLive(!ui.live); }
+  else if (e.ctrlKey && k === "r") { e.preventDefault(); tick(); }
+  else if (e.ctrlKey || e.metaKey || e.altKey) return;
+  else if (k === "1") setView("market");
+  else if (k === "2") setView("news");
+  else if (k === "3") setView("movers");
+  else if (k === "4") setView("vol");
+  else if (k === "t") toggleTheme();
+  else if (k === "w") { const f = $("f-list"); f.value = f.value === "watch" ? "all" : "watch"; setView("market"); }
+  else if (e.key === "?") openHelp();
+});
+setInterval(() => {
+  const age = Math.floor((Date.now() - ui.last) / 1000), dot = $("dot");
+  $("age").textContent = age + "s";
+  dot.style.background = age > 60 ? "var(--neg)" : age > 30 ? "#eab308" : "var(--pos)";
+  dot.classList.toggle("pulse", age < 10 || (age > 30 && age <= 60));
+  $("clock").textContent = t(new Date());
+}, 1000);
+$("clock").textContent = t(new Date());
+for (let i = 0; i < 12; i++) tick();
+setLive(true);
+</script>
+</body>
+</html>
