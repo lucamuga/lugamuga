@@ -14,3 +14,4 @@
 | `01_Strategieplan` | Ausführlicher Plan (Word/PDF): Kalkulation, Steuern & Recht, Finanzierung, Sanierung, Markt, Akquise, Team, Risiken, 90-Tage-Plan |
 | `02_Rechner` | Excel-Rechner: Deal-Vergleich mit max. Kaufpreis, Live-in-Szenario, Sanierungskosten-Katalog |
 | `03_Deals` | Ein Ordner pro Objekt mit Steckbrief und Platz für Exposé, Fotos, Angebote |
+| `04_Sanierungs-Handbuch` | Ablauf einer Flip-Sanierung in 13 Schritten mit Tipps, Warnungen, Katastrophen-Liste (Word/PDF) + Werkzeug- und Materialliste zum Abhaken (Excel) |

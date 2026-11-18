@@ -10,3 +10,6 @@ Erzeugt bzw. prüft die Dateien in `Fix-und-Flip/` und hilft bei allen Excel-Dat
 | `fix_flip_plan.js` | Erzeugt den Strategieplan (Word) aus den Ergebnissen des Rechners | `NODE_PATH=$(npm root -g) node fix_flip_plan.js deals.json ../Fix-und-Flip/01_Strategieplan/Fix_Flip_Plan_Damme.docx` |
 
 Benötigt: Python 3 mit `openpyxl` und `lxml`, LibreOffice (`soffice`), Node.js mit dem Paket `docx`.
+| `doc_helfer.js` | Gemeinsame Bausteine (Überschriften, Tabellen, Kästen) für die Word-Dokumente | wird von den `.js`-Skripten geladen |
+| `sanierungs_handbuch.js` | Erzeugt das Sanierungs-Handbuch (Word) | `NODE_PATH=$(npm root -g) node sanierungs_handbuch.js ../Fix-und-Flip/04_Sanierungs-Handbuch/Sanierungs-Handbuch_Fix_Flip.docx` |
+| `werkzeugliste.py` | Baut die Werkzeug- und Materialliste (Excel) | `python3 werkzeugliste.py /pfad/wz_raw.xlsx`, danach `excel_werte_speichern.py` |
