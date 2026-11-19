@@ -31,7 +31,7 @@ WERKZEUGE = [
     ("Akku-Geräte (alle von einer Marke, 18 V)", "Akku-Multitool (oszillierend) mit Sägeblättern", "Ersetzt Stichsäge und Feinsäge: Zargen kürzen, Ausschnitte, Fugen entfernen", "Kaufen", "Start", 80, 180),
     ("Akku-Geräte (alle von einer Marke, 18 V)", "Akku-Winkelschleifer 125 mm + Trennscheiben", "Metall, Fliesen, Stein trennen (nie Asbest!)", "Kaufen", "Start", 80, 180),
     ("Akku-Geräte (alle von einer Marke, 18 V)", "Rührquirl (passend für Bohrhammer/Bohrschrauber)", "Spachtel und Kleber anrühren – statt eigenem Rührwerk", "Kaufen", "Start", 10, 25),
-    ("Staub", "Bausauger Staubklasse M", "Staub beim Bohren, Schleifen, Stemmen absaugen (Gesundheit!)", "Kaufen", "Start", 250, 600),
+    ("Staub", "Bausauger Staubklasse M", "Staub beim Bohren, Schleifen, Stemmen absaugen (Gesundheit!) – alternativ mieten", "Kaufen", "Start", 470, 700),
     ("Messen & Prüfen", "Mess-Set: Wasserwaage 120 cm, Zollstock, Maßband 8 m, Bleistift", "Aufmaß, Ausrichten, Zuschnitt", "Kaufen", "Start", 40, 90),
     ("Messen & Prüfen", "Leitungsortungsgerät + zweipoliger Spannungsprüfer", "Vor jedem Bohren Leitungen finden, Spannungsfreiheit prüfen", "Kaufen", "Start", 60, 200),
     ("Handwerkzeug", "Handwerkzeug-Set: Hammer, Kuhfuß, Cuttermesser, VDE-Schraubendreher, Kombizange", "Abbruch, Montage, Zuschneiden", "Kaufen", "Start", 70, 140),
@@ -221,6 +221,133 @@ for sh in (ws, ps, m):
     sh.page_setup.fitToWidth = 1
     sh.page_setup.fitToHeight = 0
     sh.sheet_properties.pageSetUpPr.fitToPage = True
+
+
+# ---------------- Set-Empfehlungen ----------------
+# (Paket, Artikel, Inhalt/Hinweis, Preis von, Preis bis, Quelle)
+PAKETE = [
+    ("Paket 1 – Sparpaket Einhell Power X-Change", "Für den Einstieg: alles Nötige zum kleinsten Preis. Gut für 1–2 Projekte pro Jahr.", [
+        ("Einhell Akku-Set: Schlagbohrschrauber TE-CD 18/48, Bohrhammer TE-HD 18/20, Winkelschleifer TE-AG 18/115", "inkl. 2 × 3,0-Ah-Akku und Ladegerät", 300, 330, "amazon.de (B0DBLLGKS1)"),
+        ("Einhell VARRITO Akku-Multitool (solo)", "passt auf dieselben Akkus, inkl. Zubehör", 59, 64, "geizhals.de / heise Preisvergleich"),
+    ]),
+    ("Paket 2 – Preis-Leistungs-Tipp Einhell mit Profi-Bohrhammer", "Empfehlung: gleiche Akkus, aber ein bürstenloser Bohrhammer (2,6 J), der Stemmen und Fliesen-Abschlagen besser schafft.", [
+        ("Einhell Set TE-TK 18/2 Li: Bohrschrauber + Winkelschleifer", "inkl. Akku und Ladegerät", 120, 125, "obi.de"),
+        ("Einhell Professional Bohrhammer TP-HD 18/26 Li BL (solo)", "bürstenlos, SDS-plus, mit Koffer", 150, 160, "geizhals.de"),
+        ("Einhell VARRITO Akku-Multitool (solo)", "inkl. Zubehör", 59, 64, "geizhals.de / heise Preisvergleich"),
+        ("Zweiter Power-X-Change-Akku 4,0 Ah", "Schätzung – Preis vor Kauf prüfen", 40, 60, "Schätzung"),
+    ]),
+    ("Paket 3 – Profi Bosch Professional 18 V", "Für Dauereinsatz und viele Projekte; robuster, teurer, größtes Profi-Zubehörprogramm.", [
+        ("Bosch Professional Set GSR + GBH + GWS", "Bohrschrauber, Bohrhammer, Winkelschleifer, 2 Akkus, Ladegerät, Tasche – Generation vor Kauf prüfen", 459, 599, "gotools.de, haberl.at, bosch-professional.com (UVP 566 € netto)"),
+        ("Bosch Professional Akku-Multitool (solo)", "Schätzung – Modell und Preis vor Kauf prüfen", 150, 220, "Schätzung"),
+    ]),
+]
+EXTRA = [
+    ("Bausauger Staubklasse M", [
+        ("Metabo ASR 35 M ACP", "Preis-Leistungs-Tipp: 35 l, automatische Filterabreinigung", 523, 589, "geizhals.eu"),
+        ("Bosch GAS 35 M AFC Professional", "35 l, automatische Filterreinigung", 470, 604, "werkstatt-ratgeber.de / amazon.de"),
+        ("Kärcher NT 30/1 Tact Te M", "30 l, Tact-Filterabreinigung", 640, 666, "geizhals.de"),
+    ]),
+    ("Messen & Prüfen", [
+        ("Bosch Truvo Ortungsgerät", "findet Strom- und Metallleitungen vor dem Bohren", 34, 59, "geizhals.de / bosch-diy.com"),
+        ("Zweipoliger Spannungsprüfer (Markengerät)", "Schätzung – Preis vor Kauf prüfen", 20, 50, "Schätzung"),
+    ]),
+]
+
+e = wb.create_sheet("Set-Empfehlungen", 0)
+e.sheet_view.showGridLines = False
+e["B1"] = "Werkzeug-Sets mit gutem Preis-Leistungs-Verhältnis"
+e["B1"].font = Font(name=F, size=14, bold=True)
+e["B2"] = ("Ein Akku-System wählen und dabei bleiben – die Akkus sind der teure Teil. Preise sind Momentaufnahmen aus Preisvergleichen "
+           "und Händlerseiten (Stand Nov. 2026) und schwanken stark; „Schätzung“ = kein belastbarer Preis gefunden. Vor dem Kauf Artikelnummer und Inhalt prüfen.")
+e["B2"].font = GREY
+e.merge_cells("B2:G2")
+e["B2"].alignment = Alignment(wrap_text=True, vertical="top")
+e.row_dimensions[2].height = 42
+for i, h in enumerate(["Paket / Artikel", "Inhalt / Hinweis", "Preis von", "Preis bis", "Quelle", "Gekauft"]):
+    c = e.cell(row=4, column=2 + i, value=h)
+    c.font = HDR
+    c.fill = HFILL
+    c.alignment = Alignment(wrap_text=True, vertical="center")
+for col, w in {"A": 2, "B": 58, "C": 50, "D": 12, "E": 12, "F": 34, "G": 10}.items():
+    e.column_dimensions[col].width = w
+dv3 = DataValidation(type="list", formula1='"Ja,Nein"', allow_blank=True)
+e.add_data_validation(dv3)
+TOT = PatternFill("solid", fgColor="F5E6E0")
+r = 5
+paket_rows = []
+
+
+def item_rows(items, r):
+    first = r
+    for art, inh, lo_, hi_, src in items:
+        e.cell(row=r, column=2, value=art).font = BLK
+        e.cell(row=r, column=3, value=inh).font = GREY if inh.startswith("Schätzung") else BLK
+        for col, v in ((4, lo_), (5, hi_)):
+            c = e.cell(row=r, column=col, value=v)
+            c.font = BLUE
+            c.fill = YEL
+            c.number_format = EUR
+        e.cell(row=r, column=6, value=src).font = GREY
+        g = e.cell(row=r, column=7, value="Nein")
+        g.font = BLUE
+        g.fill = YEL
+        g.alignment = Alignment(horizontal="center")
+        dv3.add(g)
+        for col in range(2, 8):
+            e.cell(row=r, column=col).alignment = Alignment(wrap_text=True, vertical="top", horizontal="center" if col == 7 else None)
+            e.cell(row=r, column=col).border = LINE
+        r += 1
+    return first, r - 1, r
+
+
+for name, why, items in PAKETE:
+    e.cell(row=r, column=2, value=name).font = BOLD
+    for col in range(2, 8):
+        e.cell(row=r, column=col).fill = SUB
+    head = r
+    r += 1
+    e.cell(row=r, column=2, value=why).font = GREY
+    e.merge_cells(start_row=r, start_column=2, end_row=r, end_column=6)
+    e.cell(row=r, column=2).alignment = Alignment(wrap_text=True)
+    e.row_dimensions[r].height = 28
+    r += 1
+    f0, f1, r = item_rows(items, r)
+    e.cell(row=r, column=2, value="Summe Paket").font = BOLD
+    for col, L in ((4, "D"), (5, "E")):
+        c = e.cell(row=r, column=col, value=f"=SUM({L}{f0}:{L}{f1})")
+        c.font = BOLD
+        c.number_format = EUR
+    for col in range(2, 8):
+        e.cell(row=r, column=col).fill = TOT
+    paket_rows.append((name, r, items))
+    r += 2
+
+for name, items in EXTRA:
+    e.cell(row=r, column=2, value=name + " (für alle Pakete gleich – eines davon wählen)").font = BOLD
+    for col in range(2, 8):
+        e.cell(row=r, column=col).fill = SUB
+    r += 1
+    _, _, r = item_rows(items, r)
+    r += 1
+
+e.cell(row=r, column=2, value="Meine Empfehlung").font = BOLD
+tips = [
+    "• Paket 2 bietet das beste Preis-Leistungs-Verhältnis: günstige Einhell-Akkus, aber ein kräftiger bürstenloser Bohrhammer für Abbruch und Fliesen.",
+    "• Paket 3 lohnt sich, wenn du mehrere Projekte pro Jahr machst oder Handwerker-Qualität willst – höherer Wiederverkaufswert.",
+    "• Parkside (Lidl) ist als Hauptsystem nicht empfohlen: Das aktuelle Kombiset hat keinen Bohrhammer und Winkelschleifer, und ein älterer Parkside-Bohrhammer fiel im Dauertest durch.",
+    "• Den Bausauger kannst du für das erste Projekt auch mieten – er ist das teuerste Einzelteil.",
+]
+for i, tip in enumerate(tips):
+    c = e.cell(row=r + 1 + i, column=2, value=tip)
+    c.font = GREY
+    e.merge_cells(start_row=r + 1 + i, start_column=2, end_row=r + 1 + i, end_column=6)
+e.freeze_panes = "C5"
+e.page_setup.orientation = "landscape"
+e.page_setup.paperSize = e.PAPERSIZE_A4
+e.page_setup.fitToWidth = 1
+e.page_setup.fitToHeight = 0
+e.sheet_properties.pageSetUpPr.fitToPage = True
+print("Pakete", [(n[:8], rr) for n, rr, _ in paket_rows])
 
 wb.calculation.fullCalcOnLoad = True
 wb.save(OUT)

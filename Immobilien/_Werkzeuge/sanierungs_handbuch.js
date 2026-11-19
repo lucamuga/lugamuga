@@ -386,7 +386,7 @@ C.push(table([2600, 7000], [
   ['Baustelle', 'Stehleiter, Eimer, Mörtelkübel, Besen, Schaufel, Kabeltrommel'],
   ['Schutz (Pflicht)', 'FFP3-Masken, Schutzbrille, Gehörschutz, Schnittschutzhandschuhe, Sicherheitsschuhe S3, Erste-Hilfe-Kasten, Feuerlöscher'],
 ], { boldFirst: true }));
-C.push(P([t('Startausstattung inklusive Schutzausrüstung laut Liste ca. 1.400–3.100 € – je nach Marke. Alles Weitere erst kaufen, wenn ein Projekt es wirklich braucht.', { italics: true })], { spacing: { before: 80 } }));
+C.push(P([t('Startausstattung inklusive Schutzausrüstung laut Liste ca. 1.600–3.200 € – je nach Marke; größter Einzelposten ist der Bausauger (ca. 470–700 €, alternativ mieten). Konkrete Sets mit gutem Preis-Leistungs-Verhältnis (Akku-Pakete ab ca. 360 €) stehen im Excel-Blatt „Set-Empfehlungen“.', { italics: true })], { spacing: { before: 80 } }));
 C.push(H2('Nur leihen, wenn nötig'));
 C.push(BL('Abbruchhammer, Bautrockner, Fliesenschneider (nur wenn du selbst fliest), Hochdruckreiniger, Anhänger. Container und Gerüst bestellst du ohnehin projektbezogen.'));
 C.push(H2('Materialien – das Minimum'));
