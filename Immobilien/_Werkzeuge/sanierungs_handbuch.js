@@ -373,32 +373,31 @@ C.push(BL([b('Strom: '), t('Vor dem Bohren Leitungen orten, Stromkreise abschalt
 C.push(BL([b('Notfall: '), t('Erste-Hilfe-Kasten, Feuerlöscher, Handy geladen, nie allein schwere Abbrucharbeiten.')]));
 
 // ---------- 10 Werkzeuge & Material ----------
-C.push(H1('10. Zusammenfassung: Werkzeuge und Materialien'));
-C.push(P('Die vollständige Liste mit Preisspannen, Kaufen/Leihen-Empfehlung und Abhakfeld steht in der Excel-Datei „Werkzeug_und_Materialliste.xlsx“. Hier die Kurzfassung.'));
-C.push(H2('Werkzeuge – Grundausstattung (kaufen)'));
+C.push(H1('10. Zusammenfassung: Werkzeuge und Materialien (Minimum)'));
+C.push(P('Hier steht nur das, was du wirklich brauchst. Dahinter stecken zwei Ideen: Ein Akku-System ersetzt die meisten Spezialgeräte, und Fachbetriebe bringen ihr eigenes Material mit. Die Liste zum Abhaken mit Preisen steht in „Werkzeug_und_Materialliste.xlsx“.'));
+C.push(H2('Werkzeuge kaufen – Minimum-Ausstattung'));
 C.push(table([2600, 7000], [
   ['Bereich', 'Werkzeuge'],
-  ['Akku-System (eine Marke, 18 V)', 'Akku-Bohrschrauber, Schlagschrauber, Bohrhammer SDS-plus, Winkelschleifer 125 mm, Stichsäge, Multitool (oszillierend), Handkreissäge, LED-Baustrahler, 3–4 Akkus + Schnellladegerät'],
-  ['Netzgeräte', 'Bausauger Staubklasse M, Rührwerk für Kleber/Spachtel, Exzenterschleifer, Kappsäge (Böden, Leisten), Heißluftföhn'],
-  ['Messen & Prüfen', 'Kreuzlinienlaser, Wasserwaage 60/120 cm, Richtlatte 2 m, Zollstock, Maßband, Winkel, Leitungsortungsgerät, zweipoliger Spannungsprüfer, Feuchtemessgerät'],
-  ['Handwerkzeug', 'Hammer, Fäustel, Meißel-Set, Kuhfuß/Brechstange, Cuttermesser, VDE-Schraubendreher, Zangen-Set, Spachtel-Set, Kartuschenpresse, Kelle, Gummihammer, Zahnspachtel'],
-  ['Maler & Boden', 'Farbrollen + Teleskopstange, Pinsel, Abdeckvlies, Malerkrepp, Zugeisen, Schlagklotz, Abstandskeile, Cutter für Vinyl'],
-  ['Transport & Ordnung', 'Schubkarre, Eimer, Mörtelkübel, Besen, Schaufel, Leiter, Arbeitsböcke, Verlängerungskabel/Kabeltrommel, Werkzeugkiste'],
-  ['Schutz', 'FFP3-Masken, Schutzbrille, Gehörschutz, Handschuhe, Sicherheitsschuhe S3, Knieschoner, Erste-Hilfe-Kasten, Feuerlöscher'],
+  ['Akku-Geräte (eine Marke, 18 V)', 'Bohrschrauber-Set mit 2 Akkus und Ladegerät, Bohrhammer SDS-plus mit Meißeln, Multitool (ersetzt Stich- und Feinsäge), Winkelschleifer 125 mm, Rührquirl als Aufsatz'],
+  ['Staub', 'Bausauger Staubklasse M'],
+  ['Messen & Prüfen', 'Wasserwaage 120 cm, Zollstock, Maßband, Leitungsortungsgerät, zweipoliger Spannungsprüfer'],
+  ['Handwerkzeug', 'Hammer, Kuhfuß, Cuttermesser, VDE-Schraubendreher, Kombizange, Spachtel-Set, Kartuschenpresse'],
+  ['Maler & Boden', 'Farbrollen, Teleskopstange, Pinsel, Abdeckvlies; Zugeisen, Schlagklotz, Abstandskeile, Gehrungslade mit Feinsäge'],
+  ['Baustelle', 'Stehleiter, Eimer, Mörtelkübel, Besen, Schaufel, Kabeltrommel'],
+  ['Schutz (Pflicht)', 'FFP3-Masken, Schutzbrille, Gehörschutz, Schnittschutzhandschuhe, Sicherheitsschuhe S3, Erste-Hilfe-Kasten, Feuerlöscher'],
 ], { boldFirst: true }));
-C.push(P([t('Startausstattung inklusive Schutzausrüstung laut Liste ca. 2.200–5.100 € – je nach Marke und Qualität. Lohnt sich ab dem ersten Projekt, weil die Eigenleistung mehr spart.', { italics: true })], { spacing: { before: 80 } }));
-C.push(H2('Werkzeuge – leihen (Baumaschinenverleih)'));
-C.push(BL('Abbruchhammer, Wandschlitzfräse, Fliesen-/Bodenstripper, Nass-Fliesenschneider, Bautrockner/Luftentfeuchter, Estrich-/Bodenschleifer, Airless-Farbspritzgerät, Dampf-Tapetenablöser, Hochdruckreiniger (oder kaufen), Gerüst, Anhänger, Container.'));
-C.push(H2('Materialien – dein Flip-Standard'));
-C.push(table([2400, 7200], [
-  ['Gewerk', 'Standard-Material (Beispiel)'],
-  ['Maler', 'Tiefengrund, Spachtelmasse, Malervlies (bei schlechten Wänden), Dispersionsfarbe weiß (Nassabrieb Klasse 2), Acryl'],
-  ['Boden', 'Rigid-/Klick-Vinyl helle Eiche (Nutzungsklasse 33) mit integrierter Trittschalldämmung, weiße Sockelleisten, Übergangsprofile'],
-  ['Bad', 'Feinsteinzeug 60 × 60 cm matt hellgrau/beige, Flexkleber C2, Abdichtungs-Set (Flüssigabdichtung, Dichtband, Manschetten), Sanitärsilikon, Vorwandelemente, weiße Keramik, Mittelklasse-Armaturen, Duschrinne + Glaswand, LED-Spiegel, Handtuchheizkörper'],
-  ['Trockenbau & Dämmung', 'Gipskartonplatten (im Bad imprägniert), CW/UW-Profile, Mineralwolle oder Holzfaser (WLS 035), Dampfbremse + Klebeband, Fugenspachtel, Kantenschutz'],
-  ['Elektro (über Elektriker)', 'Schalterprogramm reinweiß, LED-Spots, Rauchmelder, Leerrohre'],
-  ['Türen & Fenster', 'Innentüren weiß CPL mit Zargen, einheitliche Drückergarnituren, Fensterbänke'],
-  ['Kleinmaterial', 'Schrauben-/Dübel-Sortiment, Bauschaum, Montagekleber, Abdeckfolie, Malerkrepp, Big Bags, Müllsäcke, Schleifpapier, Trennscheiben, Bohrer-Set'],
+C.push(P([t('Startausstattung inklusive Schutzausrüstung laut Liste ca. 1.400–3.100 € – je nach Marke. Alles Weitere erst kaufen, wenn ein Projekt es wirklich braucht.', { italics: true })], { spacing: { before: 80 } }));
+C.push(H2('Nur leihen, wenn nötig'));
+C.push(BL('Abbruchhammer, Bautrockner, Fliesenschneider (nur wenn du selbst fliest), Hochdruckreiniger, Anhänger. Container und Gerüst bestellst du ohnehin projektbezogen.'));
+C.push(H2('Materialien – das Minimum'));
+C.push(P('Elektriker, Sanitär-/Heizungsbauer, Fliesenleger, Fensterbauer und Estrichleger liefern ihr Material im Angebot mit. Du kaufst nur für deine Eigenleistung und wählst die sichtbaren Materialien aus.'));
+C.push(table([2600, 7000], [
+  ['Gruppe', 'Material'],
+  ['Maler (selbst)', 'Tiefengrund, Fertigspachtel, eine weiße Wandfarbe für alles, Acryl, Malerkrepp, Abdeckfolie'],
+  ['Boden (selbst)', 'Klick-Vinyl (Rigid, helle Eiche, Trittschall integriert), weiße Sockelleisten, Montagekleber'],
+  ['Bad (du wählst, Fachbetrieb liefert)', 'Eine Fliese 60 × 60 cm für Boden und Wand, Sanitär-Paket (WC, Waschtisch, Armaturen, Duschwand), Sanitärsilikon'],
+  ['Kleinmaterial', 'Schrauben- und Dübel-Sortiment, Big Bags und Müllsäcke, Bohrer, Bits, Schleifpapier, Trennscheiben'],
+  ['Nur falls nötig', 'Dämmung oberste Geschossdecke mit Dampfbremse, Gipskarton mit Profilen, Ausgleichsmasse'],
 ], { boldFirst: true }));
 
 const doc = new Document({

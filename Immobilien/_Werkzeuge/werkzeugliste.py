@@ -23,106 +23,59 @@ YEL = PatternFill("solid", fgColor="FFFF00")
 LINE = Border(bottom=Side(style="thin", color="D5D2CC"))
 EUR = '#,##0 €;-#,##0 €;"-"'
 
+# Minimum-Ausstattung: nur was du für Eigenleistung (Rückbau, Maler, Boden, Montage) wirklich brauchst.
 # (Kategorie, Artikel, Wofür, Kaufen/Leihen, Priorität, Preis von, Preis bis)
 WERKZEUGE = [
-    ("Akku-System 18 V (eine Marke)", "Akku-Bohrschrauber (Set mit 2 Akkus + Ladegerät)", "Schrauben, Bohren in Holz/Metall, Trockenbau", "Kaufen", "Start", 150, 300),
-    ("Akku-System 18 V (eine Marke)", "Zusatzakkus (2 × 4–5 Ah) + Schnellladegerät", "Ganztägig arbeiten ohne Pause", "Kaufen", "Start", 120, 250),
-    ("Akku-System 18 V (eine Marke)", "Schlagschrauber", "Lange Schrauben, Dachlatten, Montage", "Kaufen", "Bei Bedarf", 100, 200),
-    ("Akku-System 18 V (eine Marke)", "Bohrhammer SDS-plus", "Bohren in Beton/Mauerwerk, leichtes Stemmen, Fliesen abschlagen", "Kaufen", "Start", 150, 350),
-    ("Akku-System 18 V (eine Marke)", "Winkelschleifer 125 mm", "Trennen von Metall, Fliesen, Stein (nie Asbest!)", "Kaufen", "Start", 80, 180),
-    ("Akku-System 18 V (eine Marke)", "Stichsäge", "Ausschnitte in Holz, Platten, Arbeitsplatten", "Kaufen", "Start", 100, 200),
-    ("Akku-System 18 V (eine Marke)", "Multitool (oszillierend)", "Türzargen kürzen, Ausschnitte, Silikon/Fugen entfernen", "Kaufen", "Start", 80, 180),
-    ("Akku-System 18 V (eine Marke)", "Handkreissäge", "Gerade Schnitte in Platten, OSB, Holz", "Kaufen", "Bei Bedarf", 120, 250),
-    ("Akku-System 18 V (eine Marke)", "LED-Baustrahler (2 Stück)", "Licht in Räumen ohne Strom/Leuchten", "Kaufen", "Start", 40, 100),
-    ("Netzgeräte", "Bausauger Staubklasse M", "Staub beim Bohren, Schleifen, Stemmen absaugen", "Kaufen", "Start", 250, 600),
-    ("Netzgeräte", "Rührwerk", "Fliesenkleber, Spachtel, Ausgleichsmasse anrühren", "Kaufen", "Start", 80, 200),
-    ("Netzgeräte", "Exzenterschleifer", "Holz, Türen, Spachtelstellen schleifen", "Kaufen", "Bei Bedarf", 60, 150),
-    ("Netzgeräte", "Kapp- und Gehrungssäge", "Sockelleisten, Vinyldielen, Latten exakt sägen", "Kaufen", "Start", 150, 350),
-    ("Netzgeräte", "Heißluftföhn", "Alte Farbe/Kleber lösen, Folien", "Kaufen", "Bei Bedarf", 30, 60),
-    ("Messen & Prüfen", "Kreuzlinienlaser", "Gerade Linien für Fliesen, Trockenbau, Bilder", "Kaufen", "Start", 80, 250),
-    ("Messen & Prüfen", "Wasserwaagen 60 cm + 120 cm", "Waagerecht/senkrecht prüfen", "Kaufen", "Start", 30, 80),
-    ("Messen & Prüfen", "Richtlatte 2 m (Alu)", "Ebenheit von Wänden und Böden prüfen, Abziehen", "Kaufen", "Start", 20, 40),
-    ("Messen & Prüfen", "Zollstock + Maßband 8 m", "Aufmaß, Zuschnitt", "Kaufen", "Start", 15, 30),
-    ("Messen & Prüfen", "Anschlagwinkel", "Rechte Winkel anzeichnen", "Kaufen", "Start", 10, 25),
-    ("Messen & Prüfen", "Leitungsortungsgerät", "Strom-, Wasserleitungen und Metall vor dem Bohren finden", "Kaufen", "Start", 40, 150),
-    ("Messen & Prüfen", "Zweipoliger Spannungsprüfer", "Spannungsfreiheit sicher prüfen", "Kaufen", "Start", 20, 50),
-    ("Messen & Prüfen", "Feuchtemessgerät", "Feuchte in Wänden/Holz bei Besichtigung und Sanierung", "Kaufen", "Start", 25, 80),
-    ("Handwerkzeug", "Hammer + Fäustel", "Nageln, Stemmen mit Meißel", "Kaufen", "Start", 25, 50),
-    ("Handwerkzeug", "Meißel-Set (Hand und SDS-plus)", "Stemmen, Fliesen und Putz entfernen", "Kaufen", "Start", 20, 40),
-    ("Handwerkzeug", "Kuhfuß / Brechstange", "Abbruch, Leisten und Verkleidungen lösen", "Kaufen", "Start", 15, 30),
-    ("Handwerkzeug", "Cuttermesser + Ersatzklingen", "Gipskarton, Vinyl, Folien, Teppich", "Kaufen", "Start", 10, 20),
-    ("Handwerkzeug", "VDE-Schraubendreher-Set", "Schalter, Steckdosen (nur spannungsfrei!), Montage", "Kaufen", "Start", 25, 60),
-    ("Handwerkzeug", "Zangen-Set (Kombi-, Wasserpumpen-, Seitenschneider)", "Universal, Sanitär-Kleinteile", "Kaufen", "Start", 40, 80),
-    ("Handwerkzeug", "Spachtel-Set + Glätter + Kelle", "Spachteln, Putzen, Kleber auftragen", "Kaufen", "Start", 20, 45),
-    ("Handwerkzeug", "Kartuschenpresse", "Silikon, Acryl, Montagekleber", "Kaufen", "Start", 10, 25),
-    ("Handwerkzeug", "Gummihammer + Zahnspachtel-Set", "Fliesen verlegen", "Kaufen", "Bei Bedarf", 20, 40),
-    ("Handwerkzeug", "Bohrer-, Bit- und Sägeblatt-Set", "Verbrauchsmaterial für die Maschinen", "Kaufen", "Start", 30, 60),
-    ("Maler & Boden", "Farbrollen-Set + Teleskopstange + Pinsel", "Wände und Decken streichen", "Kaufen", "Start", 40, 80),
-    ("Maler & Boden", "Abdeckvlies (wiederverwendbar)", "Böden und Treppen schützen", "Kaufen", "Start", 30, 60),
-    ("Maler & Boden", "Verlege-Set Boden (Zugeisen, Schlagklotz, Abstandskeile)", "Klick-Vinyl und Laminat verlegen", "Kaufen", "Start", 20, 40),
-    ("Transport & Ordnung", "Schubkarre", "Bauschutt, Material", "Kaufen", "Start", 60, 120),
-    ("Transport & Ordnung", "Eimer, Mörtelkübel, Besen, Schaufel", "Anmischen, Aufräumen", "Kaufen", "Start", 30, 60),
-    ("Transport & Ordnung", "Stehleiter (Alu, 6–8 Stufen)", "Arbeiten an Decken und oberen Wandbereichen", "Kaufen", "Start", 80, 200),
-    ("Transport & Ordnung", "Arbeitsböcke (Paar)", "Zuschnitt, Arbeitstisch", "Kaufen", "Start", 40, 100),
-    ("Transport & Ordnung", "Kabeltrommel + Verlängerungen", "Strom auf der Baustelle", "Kaufen", "Start", 40, 80),
-    ("Transport & Ordnung", "Werkzeugkisten / Systemkoffer", "Ordnung, Transport, Diebstahlschutz", "Kaufen", "Start", 30, 80),
-    ("Außen", "Hochdruckreiniger", "Pflaster, Fassade, Terrasse reinigen", "Kaufen", "Bei Bedarf", 120, 300),
-    ("Außen", "Heckenschere, Spaten, Rechen", "Garten herrichten", "Kaufen", "Bei Bedarf", 60, 150),
-    ("Leihen (Preis pro Tag)", "Abbruchhammer (schwer)", "Estrich, Fliesen und Mauerwerk abbrechen", "Leihen", "Bei Bedarf", 40, 80),
-    ("Leihen (Preis pro Tag)", "Wandschlitzfräse mit Absaugung", "Schlitze für Elektro/Sanitär", "Leihen", "Bei Bedarf", 50, 90),
-    ("Leihen (Preis pro Tag)", "Fliesen- und Bodenstripper", "Alte Bodenbeläge und Fliesen großflächig entfernen", "Leihen", "Bei Bedarf", 60, 120),
-    ("Leihen (Preis pro Tag)", "Nass-Fliesenschneider", "Große Feinsteinzeugfliesen schneiden", "Leihen", "Bei Bedarf", 40, 80),
-    ("Leihen (Preis pro Tag)", "Bautrockner / Luftentfeuchter", "Estrich, Putz und Wände trocknen", "Leihen", "Bei Bedarf", 25, 50),
-    ("Leihen (Preis pro Tag)", "Boden-/Estrichschleifer", "Untergründe vorbereiten, Kleberreste (nicht bei Asbest!)", "Leihen", "Bei Bedarf", 60, 120),
-    ("Leihen (Preis pro Tag)", "Airless-Farbspritzgerät", "Große Wand- und Deckenflächen schnell streichen", "Leihen", "Bei Bedarf", 50, 100),
-    ("Leihen (Preis pro Tag)", "Dampf-Tapetenablöser", "Alte Tapeten lösen", "Leihen", "Bei Bedarf", 15, 30),
-    ("Leihen (Preis pro Tag)", "Anhänger", "Material, Sperrmüll", "Leihen", "Bei Bedarf", 20, 50),
-    ("Leihen (Preis pro Woche)", "Gerüst (Fassade/Dach)", "Arbeiten in der Höhe (Aufbau durch Fachfirma empfohlen)", "Leihen", "Bei Bedarf", 150, 400),
+    ("Akku-Geräte (alle von einer Marke, 18 V)", "Akku-Bohrschrauber-Set (2 Akkus 4–5 Ah + Ladegerät)", "Schrauben, Bohren in Holz/Metall, Möbel- und Türmontage", "Kaufen", "Start", 180, 350),
+    ("Akku-Geräte (alle von einer Marke, 18 V)", "Akku-Bohrhammer SDS-plus + Meißel (Flach- und Spitzmeißel)", "Bohren in Beton/Mauerwerk, Fliesen und Putz abschlagen", "Kaufen", "Start", 170, 380),
+    ("Akku-Geräte (alle von einer Marke, 18 V)", "Akku-Multitool (oszillierend) mit Sägeblättern", "Ersetzt Stichsäge und Feinsäge: Zargen kürzen, Ausschnitte, Fugen entfernen", "Kaufen", "Start", 80, 180),
+    ("Akku-Geräte (alle von einer Marke, 18 V)", "Akku-Winkelschleifer 125 mm + Trennscheiben", "Metall, Fliesen, Stein trennen (nie Asbest!)", "Kaufen", "Start", 80, 180),
+    ("Akku-Geräte (alle von einer Marke, 18 V)", "Rührquirl (passend für Bohrhammer/Bohrschrauber)", "Spachtel und Kleber anrühren – statt eigenem Rührwerk", "Kaufen", "Start", 10, 25),
+    ("Staub", "Bausauger Staubklasse M", "Staub beim Bohren, Schleifen, Stemmen absaugen (Gesundheit!)", "Kaufen", "Start", 250, 600),
+    ("Messen & Prüfen", "Mess-Set: Wasserwaage 120 cm, Zollstock, Maßband 8 m, Bleistift", "Aufmaß, Ausrichten, Zuschnitt", "Kaufen", "Start", 40, 90),
+    ("Messen & Prüfen", "Leitungsortungsgerät + zweipoliger Spannungsprüfer", "Vor jedem Bohren Leitungen finden, Spannungsfreiheit prüfen", "Kaufen", "Start", 60, 200),
+    ("Handwerkzeug", "Handwerkzeug-Set: Hammer, Kuhfuß, Cuttermesser, VDE-Schraubendreher, Kombizange", "Abbruch, Montage, Zuschneiden", "Kaufen", "Start", 70, 140),
+    ("Handwerkzeug", "Spachtel-Set + Glätter + Kartuschenpresse", "Spachteln, Silikon/Acryl, Montagekleber", "Kaufen", "Start", 25, 55),
+    ("Maler & Boden", "Maler-Set: Farbrollen, Teleskopstange, Pinsel, Abdeckvlies", "Wände und Decken streichen, Böden schützen", "Kaufen", "Start", 70, 140),
+    ("Maler & Boden", "Boden-Set: Zugeisen, Schlagklotz, Abstandskeile + Gehrungslade mit Feinsäge", "Klick-Vinyl und Sockelleisten verlegen", "Kaufen", "Start", 35, 70),
+    ("Baustelle", "Stehleiter (Alu, 6–8 Stufen)", "Arbeiten an Decken und oberen Wandbereichen", "Kaufen", "Start", 80, 200),
+    ("Baustelle", "Eimer, Mörtelkübel, Besen, Schaufel, Kabeltrommel", "Anmischen, Aufräumen, Strom", "Kaufen", "Start", 70, 140),
+    ("Leihen – nur bei Bedarf (Preis pro Tag)", "Abbruchhammer (schwer)", "Estrich, Fliesen, Mauerwerk großflächig abbrechen", "Leihen", "Bei Bedarf", 40, 80),
+    ("Leihen – nur bei Bedarf (Preis pro Tag)", "Bautrockner / Luftentfeuchter", "Estrich, Putz und Wände trocknen", "Leihen", "Bei Bedarf", 25, 50),
+    ("Leihen – nur bei Bedarf (Preis pro Tag)", "Fliesenschneider", "Nur wenn du selbst fliest – sonst bringt der Fliesenleger ihn mit", "Leihen", "Bei Bedarf", 40, 80),
+    ("Leihen – nur bei Bedarf (Preis pro Tag)", "Hochdruckreiniger", "Pflaster, Fassade, Terrasse reinigen", "Leihen", "Bei Bedarf", 30, 60),
+    ("Leihen – nur bei Bedarf (Preis pro Tag)", "Anhänger", "Material holen, Sperrmüll wegbringen", "Leihen", "Bei Bedarf", 20, 50),
 ]
 
 SCHUTZ = [
-    ("Atemschutz", "FFP3-Masken (10 Stück)", "Staub beim Schleifen, Stemmen, Abbruch", "Kaufen", "Start", 20, 40),
-    ("Augen & Ohren", "Schutzbrille (2 Stück)", "Splitter, Staub", "Kaufen", "Start", 10, 25),
-    ("Augen & Ohren", "Gehörschutz (Kapsel)", "Bohrhammer, Flex, Kappsäge", "Kaufen", "Start", 15, 30),
-    ("Hände & Füße", "Arbeits- und Schnittschutzhandschuhe (Set)", "Abbruch, Glas, Bleche", "Kaufen", "Start", 15, 30),
-    ("Hände & Füße", "Sicherheitsschuhe S3", "Durchtritt- und Zehenschutz", "Kaufen", "Start", 60, 150),
-    ("Hände & Füße", "Knieschoner", "Fliesen, Boden, Trockenbau", "Kaufen", "Start", 20, 40),
-    ("Kleidung", "Einweg-Overalls (Set)", "Staubige Arbeiten, Mineralwolle", "Kaufen", "Start", 20, 40),
-    ("Notfall", "Erste-Hilfe-Kasten (DIN 13157)", "Pflicht auf jeder Baustelle", "Kaufen", "Start", 20, 35),
-    ("Notfall", "Feuerlöscher 6 kg (ABC)", "Brandschutz bei Flex-, Heiß- und Elektroarbeiten", "Kaufen", "Start", 40, 80),
+    ("Pflicht – immer", "FFP3-Masken (10 Stück)", "Staub beim Schleifen, Stemmen, Abbruch", "Kaufen", "Start", 20, 40),
+    ("Pflicht – immer", "Schutzbrille", "Splitter, Staub", "Kaufen", "Start", 10, 25),
+    ("Pflicht – immer", "Gehörschutz (Kapsel)", "Bohrhammer, Winkelschleifer", "Kaufen", "Start", 15, 30),
+    ("Pflicht – immer", "Arbeitshandschuhe (Schnittschutz)", "Abbruch, Glas, Bleche", "Kaufen", "Start", 15, 30),
+    ("Pflicht – immer", "Sicherheitsschuhe S3", "Durchtritt- und Zehenschutz", "Kaufen", "Start", 60, 150),
+    ("Pflicht – immer", "Erste-Hilfe-Kasten (DIN 13157)", "Gehört auf jede Baustelle", "Kaufen", "Start", 20, 35),
+    ("Pflicht – immer", "Feuerlöscher 6 kg (ABC)", "Brandschutz bei Flex- und Elektroarbeiten", "Kaufen", "Start", 40, 80),
 ]
 
-# (Gewerk, Material, Empfehlung, Faustregel Menge, Preis ca.)
+# Fachbetriebe (Elektro, Sanitär/Heizung, Fliesenleger, Fenster, Estrich) bringen ihr Material laut Angebot mit.
+# Du kaufst nur für deine Eigenleistung und wählst die sichtbaren Standard-Materialien aus.
+# (Gruppe, Material, Empfehlung, Faustregel Menge, Preis ca.)
 MATERIAL = [
-    ("Maler", "Tiefengrund", "lösemittelfrei, für saugende Untergründe", "ca. 1 l pro 5–10 m²", "15–30 € / 10 l"),
-    ("Maler", "Spachtelmasse (Fertig- oder Pulverspachtel)", "für Q2/Q3-Oberflächen", "nach Zustand", "15–30 € / Eimer"),
-    ("Maler", "Wandfarbe weiß, Dispersion", "Nassabrieb Klasse 2, gute Deckkraft", "ca. 1 l pro 6–7 m² je Anstrich", "60–120 € / 12,5 l"),
-    ("Maler", "Malervlies", "nur bei rissigen, schlechten Wänden", "Wandfläche + 10 %", "1–3 € / m²"),
-    ("Maler", "Acryl", "Anschlussfugen an Decken, Türzargen", "1 Kartusche pro Raum", "3–6 € / Kartusche"),
-    ("Boden", "Rigid-/Klick-Vinyl, helle Eiche", "Nutzungsklasse 33, integrierte Trittschalldämmung", "Bodenfläche + 8–10 % Verschnitt", "25–45 € / m²"),
-    ("Boden", "Sockelleisten weiß + Clips/Kleber", "einheitlich im ganzen Haus", "Raumumfang + 10 %", "3–8 € / lfm"),
-    ("Boden", "Ausgleichsmasse", "für Unebenheiten bis ca. 10 mm", "ca. 1,5 kg pro m² und mm", "15–30 € / 25 kg"),
-    ("Bad", "Feinsteinzeug 60 × 60 cm matt", "hellgrau/beige, rutschhemmend R10 am Boden", "Fläche + 10 % Verschnitt", "25–50 € / m²"),
-    ("Bad", "Flexkleber C2 + Fugenmörtel", "für Feinsteinzeug und Fußbodenheizung", "ca. 4–6 kg Kleber pro m²", "15–30 € / 25 kg"),
-    ("Bad", "Abdichtungs-Set", "Flüssigabdichtung/Dichtschlämme, Dichtband, Innen-/Außenecken, Manschetten", "alle Spritzwasserflächen + Boden Dusche", "100–250 € je Bad"),
-    ("Bad", "Vorwandelemente WC + Waschtisch", "Markenware, mit Spülkasten", "1 je Objekt", "150–350 € / Stück"),
-    ("Bad", "Sanitärkeramik weiß", "spülrandloses WC, Waschtisch 60–80 cm", "je Bad", "300–800 € je Bad"),
-    ("Bad", "Armaturen + Duschsystem", "solide Mittelklasse-Marke", "je Bad", "300–800 € je Bad"),
-    ("Bad", "Duschrinne + Glaswand", "bodengleiche Dusche", "je Bad", "500–1.200 €"),
-    ("Bad", "LED-Spiegel + Handtuchheizkörper", "„neues Bad“-Effekt", "je Bad", "250–600 €"),
-    ("Bad", "Sanitärsilikon (fungizid)", "Wartungsfugen", "2–3 Kartuschen je Bad", "6–10 € / Kartusche"),
-    ("Trockenbau & Dämmung", "Gipskartonplatten (im Bad imprägniert)", "12,5 mm", "Wand-/Deckenfläche + 10 %", "4–8 € / m²"),
-    ("Trockenbau & Dämmung", "CW/UW-Profile + Schnellbauschrauben", "Ständerwerk", "nach Wandlänge", "2–4 € / lfm"),
-    ("Trockenbau & Dämmung", "Dämmung (Mineralwolle oder Holzfaser, WLS 035)", "oberste Geschossdecke/Dachschräge", "Fläche, Stärke laut Energieberater", "8–25 € / m²"),
-    ("Trockenbau & Dämmung", "Dampfbremse + Klebeband", "luftdicht verkleben!", "Fläche + 15 %", "1–3 € / m²"),
-    ("Elektro (über Elektriker)", "Schalterprogramm reinweiß", "ein Programm im ganzen Haus", "laut Elektroplan", "5–15 € / Stück"),
-    ("Elektro (über Elektriker)", "LED-Einbauspots + Rauchmelder", "Küche, Flur, Bad; Rauchmelder in Schlafräumen und Fluren", "laut Plan", "10–25 € / Spot; 20–40 € / Melder"),
-    ("Türen", "Innentür weiß CPL mit Zarge + Drücker", "einheitlich", "je Türöffnung", "250–500 € / Stück"),
-    ("Kleinmaterial", "Schrauben- und Dübel-Sortiment", "Universal", "1–2 Sortimente", "30–60 €"),
-    ("Kleinmaterial", "Bauschaum, Montagekleber", "Zargen, Fensterbänke", "nach Bedarf", "8–15 € / Dose"),
-    ("Kleinmaterial", "Abdeckfolie, Malerkrepp", "Schutz während Arbeiten", "großzügig", "30–60 € pro Projekt"),
-    ("Kleinmaterial", "Big Bags, Müllsäcke (reißfest)", "Bauschutt, Abfall getrennt", "nach Rückbau", "5–15 € / Big Bag"),
-    ("Kleinmaterial", "Schleifpapier, Trennscheiben", "Verbrauch", "laufend", "20–50 € pro Projekt"),
+    ("Maler (Eigenleistung)", "Tiefengrund", "lösemittelfrei, nur auf saugenden Wänden", "ca. 1 l pro 5–10 m²", "15–30 € / 10 l"),
+    ("Maler (Eigenleistung)", "Fertigspachtel", "Löcher und Risse schließen", "1–2 Eimer pro Haus", "15–30 € / Eimer"),
+    ("Maler (Eigenleistung)", "Wandfarbe weiß (Dispersion, Nassabrieb Kl. 2)", "eine Farbe für alle Wände und Decken", "ca. 1 l pro 6–7 m² je Anstrich, 2 Anstriche", "60–120 € / 12,5 l"),
+    ("Maler (Eigenleistung)", "Acryl + Malerkrepp + Abdeckfolie", "Anschlussfugen, sauberes Abkleben", "1 Kartusche pro Raum", "40–80 € pro Haus"),
+    ("Boden (Eigenleistung)", "Klick-Vinyl (Rigid), helle Eiche, Trittschall integriert", "ein Boden für alle Wohnräume", "Bodenfläche + 10 % Verschnitt", "25–45 € / m²"),
+    ("Boden (Eigenleistung)", "Sockelleisten weiß + Montagekleber", "einheitlich im ganzen Haus", "Raumumfang + 10 %", "3–8 € / lfm"),
+    ("Bad (du wählst aus, Fachbetrieb liefert und baut ein)", "Fliese 60 × 60 cm matt, hellgrau/beige", "eine Fliese für Boden und Wand (Boden R10)", "Fläche + 10 % Verschnitt", "25–50 € / m²"),
+    ("Bad (du wählst aus, Fachbetrieb liefert und baut ein)", "Sanitär-Paket: WC, Waschtisch, Armaturen, Duschwand", "weiß, solide Mittelklasse-Marke", "1 Paket pro Bad", "1.000–2.500 € pro Bad"),
+    ("Bad (du wählst aus, Fachbetrieb liefert und baut ein)", "Sanitärsilikon (fungizid, weiß)", "Wartungsfugen nachziehen", "2–3 Kartuschen pro Bad", "6–10 € / Kartusche"),
+    ("Kleinmaterial", "Schrauben- und Dübel-Sortiment", "Universal", "1 Sortiment", "30–60 €"),
+    ("Kleinmaterial", "Big Bags + reißfeste Müllsäcke", "Bauschutt und Abfall getrennt sammeln", "nach Rückbau-Menge", "5–15 € / Big Bag"),
+    ("Kleinmaterial", "Verbrauch: Bohrer, Bits, Schleifpapier, Trennscheiben", "Ersatz für die Maschinen", "laufend", "30–60 € pro Projekt"),
+    ("Nur falls im Objekt nötig", "Dämmung oberste Geschossdecke + Dampfbremse + Klebeband", "günstigster Sprung in der Energieklasse; Stärke laut Energieberater", "Deckenfläche + 10 %", "10–25 € / m²"),
+    ("Nur falls im Objekt nötig", "Gipskarton + Profile + Schrauben", "neue Wände, Vorwände, Deckenverkleidung", "nach Plan", "6–12 € / m²"),
+    ("Nur falls im Objekt nötig", "Ausgleichsmasse", "unebene Böden vor dem Vinyl (bis ca. 10 mm)", "ca. 1,5 kg pro m² und mm", "15–30 € / 25 kg"),
 ]
 
 
@@ -142,7 +95,7 @@ def tool_sheet(ws, title, rows, start=7):
     ws.sheet_view.showGridLines = False
     ws["B1"] = title
     ws["B1"].font = Font(name=F, size=14, bold=True)
-    ws["B2"] = "Preise sind grobe Richtwerte (Stand 2026, Mittelklasse-Marken). Spalte „Hab ich“ per Auswahl abhaken, gelbe Felder kannst du anpassen."
+    ws["B2"] = "Minimum-Ausstattung: nur was du für deine Eigenleistung brauchst. Preise sind grobe Richtwerte (Stand 2026). Spalte „Hab ich“ abhaken, gelbe Felder kannst du anpassen."
     ws["B2"].font = GREY
     header(ws, start - 1, ["Kategorie", "Artikel", "Wofür", "Kaufen / Leihen", "Priorität", "Preis von", "Preis bis", "Hab ich", "Notiz"],
            [24, 40, 46, 13, 12, 11, 11, 10, 26])
@@ -182,7 +135,7 @@ def tool_sheet(ws, title, rows, start=7):
 wb = Workbook()
 ws = wb.active
 ws.title = "Werkzeuge"
-w0, w1 = tool_sheet(ws, "Werkzeuge für die Flip-Sanierung", WERKZEUGE, start=9)
+w0, w1 = tool_sheet(ws, "Werkzeuge – Minimum-Ausstattung", WERKZEUGE, start=9)
 ps = wb.create_sheet("Schutzausrüstung")
 p0, p1 = tool_sheet(ps, "Schutzausrüstung (Pflicht für jede Baustelle)", SCHUTZ)
 
@@ -225,10 +178,14 @@ for i, (lab, extra, schutz) in enumerate([
 # Materialien
 m = wb.create_sheet("Materialien")
 m.sheet_view.showGridLines = False
-m["B1"] = "Materialien – dein Flip-Standard"
+m["B1"] = "Materialien – das Minimum"
 m["B1"].font = Font(name=F, size=14, bold=True)
-m["B2"] = "Einmal festlegen, bei jedem Projekt gleich bestellen. Preise sind grobe Richtwerte (Stand 2026). Bestellstatus per Auswahl setzen."
+m["B2"] = ("Fachbetriebe (Elektro, Sanitär/Heizung, Fliesenleger, Fenster, Estrich) bringen ihr Material laut Angebot mit. Du kaufst nur für deine Eigenleistung "
+            "und wählst die sichtbaren Materialien aus. Preise sind grobe Richtwerte (Stand 2026). Status per Auswahl setzen.")
 m["B2"].font = GREY
+m.merge_cells("B2:H2")
+m["B2"].alignment = Alignment(wrap_text=True, vertical="top")
+m.row_dimensions[2].height = 30
 header(m, 4, ["Gewerk", "Material", "Empfehlung", "Faustregel Menge", "Preis ca.", "Status", "Notiz"], [22, 40, 44, 30, 22, 12, 26])
 dv2 = DataValidation(type="list", formula1='"Offen,Bestellt,Geliefert"', allow_blank=True)
 m.add_data_validation(dv2)
