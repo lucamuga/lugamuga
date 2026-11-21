@@ -14,6 +14,7 @@
 |---|---|
 | `01_Rechner` | Excel-Rechner mit Dashboard (Cashflow, max. Kaufpreis, Verkäufersicht, 30-Jahres-Prognose), Web-Version, Vorschaubild |
 | `02_Anschreiben-Verkaeufer` | Anschreiben (Word/PDF) mit Beiblatt-Grafik |
+| `04_Gebietsplan` | Welche Gebiete in Damme und Umgebung sich eignen (Ranking A/B/C), Steckbriefe der Top-Gebiete, Akquise-Plan in 4 Phasen (Word/PDF) |
 | `03_Objektpruefung` | Checkliste mit 53 Prüfpunkten und 14 K.O.-Kriterien – pro Haus eine Kopie des Blatts anlegen |
 
-Konkrete Objekte: pro Haus einen Ordner `04_Objekte/Ort_Strasse` anlegen (Checkliste, Rechner-Kopie, Exposé, Verträge).
+Konkrete Objekte: pro Haus einen Ordner `05_Objekte/Ort_Strasse` anlegen (Checkliste, Rechner-Kopie, Exposé, Verträge).
