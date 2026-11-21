@@ -1,0 +1,47 @@
+{
+ "titel": "Objekt-Rechner: Zweifamilienhaus Damme-Glückauf (ImmoScout 171741799)",
+ "untertitel": "Gelb = Annahmen (änderbar). Grün markierte Quellen stammen aus dem Exposé. Spalte C ist bewusst vorsichtig (höchste Kosten, niedrigste Miete) und wird gerechnet; Spalte D zeigt die Spanne, Spalte E den günstigen Fall zum Vergleich. Stand 21.11.2026 – keine Steuer- oder Rechtsberatung.",
+ "eingaben": [
+  {"gruppe": "Kauf", "werte": [
+   {"name": "preis", "label": "Kaufpreis", "konservativ": 395000, "guenstig": 355000, "spanne": "350.000–395.000 € (Verhandlungsspielraum)", "einheit": "€", "fmt": "eur", "quelle": "Exposé: 395.000 € (bereits von 425.000 € um 7 % gesenkt). Argumente: Energieklasse H, Baujahr 1950, Leerstand, 2. Küche fehlt", "aus_expose": true},
+   {"name": "grest", "label": "Grunderwerbsteuer", "konservativ": 0.05, "guenstig": 0.05, "spanne": "fest", "einheit": "%", "fmt": "pct", "quelle": "Niedersachsen 5 %"},
+   {"name": "notar", "label": "Notar & Grundbuch", "konservativ": 0.02, "guenstig": 0.015, "spanne": "1,5–2,0 %", "einheit": "%", "fmt": "pct", "quelle": "übliche Spanne"},
+   {"name": "makler", "label": "Maklerprovision Käufer", "konservativ": 0.0357, "guenstig": 0.0357, "spanne": "fest", "einheit": "%", "fmt": "pct2", "quelle": "Exposé: 3,57 % inkl. MwSt. (LzO / LBSi NordWest)", "aus_expose": true},
+   {"name": "sofort", "label": "Sofort-Investitionen (2. Wohnung vermietbar machen)", "konservativ": 60000, "guenstig": 25000, "spanne": "25.000–60.000 €", "einheit": "€", "fmt": "eur", "quelle": "Annahme: 2. Küche + Anschlüsse 8–15 T€, getrennte Zähler 2–5 T€, Maler/Böden/Kleinreparaturen 10–20 T€, Elektrik prüfen/teilweise erneuern 5–20 T€. Exposé nennt nur 1 Küche."}
+  ]},
+  {"gruppe": "Wohnungen & Einnahmen", "werte": [
+   {"name": "wf1", "label": "Wohnung 1 – Wohnfläche (Hausteil 1950)", "konservativ": 95, "guenstig": 95, "spanne": "–", "einheit": "m²", "fmt": "num", "quelle": "Exposé: ca. 95 m²", "aus_expose": true},
+   {"name": "miete1", "label": "Wohnung 1 – Kaltmiete", "konservativ": 7.5, "guenstig": 9.0, "spanne": "7,50–9,00 €/m²", "einheit": "€/m²", "fmt": "eur2", "quelle": "Damme 2026: 7,75–9,06 €/m² (ImmoScout24, Engel & Völkers); Abschlag wegen Energieklasse H"},
+   {"name": "wf2", "label": "Wohnung 2 – Wohnfläche (Anbau 1972)", "konservativ": 120, "guenstig": 120, "spanne": "–", "einheit": "m²", "fmt": "num", "quelle": "Exposé: ca. 120 m²", "aus_expose": true},
+   {"name": "miete2", "label": "Wohnung 2 – Kaltmiete", "konservativ": 7.0, "guenstig": 8.5, "spanne": "7,00–8,50 €/m²", "einheit": "€/m²", "fmt": "eur2", "quelle": "große Wohnungen erzielen weniger pro m²"},
+   {"name": "pv", "label": "Einnahmen Photovoltaik pro Jahr", "konservativ": 0, "guenstig": 1500, "spanne": "0–1.500 €/Jahr", "einheit": "€/Jahr", "fmt": "eur", "quelle": "Exposé: PV mit Volleinspeisung; Größe, Vergütung und Restlaufzeit unbekannt → beim Makler erfragen"}
+  ]},
+  {"gruppe": "Finanzierung", "werte": [
+   {"name": "ek", "label": "Eigenkapital", "konservativ": 55000, "guenstig": 55000, "spanne": "dein Wert", "einheit": "€", "fmt": "eur", "quelle": "Annahme aus deinem bisherigen Rechner – bitte anpassen"},
+   {"name": "zins", "label": "Sollzins (10 Jahre fest)", "konservativ": 0.045, "guenstig": 0.039, "spanne": "3,9–4,5 %", "einheit": "% p. a.", "fmt": "pct2", "quelle": "Nov. 2026: Interhyp ca. 4,3 %, Topzins ca. 4,0 %; Kapitalanlage mit hoher Finanzierung eher oben"},
+   {"name": "tilgung", "label": "Anfängliche Tilgung", "konservativ": 0.02, "guenstig": 0.02, "spanne": "1–3 %", "einheit": "% p. a.", "fmt": "pct2", "quelle": "Standard"}
+  ]},
+  {"gruppe": "Laufende Kosten & Steuer", "werte": [
+   {"name": "ausfall", "label": "Mietausfall-Reserve", "konservativ": 0.04, "guenstig": 0.02, "spanne": "2–4 %", "einheit": "% der Miete", "fmt": "pct", "quelle": "zwei Mieter = doppeltes Ausfallrisiko"},
+   {"name": "instand", "label": "Instandhaltung", "konservativ": 18, "guenstig": 12, "spanne": "12–18 €/m² und Jahr", "einheit": "€/m²·Jahr", "fmt": "eur2", "quelle": "Altbau 1950/1972; Dach 2000 erneuert (Exposé) spricht für die Mitte"},
+   {"name": "sonst", "label": "Nicht umlagefähige Kosten", "konservativ": 40, "guenstig": 20, "spanne": "20–40 €/Monat", "einheit": "€/Monat", "fmt": "eur", "quelle": "Bankgebühren, Kleinkram, selbst verwaltet"},
+   {"name": "leer_monate", "label": "Monate bis zur Vermietung", "konservativ": 4, "guenstig": 2, "spanne": "2–4 Monate", "einheit": "Monate", "fmt": "num", "quelle": "Haus steht leer (Exposé); Umbau 2. Wohnung + Mietersuche"},
+   {"name": "gebaeude", "label": "Gebäudeanteil (abschreibbar)", "konservativ": 0.40, "guenstig": 0.60, "spanne": "40–60 %", "einheit": "%", "fmt": "pct", "quelle": "großes Grundstück 1.025 m² × Bodenrichtwert ca. 160–250 €/m² (Portale) = ca. 165–255 T€ Bodenwert; amtlich bei BORIS prüfen"},
+   {"name": "afa", "label": "AfA-Satz", "konservativ": 0.02, "guenstig": 0.02, "spanne": "fest", "einheit": "% p. a.", "fmt": "pct", "quelle": "Baujahr 1925–2022: 2 %"},
+   {"name": "steuersatz", "label": "Persönlicher Steuersatz", "konservativ": 0.25, "guenstig": 0.35, "spanne": "25–42 %", "einheit": "%", "fmt": "pct", "quelle": "dein Grenzsteuersatz; niedriger Satz = weniger Erstattung = vorsichtiger"}
+  ]}
+ ],
+ "verhandlung": [
+  ["Angebotspreis", 395000, "aktueller Preis laut Exposé"],
+  ["−5 %", 375000, "leicht erreichbar bei Klasse H und Leerstand"],
+  ["−10 %", 355000, "realistisches Ziel mit Mängelliste und Sanierungsangeboten"],
+  ["−15 %", 335000, "ambitioniert – nur wenn das Haus lange unverkauft bleibt"],
+  ["Ursprünglicher Preis", 425000, "zur Einordnung: so viel wurde vorher verlangt"]
+ ],
+ "hinweise": [
+  "Wichtige Hinweise",
+  "• Ob zwei getrennte Wohnungen genehmigt sind (Baugenehmigung, getrennte Eingänge, Küche, Zähler, Brandschutz), steht nicht im Exposé – beim Makler und Bauamt Damme klären. Ohne zweite Küche ist die zweite Wohnung nicht vermietbar.",
+  "• Energieklasse H (307 kWh/m²a laut Bedarfsausweis): Mieter achten zunehmend auf Heizkosten. Nach Vermietung sind energetische Maßnahmen nur noch eingeschränkt auf die Miete umlegbar.",
+  "• Alle Marktwerte sind Schätzungen aus Portalen und Ratgebern; vor einem Gebot Besichtigung mit Bausachverständigem und die Checkliste Objektprüfung durchgehen."
+ ]
+}

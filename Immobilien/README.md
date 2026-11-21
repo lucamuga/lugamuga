@@ -5,6 +5,7 @@ Alle Unterlagen zu meinen Immobilien-Strategien in Damme und Umgebung.
 | Ordner | Inhalt |
 |---|---|
 | [Kauf-mit-Rueckmietung](Kauf-mit-Rueckmietung/README.md) | Häuser von älteren Eigentümern kaufen, die als Mieter wohnen bleiben (Kapitalanlage, Cashflow) |
+| [Kapitalanlage-Vermietung](Kapitalanlage-Vermietung/README.md) | Häuser/Wohnungen kaufen und vermieten (Buy & Hold) – mit geprüften Objekten |
 | [Fix-und-Flip](Fix-und-Flip/README.md) | Ältere Häuser/Wohnungen kaufen, sanieren und mit Gewinn verkaufen |
 | [_Werkzeuge](_Werkzeuge/README.md) | Skripte, mit denen die Rechner und Dokumente erzeugt und geprüft werden |
 

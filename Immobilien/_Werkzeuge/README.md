@@ -13,3 +13,4 @@ Benötigt: Python 3 mit `openpyxl` und `lxml`, LibreOffice (`soffice`), Node.js 
 | `doc_helfer.js` | Gemeinsame Bausteine (Überschriften, Tabellen, Kästen) für die Word-Dokumente | wird von den `.js`-Skripten geladen |
 | `sanierungs_handbuch.js` | Erzeugt das Sanierungs-Handbuch (Word) | `NODE_PATH=$(npm root -g) node sanierungs_handbuch.js ../Fix-und-Flip/04_Sanierungs-Handbuch/Sanierungs-Handbuch_Fix_Flip.docx` |
 | `werkzeugliste.py` | Baut die Werkzeug- und Materialliste (Excel) | `python3 werkzeugliste.py /pfad/wz_raw.xlsx`, danach `excel_werte_speichern.py` |
+| `objekt_rechner.py` | Objekt-Rechner für Vermietung mit bis zu 2 Wohnungen (Spalten: konservativ, Spanne, günstig) aus einer `objekt.json` | `python3 objekt_rechner.py objekt.json roh.xlsx`, danach `excel_werte_speichern.py` |
