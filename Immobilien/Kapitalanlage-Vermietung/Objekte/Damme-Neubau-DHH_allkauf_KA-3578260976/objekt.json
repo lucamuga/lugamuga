@@ -2,39 +2,236 @@
  "titel": "Objekt-Rechner: Neubau-Doppelhaushälfte Damme, allkauf Ausbauhaus (Kleinanzeigen 3578260976)",
  "untertitel": "Gelb = Annahmen (änderbar). Grün markierte Quellen stammen aus der Anzeige. ACHTUNG: Ausbauhaus vom Fertighausanbieter – die Anzeige sagt nicht, ob Grundstück und Bodenplatte im Preis von 353.650 € enthalten sind, und der Innenausbau kommt dazu. Spalte C ist vorsichtig und wird gerechnet, D zeigt die Spanne, E den günstigen Fall. Stand 21.11.2026 – keine Steuer- oder Rechtsberatung.",
  "eingaben": [
-  {"gruppe": "Kauf & Bau", "werte": [
-   {"name": "preis", "label": "Haus laut Anzeige + Grundstück", "konservativ": 466850, "guenstig": 353650, "spanne": "353.650–466.850 €", "einheit": "€", "fmt": "eur", "quelle": "Anzeige: 353.650 €. Vorsichtig: Grundstück NICHT enthalten → + 566 m² × 200 €/m² = 113.200 €. Günstig: Grundstück enthalten. Bei allkauf erfragen!", "aus_expose": true},
-   {"name": "grest", "label": "Grunderwerbsteuer", "konservativ": 0.05, "guenstig": 0.0136, "spanne": "1,4–5 %", "einheit": "%", "fmt": "pct2", "quelle": "Niedersachsen 5 %. Vorsichtig auf Haus + Grundstück (bei Grundstück mit Bauvertrag aus einer Hand üblich). Günstig nur auf das Grundstück (ca. 96.000 € → 1,36 % des Preises)"},
-   {"name": "notar", "label": "Notar & Grundbuch", "konservativ": 0.02, "guenstig": 0.015, "spanne": "1,5–2,0 %", "einheit": "%", "fmt": "pct", "quelle": "übliche Spanne"},
-   {"name": "makler", "label": "Maklerprovision Käufer", "konservativ": 0.0, "guenstig": 0.0, "spanne": "fest", "einheit": "%", "fmt": "pct2", "quelle": "Anzeige: keine zusätzliche Käuferprovision", "aus_expose": true},
-   {"name": "sofort", "label": "Zusatzkosten Bau (Ausbau, Bodenplatte, Nebenkosten)", "konservativ": 155000, "guenstig": 70000, "spanne": "70.000–155.000 €", "einheit": "€", "fmt": "eur", "quelle": "Innenausbau 45.000–80.000 € (viel/wenig Eigenleistung), Bodenplatte 0–30.000 €, Hausanschlüsse, Genehmigung, Statik, Vermessung, Außenanlagen, Bauzeitzinsen 25.000–45.000 €"}
-  ]},
-  {"gruppe": "Einnahmen", "werte": [
-   {"name": "wf1", "label": "Wohnfläche", "konservativ": 131.18, "guenstig": 131.18, "spanne": "fest", "einheit": "m²", "fmt": "num1", "quelle": "Anzeige", "aus_expose": true},
-   {"name": "miete1", "label": "Kaltmiete", "konservativ": 9.0, "guenstig": 10.5, "spanne": "9,00–10,50 €/m²", "einheit": "€/m²", "fmt": "eur2", "quelle": "Damme 2026: Häuser Ø ca. 8,33–8,49 €/m² (ohne-makler.net, immoportal); Neubau mit Wärmepumpe und Fußbodenheizung → Aufschlag"},
-   {"name": "pv", "label": "Sonstige Einnahmen pro Jahr", "konservativ": 0, "guenstig": 0, "spanne": "–", "einheit": "€/Jahr", "fmt": "eur", "quelle": "keine (Garage/Carport nicht erwähnt)"}
-  ]},
-  {"gruppe": "Finanzierung", "werte": [
-   {"name": "ek", "label": "Eigenkapital", "konservativ": 55000, "guenstig": 55000, "spanne": "dein Wert", "einheit": "€", "fmt": "eur", "quelle": "Annahme aus deinem bisherigen Rechner – bitte anpassen"},
-   {"name": "zins", "label": "Sollzins (10 Jahre fest)", "konservativ": 0.045, "guenstig": 0.039, "spanne": "3,9–4,5 %", "einheit": "% p. a.", "fmt": "pct2", "quelle": "Nov. 2026 ca. 4,0–4,3 %; KfW-Förderkredit bei KfW 40 evtl. günstiger"},
-   {"name": "tilgung", "label": "Anfängliche Tilgung", "konservativ": 0.02, "guenstig": 0.02, "spanne": "1–3 %", "einheit": "% p. a.", "fmt": "pct2", "quelle": "Standard"}
-  ]},
-  {"gruppe": "Laufende Kosten & Steuer", "werte": [
-   {"name": "ausfall", "label": "Mietausfall-Reserve", "konservativ": 0.03, "guenstig": 0.02, "spanne": "2–3 %", "einheit": "% der Miete", "fmt": "pct", "quelle": "Familienhaus, eher lange Mietdauer"},
-   {"name": "instand", "label": "Instandhaltung", "konservativ": 8, "guenstig": 5, "spanne": "5–8 €/m² und Jahr", "einheit": "€/m²·Jahr", "fmt": "eur2", "quelle": "Neubau: in den ersten Jahren wenig; Wärmepumpe und Lüftung brauchen Wartung"},
-   {"name": "sonst", "label": "Nicht umlagefähige Kosten", "konservativ": 30, "guenstig": 20, "spanne": "20–30 €/Monat", "einheit": "€/Monat", "fmt": "eur", "quelle": "Bankgebühren, Nebenkostenabrechnung; ein Mieter"},
-   {"name": "leer_monate", "label": "Monate ohne Miete (Bau + Ausbau)", "konservativ": 12, "guenstig": 8, "spanne": "8–12 Monate", "einheit": "Monate", "fmt": "num", "quelle": "Bauzeit und Innenausbau: Kreditrate läuft (vereinfacht volle Rate), Miete kommt erst nach Fertigstellung"},
-   {"name": "gebaeude", "label": "Gebäudeanteil (abschreibbar)", "konservativ": 0.75, "guenstig": 0.73, "spanne": "73–76 %", "einheit": "%", "fmt": "pct", "quelle": "Grundstück ca. 96.000–113.000 € ist nicht abschreibbar; Zusatzkosten Bau zählen voll zum Gebäude"},
-   {"name": "afa", "label": "AfA-Satz", "konservativ": 0.03, "guenstig": 0.05, "spanne": "3–5 %", "einheit": "% p. a.", "fmt": "pct", "quelle": "Neubau: 3 % linear. 5 % degressiv vom Restwert, wenn Baubeginn 01.10.2023–30.09.2029 (Jahr 1 gerechnet). § 7b Sonder-AfA evtl. zusätzlich – mit Steuerberater prüfen"},
-   {"name": "steuersatz", "label": "Persönlicher Steuersatz", "konservativ": 0.25, "guenstig": 0.35, "spanne": "25–42 %", "einheit": "%", "fmt": "pct", "quelle": "dein Grenzsteuersatz; niedriger Satz = weniger Erstattung = vorsichtiger"}
-  ]}
+  {
+   "gruppe": "Kauf & Bau",
+   "werte": [
+    {
+     "name": "preis",
+     "label": "Haus laut Anzeige + Grundstück",
+     "konservativ": 466850,
+     "guenstig": 353650,
+     "spanne": "353.650–466.850 €",
+     "einheit": "€",
+     "fmt": "eur",
+     "quelle": "Anzeige: 353.650 €. Vorsichtig: Grundstück NICHT enthalten → + 566 m² × 200 €/m² = 113.200 €. Günstig: Grundstück enthalten. Bei allkauf erfragen!",
+     "aus_expose": true
+    },
+    {
+     "name": "grest",
+     "label": "Grunderwerbsteuer",
+     "konservativ": 0.05,
+     "guenstig": 0.0136,
+     "spanne": "1,4–5 %",
+     "einheit": "%",
+     "fmt": "pct2",
+     "quelle": "Niedersachsen 5 %. Vorsichtig auf Haus + Grundstück (bei Grundstück mit Bauvertrag aus einer Hand üblich). Günstig nur auf das Grundstück (ca. 96.000 € → 1,36 % des Preises)"
+    },
+    {
+     "name": "notar",
+     "label": "Notar & Grundbuch",
+     "konservativ": 0.02,
+     "guenstig": 0.015,
+     "spanne": "1,5–2,0 %",
+     "einheit": "%",
+     "fmt": "pct",
+     "quelle": "übliche Spanne"
+    },
+    {
+     "name": "makler",
+     "label": "Maklerprovision Käufer",
+     "konservativ": 0.0,
+     "guenstig": 0.0,
+     "spanne": "fest",
+     "einheit": "%",
+     "fmt": "pct2",
+     "quelle": "Anzeige: keine zusätzliche Käuferprovision",
+     "aus_expose": true
+    },
+    {
+     "name": "sofort",
+     "label": "Zusatzkosten Bau (nur Nötiges)",
+     "konservativ": 123000,
+     "guenstig": 60000,
+     "spanne": "60.000–123.000 €",
+     "einheit": "€",
+     "fmt": "eur",
+     "quelle": "Nur was für eine vermietbare Wohnung nötig ist: Innenausbau einfacher Mietstandard 40.000–65.000 € (viel/wenig Eigenleistung), Bodenplatte 0–25.000 € (falls nicht enthalten), Hausanschlüsse, Genehmigung, Statik, Vermessung 15.000–25.000 €, Außenanlagen minimal (Zuweg, Rasen, keine Pflasterterrasse) 5.000–8.000 €. Bauzeitzinsen stecken in „Monate ohne Miete“"
+    }
+   ]
+  },
+  {
+   "gruppe": "Einnahmen",
+   "werte": [
+    {
+     "name": "wf1",
+     "label": "Wohnfläche",
+     "konservativ": 131.18,
+     "guenstig": 131.18,
+     "spanne": "fest",
+     "einheit": "m²",
+     "fmt": "num1",
+     "quelle": "Anzeige",
+     "aus_expose": true
+    },
+    {
+     "name": "miete1",
+     "label": "Kaltmiete",
+     "konservativ": 9.0,
+     "guenstig": 10.5,
+     "spanne": "9,00–10,50 €/m²",
+     "einheit": "€/m²",
+     "fmt": "eur2",
+     "quelle": "Damme 2026: Häuser Ø ca. 8,33–8,49 €/m² (ohne-makler.net, immoportal); Neubau mit Wärmepumpe und Fußbodenheizung → Aufschlag"
+    },
+    {
+     "name": "pv",
+     "label": "Sonstige Einnahmen pro Jahr",
+     "konservativ": 0,
+     "guenstig": 0,
+     "spanne": "–",
+     "einheit": "€/Jahr",
+     "fmt": "eur",
+     "quelle": "keine (Garage/Carport nicht erwähnt)"
+    }
+   ]
+  },
+  {
+   "gruppe": "Finanzierung",
+   "werte": [
+    {
+     "name": "ek",
+     "label": "Eigenkapital",
+     "konservativ": 55000,
+     "guenstig": 55000,
+     "spanne": "dein Wert",
+     "einheit": "€",
+     "fmt": "eur",
+     "quelle": "Annahme aus deinem bisherigen Rechner – bitte anpassen"
+    },
+    {
+     "name": "zins",
+     "label": "Sollzins (10 Jahre fest)",
+     "konservativ": 0.045,
+     "guenstig": 0.039,
+     "spanne": "3,9–4,5 %",
+     "einheit": "% p. a.",
+     "fmt": "pct2",
+     "quelle": "Nov. 2026 ca. 4,0–4,3 %; KfW-Förderkredit bei KfW 40 evtl. günstiger"
+    },
+    {
+     "name": "tilgung",
+     "label": "Anfängliche Tilgung",
+     "konservativ": 0.02,
+     "guenstig": 0.02,
+     "spanne": "1–3 %",
+     "einheit": "% p. a.",
+     "fmt": "pct2",
+     "quelle": "Standard"
+    }
+   ]
+  },
+  {
+   "gruppe": "Laufende Kosten & Steuer",
+   "werte": [
+    {
+     "name": "ausfall",
+     "label": "Mietausfall-Reserve",
+     "konservativ": 0.03,
+     "guenstig": 0.02,
+     "spanne": "2–3 %",
+     "einheit": "% der Miete",
+     "fmt": "pct",
+     "quelle": "Familienhaus, eher lange Mietdauer"
+    },
+    {
+     "name": "instand",
+     "label": "Instandhaltung",
+     "konservativ": 8,
+     "guenstig": 5,
+     "spanne": "5–8 €/m² und Jahr",
+     "einheit": "€/m²·Jahr",
+     "fmt": "eur2",
+     "quelle": "Neubau: in den ersten Jahren wenig; Wärmepumpe und Lüftung brauchen Wartung"
+    },
+    {
+     "name": "sonst",
+     "label": "Nicht umlagefähige Kosten",
+     "konservativ": 30,
+     "guenstig": 20,
+     "spanne": "20–30 €/Monat",
+     "einheit": "€/Monat",
+     "fmt": "eur",
+     "quelle": "Bankgebühren, Nebenkostenabrechnung; ein Mieter"
+    },
+    {
+     "name": "leer_monate",
+     "label": "Monate ohne Miete (Bau + Ausbau)",
+     "konservativ": 12,
+     "guenstig": 8,
+     "spanne": "8–12 Monate",
+     "einheit": "Monate",
+     "fmt": "num",
+     "quelle": "Bauzeit und Innenausbau: Kreditrate läuft (vereinfacht volle Rate), Miete kommt erst nach Fertigstellung"
+    },
+    {
+     "name": "gebaeude",
+     "label": "Gebäudeanteil (abschreibbar)",
+     "konservativ": 0.75,
+     "guenstig": 0.73,
+     "spanne": "73–76 %",
+     "einheit": "%",
+     "fmt": "pct",
+     "quelle": "Grundstück ca. 96.000–113.000 € ist nicht abschreibbar; Zusatzkosten Bau zählen voll zum Gebäude"
+    },
+    {
+     "name": "afa",
+     "label": "AfA-Satz",
+     "konservativ": 0.03,
+     "guenstig": 0.05,
+     "spanne": "3–5 %",
+     "einheit": "% p. a.",
+     "fmt": "pct",
+     "quelle": "Neubau: 3 % linear. 5 % degressiv vom Restwert, wenn Baubeginn 01.10.2023–30.09.2029 (Jahr 1 gerechnet). § 7b Sonder-AfA evtl. zusätzlich – mit Steuerberater prüfen"
+    },
+    {
+     "name": "steuersatz",
+     "label": "Persönlicher Steuersatz",
+     "konservativ": 0.25,
+     "guenstig": 0.35,
+     "spanne": "25–42 %",
+     "einheit": "%",
+     "fmt": "pct",
+     "quelle": "dein Grenzsteuersatz; niedriger Satz = weniger Erstattung = vorsichtiger"
+    }
+   ]
+  }
  ],
  "verhandlung": [
-  ["Grundstück nicht enthalten, 200 €/m²", 466850, "353.650 € + 113.200 €"],
-  ["Grundstück nicht enthalten, 170 €/m²", 449870, "353.650 € + 96.220 €"],
-  ["Grundstück im Preis enthalten", 353650, "Preis laut Anzeige"],
-  ["Haus + Grundstück 300.000 €", 300000, "nur mit Nachlass oder günstigerem Haustyp"],
-  ["Haus + Grundstück 250.000 €", 250000, "Vergleich"]
+  [
+   "Grundstück nicht enthalten, 200 €/m²",
+   466850,
+   "353.650 € + 113.200 €"
+  ],
+  [
+   "Grundstück nicht enthalten, 170 €/m²",
+   449870,
+   "353.650 € + 96.220 €"
+  ],
+  [
+   "Grundstück im Preis enthalten",
+   353650,
+   "Preis laut Anzeige"
+  ],
+  [
+   "Haus + Grundstück 300.000 €",
+   300000,
+   "nur mit Nachlass oder günstigerem Haustyp"
+  ],
+  [
+   "Haus + Grundstück 250.000 €",
+   250000,
+   "Vergleich"
+  ]
  ],
  "hinweise": [
   "Wichtige Hinweise",

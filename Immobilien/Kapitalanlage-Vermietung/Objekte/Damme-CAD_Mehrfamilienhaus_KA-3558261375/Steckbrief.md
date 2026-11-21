@@ -25,12 +25,25 @@ Datei: `Rechner_Damme-CAD_Mehrfamilienhaus.xlsx` (C vorsichtig, D Spanne, E gün
 | Kaufpreis (geschätzt) | 470.000 € | 400.000 € |
 | Kaltmiete 3 Wohnungen | 1.521 €/Monat | 1.831 €/Monat |
 | Kaufpreisfaktor | 25,8 | 18,2 |
-| Gesamtinvestition | 517.900 € | 426.000 € |
-| **Cashflow nach Steuern** | **−1.096 €/Monat** | **−150 €/Monat** |
-| **Max. Kaufpreis für Cashflow ≥ 0** | **ca. 224.600 €** | **ca. 357.300 €** |
+| Gesamtinvestition | 507.900 € | 426.000 € |
+| **Cashflow nach Steuern** | **−1.056 €/Monat** | **−150 €/Monat** |
+| **Max. Kaufpreis für Cashflow ≥ 0** | **ca. 233.700 €** | **ca. 357.300 €** |
 | Kaufpreis für Faktor 20 | ca. 365.000 € | ca. 439.400 € |
 
-Verhandlungstabelle (vorsichtige Annahmen): 470.000 € → −1.096 € · 430.000 € → −918 € · 400.000 € → −784 € · 375.000 € → −672 € · 335.000 € → −493 € pro Monat.
+Verhandlungstabelle (vorsichtige Annahmen): 470.000 € → −1.056 € · 430.000 € → −877 € · 400.000 € → −743 € · 375.000 € → −631 € · 335.000 € → −452 € pro Monat.
+
+## Sanierungs-Check: Was muss wirklich gemacht werden?
+Das Haus ist **vermietet** und wirkt auf dem Foto **gepflegt** (Klinker, Kunststofffenster, Rollläden). Es gibt keinen Hinweis auf Pflicht-Sanierungen. Deshalb ist **keine Sanierung** eingerechnet, nur eine kleine Reserve:
+
+| Maßnahme | Muss? | Im Rechner (vorsichtig / günstig) |
+|---|---|---|
+| Rauchmelder prüfen/ergänzen, Rohrdämmung (GEG), Kleinreparaturen | ja, falls fehlend | 5.000 € / 0 € |
+| Heizung tauschen | nur wenn Konstanttemperaturkessel älter als 30 Jahre – **Alter erfragen** | 0 € |
+| Küchen, Bäder, Böden, Maler | nein – Wohnungen sind vermietet | 0 € |
+| Energetische Sanierung | nein – keine Pflicht | 0 € |
+
+Vorher waren bis 15.000 € eingerechnet.
+
 
 ## Chancen
 - **Drei kleine Wohnungen (Ø ca. 69 m²):** in Damme sehr gefragt, Risiko auf drei Mieter verteilt, höhere Miete pro m² als bei großen Wohnungen.

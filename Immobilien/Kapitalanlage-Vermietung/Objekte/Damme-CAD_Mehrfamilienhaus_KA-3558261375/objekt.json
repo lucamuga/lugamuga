@@ -2,43 +2,274 @@
  "titel": "Objekt-Rechner: Mehrfamilienhaus Damme, Auf dem Hassel 6A (Kleinanzeigen 3558261375)",
  "untertitel": "Gelb = Annahmen (änderbar). Grün markierte Quellen stammen aus der Anzeige. ACHTUNG: Die Anzeige nennt keinen Preis (VB), keine Mieten und kein Baujahr – Kaufpreis und Mieten sind Schätzungen. Spalte C ist vorsichtig und wird gerechnet, D zeigt die Spanne, E den günstigen Fall. Stand 21.11.2026 – keine Steuer- oder Rechtsberatung.",
  "eingaben": [
-  {"gruppe": "Kauf", "werte": [
-   {"name": "preis", "label": "Kaufpreis (geschätzt – Anzeige: VB)", "konservativ": 470000, "guenstig": 400000, "spanne": "400.000–470.000 € (≈ 1.940–2.275 €/m²)", "einheit": "€", "fmt": "eur", "quelle": "Kein Preis in der Anzeige. Schätzung: Damme Ø Häuser ca. 2.420 €/m²; vermietete Mehrfamilienhäuser werden eher nach Ertrag (Faktor 18–22) bewertet → beim Verkäufer erfragen!"},
-   {"name": "grest", "label": "Grunderwerbsteuer", "konservativ": 0.05, "guenstig": 0.05, "spanne": "fest", "einheit": "%", "fmt": "pct", "quelle": "Niedersachsen 5 %"},
-   {"name": "notar", "label": "Notar & Grundbuch", "konservativ": 0.02, "guenstig": 0.015, "spanne": "1,5–2,0 %", "einheit": "%", "fmt": "pct", "quelle": "übliche Spanne"},
-   {"name": "makler", "label": "Maklerprovision Käufer", "konservativ": 0.0, "guenstig": 0.0, "spanne": "fest", "einheit": "%", "fmt": "pct2", "quelle": "Anzeige: keine zusätzliche Käuferprovision (privat)", "aus_expose": true},
-   {"name": "sofort", "label": "Sofort-Investitionen", "konservativ": 15000, "guenstig": 0, "spanne": "0–15.000 €", "einheit": "€", "fmt": "eur", "quelle": "Baujahr und Zustand unbekannt; Foto zeigt gepflegtes Klinkerhaus mit Kunststofffenstern und Rollläden"}
-  ]},
-  {"gruppe": "Wohnungen & Einnahmen (Aufteilung angenommen – Summe laut Anzeige 206,57 m²)", "werte": [
-   {"name": "wf1", "label": "Wohnung 1 (EG) – Wohnfläche", "konservativ": 75, "guenstig": 75, "spanne": "Annahme", "einheit": "m²", "fmt": "num1", "quelle": "Anzeige: 3 Wohneinheiten, gesamt 206,57 m²; Aufteilung beim Verkäufer erfragen"},
-   {"name": "miete1", "label": "Wohnung 1 – Kaltmiete", "konservativ": 7.5, "guenstig": 9.0, "spanne": "7,50–9,00 €/m²", "einheit": "€/m²", "fmt": "eur2", "quelle": "Damme 2026: 7,75–9,06 €/m² (ImmoScout24, Engel & Völkers); tatsächliche Mieten erfragen"},
-   {"name": "wf2", "label": "Wohnung 2 (OG) – Wohnfläche", "konservativ": 75, "guenstig": 75, "spanne": "Annahme", "einheit": "m²", "fmt": "num1", "quelle": "Annahme"},
-   {"name": "miete2", "label": "Wohnung 2 – Kaltmiete", "konservativ": 7.5, "guenstig": 9.0, "spanne": "7,50–9,00 €/m²", "einheit": "€/m²", "fmt": "eur2", "quelle": "wie Wohnung 1"},
-   {"name": "wf3", "label": "Wohnung 3 (DG) – Wohnfläche", "konservativ": 56.57, "guenstig": 56.57, "spanne": "Annahme", "einheit": "m²", "fmt": "num1", "quelle": "Rest bis 206,57 m²; Dachgeschoss meist kleiner"},
-   {"name": "miete3", "label": "Wohnung 3 – Kaltmiete", "konservativ": 7.0, "guenstig": 8.5, "spanne": "7,00–8,50 €/m²", "einheit": "€/m²", "fmt": "eur2", "quelle": "Dachschrägen → etwas weniger pro m²"},
-   {"name": "pv", "label": "Sonstige Einnahmen pro Jahr (Garage, PV …)", "konservativ": 0, "guenstig": 600, "spanne": "0–600 €/Jahr", "einheit": "€/Jahr", "fmt": "eur", "quelle": "Garage separat vermietbar? (ca. 40–50 €/Monat)"}
-  ]},
-  {"gruppe": "Finanzierung", "werte": [
-   {"name": "ek", "label": "Eigenkapital", "konservativ": 55000, "guenstig": 55000, "spanne": "dein Wert", "einheit": "€", "fmt": "eur", "quelle": "Annahme aus deinem bisherigen Rechner – bitte anpassen"},
-   {"name": "zins", "label": "Sollzins (10 Jahre fest)", "konservativ": 0.045, "guenstig": 0.039, "spanne": "3,9–4,5 %", "einheit": "% p. a.", "fmt": "pct2", "quelle": "Nov. 2026: Interhyp ca. 4,3 %, Topzins ca. 4,0 %; Kapitalanlage mit hoher Finanzierung eher oben"},
-   {"name": "tilgung", "label": "Anfängliche Tilgung", "konservativ": 0.02, "guenstig": 0.02, "spanne": "1–3 %", "einheit": "% p. a.", "fmt": "pct2", "quelle": "Standard"}
-  ]},
-  {"gruppe": "Laufende Kosten & Steuer", "werte": [
-   {"name": "ausfall", "label": "Mietausfall-Reserve", "konservativ": 0.04, "guenstig": 0.02, "spanne": "2–4 %", "einheit": "% der Miete", "fmt": "pct", "quelle": "drei Mieter, kleinere Wohnungen = häufigerer Mieterwechsel"},
-   {"name": "instand", "label": "Instandhaltung", "konservativ": 18, "guenstig": 12, "spanne": "12–18 €/m² und Jahr", "einheit": "€/m²·Jahr", "fmt": "eur2", "quelle": "Baujahr unbekannt → oberes Ende; 4 Bäder, 3 Wohnungen"},
-   {"name": "sonst", "label": "Nicht umlagefähige Kosten", "konservativ": 60, "guenstig": 30, "spanne": "30–60 €/Monat", "einheit": "€/Monat", "fmt": "eur", "quelle": "Bankgebühren, Nebenkostenabrechnung, Kleinkram; selbst verwaltet"},
-   {"name": "leer_monate", "label": "Monate ohne Miete am Anfang", "konservativ": 1, "guenstig": 0, "spanne": "0–1 Monat", "einheit": "Monate", "fmt": "num", "quelle": "Anzeige: „teilweise/vollständig vermietet“ – evtl. eine Einheit frei"},
-   {"name": "gebaeude", "label": "Gebäudeanteil (abschreibbar)", "konservativ": 0.75, "guenstig": 0.85, "spanne": "75–85 %", "einheit": "%", "fmt": "pct", "quelle": "kleines Grundstück (334 m²) → hoher Gebäudeanteil; Bodenrichtwert amtlich prüfen"},
-   {"name": "afa", "label": "AfA-Satz", "konservativ": 0.02, "guenstig": 0.02, "spanne": "2–3 %", "einheit": "% p. a.", "fmt": "pct", "quelle": "2 % bei Baujahr 1925–2022; 3 % bei Baujahr ab 2023"},
-   {"name": "steuersatz", "label": "Persönlicher Steuersatz", "konservativ": 0.25, "guenstig": 0.35, "spanne": "25–42 %", "einheit": "%", "fmt": "pct", "quelle": "dein Grenzsteuersatz; niedriger Satz = weniger Erstattung = vorsichtiger"}
-  ]}
+  {
+   "gruppe": "Kauf",
+   "werte": [
+    {
+     "name": "preis",
+     "label": "Kaufpreis (geschätzt – Anzeige: VB)",
+     "konservativ": 470000,
+     "guenstig": 400000,
+     "spanne": "400.000–470.000 € (≈ 1.940–2.275 €/m²)",
+     "einheit": "€",
+     "fmt": "eur",
+     "quelle": "Kein Preis in der Anzeige. Schätzung: Damme Ø Häuser ca. 2.420 €/m²; vermietete Mehrfamilienhäuser werden eher nach Ertrag (Faktor 18–22) bewertet → beim Verkäufer erfragen!"
+    },
+    {
+     "name": "grest",
+     "label": "Grunderwerbsteuer",
+     "konservativ": 0.05,
+     "guenstig": 0.05,
+     "spanne": "fest",
+     "einheit": "%",
+     "fmt": "pct",
+     "quelle": "Niedersachsen 5 %"
+    },
+    {
+     "name": "notar",
+     "label": "Notar & Grundbuch",
+     "konservativ": 0.02,
+     "guenstig": 0.015,
+     "spanne": "1,5–2,0 %",
+     "einheit": "%",
+     "fmt": "pct",
+     "quelle": "übliche Spanne"
+    },
+    {
+     "name": "makler",
+     "label": "Maklerprovision Käufer",
+     "konservativ": 0.0,
+     "guenstig": 0.0,
+     "spanne": "fest",
+     "einheit": "%",
+     "fmt": "pct2",
+     "quelle": "Anzeige: keine zusätzliche Käuferprovision (privat)",
+     "aus_expose": true
+    },
+    {
+     "name": "sofort",
+     "label": "Pflicht-Maßnahmen / Reserve",
+     "konservativ": 5000,
+     "guenstig": 0,
+     "spanne": "0–5.000 €",
+     "einheit": "€",
+     "fmt": "eur",
+     "quelle": "Vermietet und gepflegt → keine Sanierung einrechnen. Nur Reserve für Rauchmelder, Rohrdämmung (GEG), Kleinreparaturen. Heizung: Alter erfragen (Austauschpflicht nur bei Konstanttemperaturkessel älter als 30 Jahre)"
+    }
+   ]
+  },
+  {
+   "gruppe": "Wohnungen & Einnahmen (Aufteilung angenommen – Summe laut Anzeige 206,57 m²)",
+   "werte": [
+    {
+     "name": "wf1",
+     "label": "Wohnung 1 (EG) – Wohnfläche",
+     "konservativ": 75,
+     "guenstig": 75,
+     "spanne": "Annahme",
+     "einheit": "m²",
+     "fmt": "num1",
+     "quelle": "Anzeige: 3 Wohneinheiten, gesamt 206,57 m²; Aufteilung beim Verkäufer erfragen"
+    },
+    {
+     "name": "miete1",
+     "label": "Wohnung 1 – Kaltmiete",
+     "konservativ": 7.5,
+     "guenstig": 9.0,
+     "spanne": "7,50–9,00 €/m²",
+     "einheit": "€/m²",
+     "fmt": "eur2",
+     "quelle": "Damme 2026: 7,75–9,06 €/m² (ImmoScout24, Engel & Völkers); tatsächliche Mieten erfragen"
+    },
+    {
+     "name": "wf2",
+     "label": "Wohnung 2 (OG) – Wohnfläche",
+     "konservativ": 75,
+     "guenstig": 75,
+     "spanne": "Annahme",
+     "einheit": "m²",
+     "fmt": "num1",
+     "quelle": "Annahme"
+    },
+    {
+     "name": "miete2",
+     "label": "Wohnung 2 – Kaltmiete",
+     "konservativ": 7.5,
+     "guenstig": 9.0,
+     "spanne": "7,50–9,00 €/m²",
+     "einheit": "€/m²",
+     "fmt": "eur2",
+     "quelle": "wie Wohnung 1"
+    },
+    {
+     "name": "wf3",
+     "label": "Wohnung 3 (DG) – Wohnfläche",
+     "konservativ": 56.57,
+     "guenstig": 56.57,
+     "spanne": "Annahme",
+     "einheit": "m²",
+     "fmt": "num1",
+     "quelle": "Rest bis 206,57 m²; Dachgeschoss meist kleiner"
+    },
+    {
+     "name": "miete3",
+     "label": "Wohnung 3 – Kaltmiete",
+     "konservativ": 7.0,
+     "guenstig": 8.5,
+     "spanne": "7,00–8,50 €/m²",
+     "einheit": "€/m²",
+     "fmt": "eur2",
+     "quelle": "Dachschrägen → etwas weniger pro m²"
+    },
+    {
+     "name": "pv",
+     "label": "Sonstige Einnahmen pro Jahr (Garage, PV …)",
+     "konservativ": 0,
+     "guenstig": 600,
+     "spanne": "0–600 €/Jahr",
+     "einheit": "€/Jahr",
+     "fmt": "eur",
+     "quelle": "Garage separat vermietbar? (ca. 40–50 €/Monat)"
+    }
+   ]
+  },
+  {
+   "gruppe": "Finanzierung",
+   "werte": [
+    {
+     "name": "ek",
+     "label": "Eigenkapital",
+     "konservativ": 55000,
+     "guenstig": 55000,
+     "spanne": "dein Wert",
+     "einheit": "€",
+     "fmt": "eur",
+     "quelle": "Annahme aus deinem bisherigen Rechner – bitte anpassen"
+    },
+    {
+     "name": "zins",
+     "label": "Sollzins (10 Jahre fest)",
+     "konservativ": 0.045,
+     "guenstig": 0.039,
+     "spanne": "3,9–4,5 %",
+     "einheit": "% p. a.",
+     "fmt": "pct2",
+     "quelle": "Nov. 2026: Interhyp ca. 4,3 %, Topzins ca. 4,0 %; Kapitalanlage mit hoher Finanzierung eher oben"
+    },
+    {
+     "name": "tilgung",
+     "label": "Anfängliche Tilgung",
+     "konservativ": 0.02,
+     "guenstig": 0.02,
+     "spanne": "1–3 %",
+     "einheit": "% p. a.",
+     "fmt": "pct2",
+     "quelle": "Standard"
+    }
+   ]
+  },
+  {
+   "gruppe": "Laufende Kosten & Steuer",
+   "werte": [
+    {
+     "name": "ausfall",
+     "label": "Mietausfall-Reserve",
+     "konservativ": 0.04,
+     "guenstig": 0.02,
+     "spanne": "2–4 %",
+     "einheit": "% der Miete",
+     "fmt": "pct",
+     "quelle": "drei Mieter, kleinere Wohnungen = häufigerer Mieterwechsel"
+    },
+    {
+     "name": "instand",
+     "label": "Instandhaltung",
+     "konservativ": 18,
+     "guenstig": 12,
+     "spanne": "12–18 €/m² und Jahr",
+     "einheit": "€/m²·Jahr",
+     "fmt": "eur2",
+     "quelle": "Baujahr unbekannt → oberes Ende; 4 Bäder, 3 Wohnungen"
+    },
+    {
+     "name": "sonst",
+     "label": "Nicht umlagefähige Kosten",
+     "konservativ": 60,
+     "guenstig": 30,
+     "spanne": "30–60 €/Monat",
+     "einheit": "€/Monat",
+     "fmt": "eur",
+     "quelle": "Bankgebühren, Nebenkostenabrechnung, Kleinkram; selbst verwaltet"
+    },
+    {
+     "name": "leer_monate",
+     "label": "Monate ohne Miete am Anfang",
+     "konservativ": 1,
+     "guenstig": 0,
+     "spanne": "0–1 Monat",
+     "einheit": "Monate",
+     "fmt": "num",
+     "quelle": "Anzeige: „teilweise/vollständig vermietet“ – evtl. eine Einheit frei"
+    },
+    {
+     "name": "gebaeude",
+     "label": "Gebäudeanteil (abschreibbar)",
+     "konservativ": 0.75,
+     "guenstig": 0.85,
+     "spanne": "75–85 %",
+     "einheit": "%",
+     "fmt": "pct",
+     "quelle": "kleines Grundstück (334 m²) → hoher Gebäudeanteil; Bodenrichtwert amtlich prüfen"
+    },
+    {
+     "name": "afa",
+     "label": "AfA-Satz",
+     "konservativ": 0.02,
+     "guenstig": 0.02,
+     "spanne": "2–3 %",
+     "einheit": "% p. a.",
+     "fmt": "pct",
+     "quelle": "2 % bei Baujahr 1925–2022; 3 % bei Baujahr ab 2023"
+    },
+    {
+     "name": "steuersatz",
+     "label": "Persönlicher Steuersatz",
+     "konservativ": 0.25,
+     "guenstig": 0.35,
+     "spanne": "25–42 %",
+     "einheit": "%",
+     "fmt": "pct",
+     "quelle": "dein Grenzsteuersatz; niedriger Satz = weniger Erstattung = vorsichtiger"
+    }
+   ]
+  }
  ],
  "verhandlung": [
-  ["Obere Schätzung", 470000, "≈ 2.275 €/m²"],
-  ["Mittlere Schätzung", 430000, "≈ 2.080 €/m²"],
-  ["Untere Schätzung", 400000, "≈ 1.940 €/m²"],
-  ["Faktor ca. 20", 375000, "üblicher Faktor für vermietete Mehrfamilienhäuser auf dem Land"],
-  ["Faktor ca. 18", 335000, "gutes Kapitalanlage-Niveau"]
+  [
+   "Obere Schätzung",
+   470000,
+   "≈ 2.275 €/m²"
+  ],
+  [
+   "Mittlere Schätzung",
+   430000,
+   "≈ 2.080 €/m²"
+  ],
+  [
+   "Untere Schätzung",
+   400000,
+   "≈ 1.940 €/m²"
+  ],
+  [
+   "Faktor ca. 20",
+   375000,
+   "üblicher Faktor für vermietete Mehrfamilienhäuser auf dem Land"
+  ],
+  [
+   "Faktor ca. 18",
+   335000,
+   "gutes Kapitalanlage-Niveau"
+  ]
  ],
  "hinweise": [
   "Wichtige Hinweise",
