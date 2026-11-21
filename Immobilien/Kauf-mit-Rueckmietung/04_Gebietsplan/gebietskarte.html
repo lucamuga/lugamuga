@@ -1,0 +1,296 @@
+<title>Gebietskarte Damme</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;800&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+  /* Layout: Kopf mit Kurzfazit, darunter Karte (links) + Infotafel (rechts), darunter Legende und Phasen. */
+  :root {
+    --bg: #f3f4ef;
+    --paper: #fbfbf8;
+    --fg: #1d2420;
+    --muted: #5d665f;
+    --line: #d6d9d0;
+    --land: #e8eadf;
+    --land-edge: #cfd3c4;
+    --water: #a9cfe0;
+    --water-edge: #6fa7c2;
+    --hill: #d7dcc6;
+    --a: #2f7a4f;
+    --ab: #6a8f3a;
+    --b: #c98a1b;
+    --c: #8c918b;
+    --no: #b8463b;
+    --accent: #9e3b24;
+    --display: "Archivo", "Arial Narrow", Arial, sans-serif;
+    --body: "Source Sans 3", "Segoe UI", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #151a17; --paper: #1c221e; --fg: #e7ebe4; --muted: #a2aba3; --line: #313a34;
+      --land: #222a25; --land-edge: #38433b; --water: #24485a; --water-edge: #3d7590; --hill: #2c352d;
+      --a: #5cc08a; --ab: #9bc25d; --b: #e3ad4c; --c: #8f978f; --no: #ef7f72; --accent: #e28163;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #151a17; --paper: #1c221e; --fg: #e7ebe4; --muted: #a2aba3; --line: #313a34;
+    --land: #222a25; --land-edge: #38433b; --water: #24485a; --water-edge: #3d7590; --hill: #2c352d;
+    --a: #5cc08a; --ab: #9bc25d; --b: #e3ad4c; --c: #8f978f; --no: #ef7f72; --accent: #e28163;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 15px; line-height: 1.5;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 24px 40px;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 18px; }
+  header { display: grid; gap: 6px; }
+  .eyebrow { font-family: var(--display); font-weight: 600; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+  h1 { font-family: var(--display); font-weight: 800; font-size: clamp(26px, 4vw, 38px); line-height: 1.08; margin: 0; text-wrap: balance; }
+  .lede { margin: 0; color: var(--muted); max-width: 72ch; }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tab { font: 600 14px var(--body); padding: 7px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--paper); color: var(--fg); cursor: pointer; }
+  .tab[aria-selected="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+  .tab:focus-visible, .mk:focus-visible, .chip:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .main { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+  @media (max-width: 860px) { .main { grid-template-columns: 1fr; } }
+  .mapbox { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  svg { display: block; width: 100%; height: auto; }
+  .mapnote { font-size: 12px; color: var(--muted); padding: 8px 12px; border-top: 1px solid var(--line); }
+  .mk { cursor: pointer; }
+  .mk:hover .dot, .mk.sel .dot { stroke: var(--fg); stroke-width: 3; }
+  .lbl { font: 700 13px var(--body); fill: var(--fg); paint-order: stroke; stroke: var(--paper); stroke-width: 4px; stroke-linejoin: round; }
+  .lbl.small { font-weight: 600; font-size: 11.5px; fill: var(--muted); }
+  .phase { font: 800 12px var(--display); fill: #fff; }
+  .panel { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: grid; gap: 10px; }
+  .pill { display: inline-block; font: 700 12px var(--body); padding: 2px 10px; border-radius: 999px; color: #fff; }
+  .panel h2 { font-family: var(--display); font-size: 22px; margin: 0; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 14px; }
+  .kv dt { color: var(--muted); }
+  .kv dd { margin: 0; font-variant-numeric: tabular-nums; }
+  .why, .warn { margin: 0; font-size: 14.5px; }
+  .warn { color: var(--muted); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font: 600 13px var(--body); border: 1px solid var(--line); background: var(--bg); color: var(--fg); border-radius: 999px; padding: 4px 10px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+  .chip i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13.5px; align-items: center; }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; }
+  .legend svg { width: 18px; height: 18px; flex: none; }
+  .legend i { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
+  .phases { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  @media (max-width: 720px) { .phases { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .ph { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 12px; display: grid; gap: 4px; }
+  .ph b { font-family: var(--display); font-size: 15px; }
+  .ph .n { width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: #fff; font: 800 13px var(--display); display: grid; place-items: center; }
+  .ph span { font-size: 13.5px; color: var(--muted); }
+  h3 { font-family: var(--display); font-size: 17px; margin: 4px 0 0; }
+  .foot { font-size: 12px; color: var(--muted); }
+  @media (prefers-reduced-motion: no-preference) { .mk .dot { transition: r .15s; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Kauf mit Rückmietung · Damme und Umgebung</div>
+    <h1>Wo du suchen solltest</h1>
+    <p class="lede">Die besten Gebiete sind die Siedlungen der 1950er und 60er Jahre: Glückauf und Clemens-August-Dorf. Wer damals gebaut hat, ist heute im typischen Alter für einen Verkauf mit Wohnenbleiben. Tippe auf einen Punkt für Details.</p>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Kartenausschnitt">
+    <button class="tab" role="tab" id="tab-damme" aria-selected="true" data-view="damme">Stadt Damme</button>
+    <button class="tab" role="tab" id="tab-region" aria-selected="false" data-view="region">Region</button>
+  </div>
+
+  <div class="main">
+    <div class="mapbox">
+      <svg id="map" role="img" aria-label="Schematische Karte der Gebiete"></svg>
+      <div class="mapnote">Schematische Karte, nicht maßstabsgetreu. Ortspositionen nach öffentlich angegebenen Koordinaten (Wikipedia, Mapcarta, onlinestreet.de); Punkte mit gestricheltem Rand sind ungefähr platziert. Dümmer und Dammer Berge vereinfacht.</div>
+    </div>
+    <aside class="panel" id="panel" aria-live="polite"></aside>
+  </div>
+
+  <div class="legend" aria-label="Legende">
+    <span><i style="background:var(--a)"></i>A – Top-Gebiet</span>
+    <span><i style="background:var(--ab)"></i>A–B – gut, aber teurer</span>
+    <span><i style="background:var(--b)"></i>B – zweite Welle</span>
+    <span><i style="background:var(--c)"></i>C – nur Einzelfälle</span>
+    <span><i style="background:var(--no)"></i>meiden</span>
+    <span><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><rect x="2" y="2" width="14" height="14" rx="3" fill="var(--paper)" stroke="var(--fg)" stroke-width="1.6"/><path d="M9 5v8M5 9h8" stroke="var(--no)" stroke-width="2.2"/></svg>Krankenhaus</span>
+    <span><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M9 2 16 8v8H2V8z" fill="var(--paper)" stroke="var(--fg)" stroke-width="1.6"/><circle cx="9" cy="11" r="2.4" fill="var(--accent)"/></svg>Von dir geprüftes Objekt</span>
+  </div>
+
+  <section>
+    <h3>Akquise in vier Phasen</h3>
+    <div class="phases">
+      <div class="ph"><div class="n">1</div><b>Glückauf</b><span>Monat 1–2 · 30–40 persönliche Briefe, Kirchengemeinde, Seniorentreff</span></div>
+      <div class="ph"><div class="n">2</div><b>Clemens-August-Dorf</b><span>Monat 2–3 · ältere Straßenzüge zuerst, 30–40 Briefe</span></div>
+      <div class="ph"><div class="n">3</div><b>Zentrum, Süd, West</b><span>Monat 3–4 · Einliegerwohnungen und ebenerdige Bungalows</span></div>
+      <div class="ph"><div class="n">4</div><b>Umland</b><span>Monat 4–6 · Handorf-Langenberg, Steinfeld-Süd, Osterdamme</span></div>
+    </div>
+  </section>
+
+  <p class="foot">Einwohner laut Zahlenspiegel der Stadt Damme 2025 (über Suchergebnisse). Siedlungsgeschichte: erzbergbau-damme.de, Wikipedia, OM online. Mieten laut miete-aktuell.de. Stand November 2026.</p>
+</div>
+
+<script>
+(function () {
+  const P = {
+    A: { c: 'var(--a)', t: 'A – Top-Gebiet' }, AB: { c: 'var(--ab)', t: 'A–B – gut, aber teurer' },
+    B: { c: 'var(--b)', t: 'B – zweite Welle' }, C: { c: 'var(--c)', t: 'C – nur Einzelfälle' }, NO: { c: 'var(--no)', t: 'meiden' },
+  };
+  // lat, lon; approx = Lage nur ungefähr bekannt
+  const AREAS = [
+    { id: 'glueckauf', name: 'Glückauf', lat: 52.531, lon: 8.180, prio: 'A', ew: 1047, phase: 1,
+      why: 'Bergarbeitersiedlung ab 1951, bis 1966 erweitert. Heute gepflegtes, beliebtes Viertel mit großen Grundstücken um 1.000 m².',
+      warn: 'Bodenrichtwerte laut Portalen hoch (ca. 240–250 €/m²), Häuser dadurch teurer; Energieklassen oft schlecht.' },
+    { id: 'cad', name: 'Clemens-August-Dorf', lat: 52.5081, lon: 8.1743, prio: 'A', ew: 1854, phase: 2,
+      why: 'Siedlung ab 1950 (Siedlungswerk Kardinal von Galen), starkes Wachstum in den 1960ern. Größter Siedlungsbereich, ruhig, Grundschule Sierhausen.',
+      warn: 'Alte und neuere Häuser gemischt – gezielt die älteren Straßenzüge auswählen.' },
+    { id: 'zentrum', name: 'Damme-Zentrum', lat: 52.5234, lon: 8.1956, prio: 'AB', phase: 3,
+      why: 'Ärzte, Apotheken, Einkauf und Kirche zu Fuß – ideal für ältere Mieter.', warn: 'Höhere Preise, kleinere Grundstücke.' },
+    { id: 'sued', name: 'Damme-Süd', lat: 52.515, lon: 8.199, prio: 'AB', phase: 3, approx: true,
+      why: 'Krankenhaus St. Elisabeth (Lindenstraße) im Stadtteil – sehr seniorengerecht.', warn: 'Lage auf der Karte ungefähr; höhere Preise.' },
+    { id: 'west', name: 'Damme-West', lat: 52.521, lon: 8.181, prio: 'B', ew: 1199, phase: 3, approx: true,
+      why: 'Gemischtes Alter, u. a. ebenerdige Bungalows der 1960er/70er.', warn: 'Auch neuere Bebauung; Lage auf der Karte ungefähr.' },
+    { id: 'osterdamme', name: 'Osterdamme', lat: 52.5243, lon: 8.2056, prio: 'B', ew: 1385, phase: 4,
+      why: 'Größere Ortschaft mit älterem Ortskern; auf Häuser mit Einliegerwohnung achten.', warn: 'Weiter vom Zentrum.' },
+    { id: 'bexadde', name: 'Bexadde', lat: 52.5278, lon: 8.1686, prio: 'C', ew: 220,
+      why: 'Nur einzelne Häuser in Ortslage interessant.', warn: 'Überwiegend Außenbereich und Hofstellen.' },
+    { id: 'borringhausen', name: 'Borringhausen', lat: 52.5099, lon: 8.2283, prio: 'C', ew: 375,
+      why: 'Nur einzelne Häuser in Ortslage interessant.', warn: 'Überwiegend Außenbereich und Hofstellen.' },
+    { id: 'sierhausen', name: 'Sierhausen', lat: 52.503, lon: 8.192, prio: 'C', ew: 261, approx: true,
+      why: 'Nur einzelne Häuser in Ortslage interessant.', warn: 'Lage auf der Karte ungefähr.' },
+    { id: 'rueschendorf', name: 'Rüschendorf', lat: 52.522, lon: 8.2754, prio: 'B', ew: 919, phase: 4,
+      why: 'Ältere Ortslagen; Mieten laut Portal ca. 8,59 €/m².', warn: 'Ferienhausgebiete in Richtung Dümmer ausschließen.' },
+    { id: 'osterfeine', name: 'Osterfeine', lat: 52.5457, lon: 8.2766, prio: 'B', ew: 595,
+      why: 'Dörflich, ältere Häuser; Mieten laut Portal ca. 8,87 €/m².', warn: 'Kleine Zielgruppe, längere Wege.' },
+    { id: 'haverbeck', name: 'Haverbeck', lat: 52.5678, lon: 8.2781, prio: 'C', ew: 256,
+      why: 'Nur einzelne Häuser in Ortslage interessant.', warn: 'Überwiegend Außenbereich.' },
+    { id: 'duemmerlohausen', name: 'Dümmerlohausen', lat: 52.5302, lon: 8.2823, prio: 'NO', above: true,
+      why: 'Normale Wohnlagen einzeln prüfen.', warn: 'Ferien- und Wochenendhausgebiete am Dümmer: Dauerwohnen oft nicht erlaubt.' },
+    { id: 'huede', name: 'Hüde', lat: 52.4953, lon: 8.3569, prio: 'NO',
+      why: 'Liegt am Dümmer (Landkreis Diepholz).', warn: 'Ferienhausgebiete meiden.' },
+    { id: 'stadt', name: 'Stadt Damme', lat: 52.522, lon: 8.188, prio: 'A', r: 30,
+      why: 'Hier liegen die Top-Gebiete Glückauf und Clemens-August-Dorf sowie Zentrum, Süd, West und Osterdamme.', warn: 'Die Einzelheiten siehst du im Tab „Stadt Damme“.' },
+    { id: 'langenberg', name: 'Handorf-Langenberg', lat: 52.558, lon: 8.157, prio: 'B', phase: 4,
+      why: 'Bergarbeitersiedlung 1953–1958 (Gemeinde Holdorf) – gleiches Profil wie Glückauf.', warn: 'Außerhalb von Damme; Preise vor Ort vergleichen.' },
+    { id: 'steinfeldsued', name: 'Steinfeld-Süd', lat: 52.578, lon: 8.214, prio: 'B', phase: 4, approx: true,
+      why: 'Bergarbeiterhäuser von 1957 – gleiches Profil wie Glückauf.', warn: 'Außerhalb von Damme; Lage auf der Karte ungefähr.' },
+  ];
+  const TOWNS = [
+    { name: 'Holdorf', lat: 52.583, lon: 8.133 }, { name: 'Steinfeld', lat: 52.587, lon: 8.213 },
+    { name: 'Neuenkirchen', lat: 52.5167, lon: 8.0667 },
+  ];
+  const OBJ = [
+    { name: 'Zweifamilienhaus Glückauf', lat: 52.5325, lon: 8.1755, note: 'Geprüft: 395.000 €, Energieklasse H, Cashflow vorsichtig −1.039 €/Monat' },
+    { name: 'Mehrfamilienhaus Auf dem Hassel', lat: 52.5095, lon: 8.1795, note: 'Geprüft: 3 Wohnungen, VB, Cashflow vorsichtig −1.096 €/Monat' },
+  ];
+  const HOSP = { name: 'Krankenhaus St. Elisabeth', lat: 52.5165, lon: 8.1965 };
+  const VIEWS = {
+    damme: { lon: [8.150, 8.250], lat: [52.497, 52.541], W: 900, ids: ['glueckauf', 'cad', 'zentrum', 'sued', 'west', 'osterdamme', 'bexadde', 'borringhausen', 'sierhausen'], showObj: true, def: 'glueckauf' },
+    region: { lon: [8.035, 8.395], lat: [52.478, 52.600], W: 900, ids: ['stadt', 'borringhausen', 'rueschendorf', 'osterfeine', 'haverbeck', 'duemmerlohausen', 'huede', 'langenberg', 'steinfeldsued'], towns: true, lake: true, def: 'stadt' },
+  };
+  const svg = document.getElementById('map');
+  const panel = document.getElementById('panel');
+  const NS = 'http://www.w3.org/2000/svg';
+  let view = 'damme', selected = 'glueckauf';
+  try { view = localStorage.getItem('gk-view') || view; } catch (e) {}
+
+  function el(tag, attrs, parent) {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(n);
+    return n;
+  }
+  function proj(v) {
+    const k = Math.cos(52.53 * Math.PI / 180);
+    const spanX = (v.lon[1] - v.lon[0]) * k, spanY = v.lat[1] - v.lat[0];
+    const H = Math.round(v.W * spanY / spanX);
+    return { H, p: (lat, lon) => [ (lon - v.lon[0]) * k / spanX * v.W, (v.lat[1] - lat) / spanY * H ] };
+  }
+  function draw() {
+    const v = VIEWS[view];
+    const { H, p } = proj(v);
+    svg.setAttribute('viewBox', `0 0 ${v.W} ${H}`);
+    svg.innerHTML = '';
+    el('rect', { x: 0, y: 0, width: v.W, height: H, fill: 'var(--land)' }, svg);
+    // Raster
+    for (let i = 1; i < 6; i++) el('line', { x1: v.W * i / 6, y1: 0, x2: v.W * i / 6, y2: H, stroke: 'var(--land-edge)', 'stroke-width': 1, 'stroke-dasharray': '2 6' }, svg);
+    for (let i = 1; i < 4; i++) el('line', { x1: 0, y1: H * i / 4, x2: v.W, y2: H * i / 4, stroke: 'var(--land-edge)', 'stroke-width': 1, 'stroke-dasharray': '2 6' }, svg);
+    if (v.lake) {
+      const [cx, cy] = p(52.505, 8.325); const [ex] = p(52.505, 8.350); const [, ey] = p(52.485, 8.325);
+      el('ellipse', { cx, cy, rx: ex - cx, ry: ey - cy, fill: 'var(--water)', stroke: 'var(--water-edge)', 'stroke-width': 2 }, svg);
+      const t = el('text', { x: cx, y: cy + 5, 'text-anchor': 'middle', class: 'lbl' }, svg); t.textContent = 'Dümmer';
+      const [hx, hy] = p(52.556, 8.215);
+      el('ellipse', { cx: hx, cy: hy, rx: 70, ry: 26, fill: 'var(--hill)', stroke: 'var(--land-edge)', 'stroke-width': 1.5, 'stroke-dasharray': '4 4' }, svg);
+      const h = el('text', { x: hx, y: hy + 4, 'text-anchor': 'middle', class: 'lbl small' }, svg); h.textContent = 'Dammer Berge';
+    }
+    if (v.towns) TOWNS.forEach(tw => {
+      const [x, y] = p(tw.lat, tw.lon);
+      el('rect', { x: x - 5, y: y - 5, width: 10, height: 10, fill: 'var(--muted)' }, svg);
+      const t = el('text', { x: x + 9, y: y + 4, class: 'lbl small' }, svg); t.textContent = tw.name;
+    });
+    // Krankenhaus
+    if (view === 'damme') {
+      const [x, y] = p(HOSP.lat, HOSP.lon);
+      el('rect', { x: x - 9, y: y - 9, width: 18, height: 18, rx: 3, fill: 'var(--paper)', stroke: 'var(--fg)', 'stroke-width': 1.6 }, svg);
+      el('path', { d: `M${x} ${y - 5}v10M${x - 5} ${y}h10`, stroke: 'var(--no)', 'stroke-width': 2.4 }, svg);
+    }
+    const scale = view === 'damme' ? 1.9 : 1.3;
+    AREAS.filter(a => v.ids.includes(a.id)).forEach(a => {
+      const [x, y] = p(a.lat, a.lon);
+      const r = a.r || (a.ew ? 9 + Math.sqrt(a.ew) / 3.2 : 11) * scale;
+      const g = el('g', { class: 'mk' + (a.id === selected ? ' sel' : ''), tabindex: 0, role: 'button', 'aria-label': `${a.name}, ${P[a.prio].t}` }, svg);
+      el('circle', { class: 'dot', cx: x, cy: y, r, fill: P[a.prio].c, 'fill-opacity': 0.85, stroke: 'var(--paper)', 'stroke-width': 2, 'stroke-dasharray': a.approx ? '4 3' : 'none' }, g);
+      if (a.phase && (view === 'damme' ? a.phase <= 3 : true)) {
+        el('circle', { cx: x + r * 0.72, cy: y - r * 0.72, r: 10, fill: 'var(--accent)', stroke: 'var(--paper)', 'stroke-width': 2 }, g);
+        const n = el('text', { x: x + r * 0.72, y: y - r * 0.72 + 4.5, 'text-anchor': 'middle', class: 'phase' }, g); n.textContent = a.phase;
+      }
+      const t = el('text', { x, y: a.above ? y - r - 7 : y + r + 15, 'text-anchor': 'middle', class: 'lbl' + (a.prio === 'C' || a.prio === 'NO' ? ' small' : '') }, g);
+      t.textContent = a.name;
+      const pick = () => { selected = a.id; draw(); show(a); };
+      g.addEventListener('click', pick);
+      g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } });
+    });
+    if (v.showObj) OBJ.forEach(o => {
+      const [x, y] = p(o.lat, o.lon);
+      const g = el('g', {}, svg);
+      el('path', { d: `M${x} ${y - 14} L${x + 13} ${y - 3} V${y + 11} H${x - 13} V${y - 3} Z`, fill: 'var(--paper)', stroke: 'var(--fg)', 'stroke-width': 1.6 }, g);
+      el('circle', { cx: x, cy: y + 3, r: 4.5, fill: 'var(--accent)' }, g);
+      const tt = el('title', {}, g); tt.textContent = `${o.name} – ${o.note}`;
+    });
+    // Nordpfeil
+    el('path', { d: `M${v.W - 28} 40 L${v.W - 20} 18 L${v.W - 12} 40 L${v.W - 20} 34 Z`, fill: 'var(--fg)' }, svg);
+    const nt = el('text', { x: v.W - 20, y: 56, 'text-anchor': 'middle', class: 'lbl small' }, svg); nt.textContent = 'N';
+  }
+  function show(a) {
+    const others = AREAS.filter(x => VIEWS[view].ids.includes(x.id) && x.id !== a.id);
+    panel.innerHTML = `
+      <span class="pill" style="background:${P[a.prio].c}">${P[a.prio].t}</span>
+      <h2>${a.name}</h2>
+      <dl class="kv">
+        <dt>Einwohner</dt><dd>${a.ew ? a.ew.toLocaleString('de-DE') : 'k. A.'}</dd>
+        <dt>Akquise-Phase</dt><dd>${a.phase ? 'Phase ' + a.phase : '–'}</dd>
+      </dl>
+      <p class="why"><b>Warum:</b> ${a.why}</p>
+      <p class="warn"><b>Achtung:</b> ${a.warn}</p>
+      ${view === 'damme' ? '<p class="warn">Häuschen-Symbole = von dir bereits geprüfte Objekte (Zweifamilienhaus Glückauf, Mehrfamilienhaus Auf dem Hassel).</p>' : ''}
+      <div class="chips">${others.map(o => `<button class="chip" data-id="${o.id}"><i style="background:${P[o.prio].c}"></i>${o.name}</button>`).join('')}</div>`;
+    panel.querySelectorAll('.chip').forEach(b => b.addEventListener('click', () => {
+      selected = b.dataset.id; draw(); show(AREAS.find(x => x.id === selected));
+    }));
+  }
+  document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => {
+    view = b.dataset.view;
+    try { localStorage.setItem('gk-view', view); } catch (e) {}
+    document.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', String(x === b)));
+    if (!VIEWS[view].ids.includes(selected)) selected = VIEWS[view].def;
+    draw(); show(AREAS.find(x => x.id === selected));
+  }));
+  document.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', String(x.dataset.view === view)));
+  if (!VIEWS[view].ids.includes(selected)) selected = VIEWS[view].def;
+  draw();
+  show(AREAS.find(x => x.id === selected));
+})();
+</script>

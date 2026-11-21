@@ -2,7 +2,9 @@
 // Aufruf: NODE_PATH=$(npm root -g) node gebietsplan.js AUSGABE.docx
 const fs = require('fs');
 const path = require('path');
-const { Document, Packer, Paragraph, TextRun, PageBreak, Footer, PageNumber, AlignmentType } = require('docx');
+const { Document, Packer, Paragraph, TextRun, PageBreak, Footer, PageNumber, AlignmentType, ImageRun } = require('docx');
+const KARTEN = path.join(__dirname, '..', 'Kauf-mit-Rueckmietung', '04_Gebietsplan');
+const bild = (datei, w, h) => new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 120 }, children: [new ImageRun({ type: 'png', data: fs.readFileSync(path.join(KARTEN, datei)), transformation: { width: w, height: h }, altText: { title: datei, description: 'Schematische Gebietskarte', name: datei } })] });
 const { FONT, ACC, t, b, P, H1, H2, BL, NL, gap, table, box, numbering, styles } = require(path.join(__dirname, 'doc_helfer.js'));
 
 const OUT = process.argv[2];
@@ -53,6 +55,14 @@ C.push(table([1000, 2300, 1100, 2900, 2300], [
   ['C', 'Borringhausen, Haverbeck, Bexadde, Sierhausen, Holte, Nordhofe', '375 / 256 / 220 / 261 / 52 / 60', 'nur einzelne Häuser in Ortslage interessant', 'überwiegend Außenbereich und Hofstellen'],
   ['–', 'Ferien- und Wochenendhausgebiete am Dümmer (z. B. Teile von Dümmerlohausen, Hüde, Lembruch), Neubaugebiete', '', 'Dauerwohnen oft nicht erlaubt bzw. junge Eigentümer', 'meiden (siehe Kapitel 1) – normale Wohnlagen in Dümmerlohausen einzeln prüfen'],
 ], { zebra: true }));
+
+// ---------- Karten ----------
+C.push(new Paragraph({ children: [new PageBreak()] }));
+C.push(H2('Karte: Stadt Damme'));
+C.push(bild('Karte_Stadt_Damme.png', 560, Math.round(560 * 1048 / 1446)));
+C.push(H2('Karte: Damme und Umgebung'));
+C.push(bild('Karte_Region.png', 560, Math.round(560 * 806 / 1446)));
+C.push(P([t('Farben: grün = A (Top), hellgrün = A–B, orange = B, grau = C, rot = meiden. Rote Zahl = Akquise-Phase. Häuschen = bereits geprüfte Objekte. Schematische Karte, nicht maßstabsgetreu; gestrichelte Punkte sind ungefähr platziert. Interaktive Version: gebietskarte.html.', { size: 17, italics: true, color: '666666' })]));
 
 // ---------- 3 Steckbriefe ----------
 C.push(H1('3. Die Top-Gebiete im Detail'));
