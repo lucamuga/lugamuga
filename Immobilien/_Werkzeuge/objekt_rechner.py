@@ -1,4 +1,4 @@
-"""Objekt-Rechner für eine vermietete Immobilie mit bis zu zwei Wohnungen (Excel).
+"""Objekt-Rechner für eine vermietete Immobilie mit beliebig vielen Wohnungen (Excel).
 
 Jede Annahme hat drei Spalten:
   C = konservativer Wert (damit wird gerechnet – immer mit Puffer)
@@ -86,6 +86,11 @@ for grp in CFG["eingaben"]:
 last_input = r - 1
 
 
+# Wohnungen automatisch erkennen (wf1/miete1, wf2/miete2, …)
+UNITS = sorted(int(n[2:]) for n in R if n.startswith("wf") and n[2:].isdigit())
+assert UNITS and all(f"miete{i}" in R for i in UNITS), "zu jeder Wohnfläche wfN gehört eine Miete mieteN"
+
+
 def v(name, col):
     return f"{col}{R[name]}"
 
@@ -105,8 +110,8 @@ def res(col, key):
     g = lambda n: v(n, col)
     O = lambda n: f"{col}{OUT_ROWS[n]}"
     return {
-        "flaeche": f"={g('wf1')}+{g('wf2')}",
-        "kalt": f"={g('wf1')}*{g('miete1')}+{g('wf2')}*{g('miete2')}",
+        "flaeche": "=" + "+".join(g(f"wf{i}") for i in UNITS),
+        "kalt": "=" + "+".join(f"{g(f'wf{i}')}*{g(f'miete{i}')}" for i in UNITS),
         "nk": f"={g('preis')}*({g('grest')}+{g('notar')}+{g('makler')})",
         "gesamt": f"={g('preis')}+{O('nk')}+{g('sofort')}",
         "darlehen": f"=MAX(0,{O('gesamt')}-{g('ek')})",
@@ -139,13 +144,13 @@ def res(col, key):
 
 LAYOUT = [
     ("sec", "Investition"),
-    ("flaeche", "Wohnfläche gesamt (m²)", "num", "Wohnung 1 + Wohnung 2"),
+    ("flaeche", "Wohnfläche gesamt (m²)", "num1", "Summe aller Wohnungen"),
     ("nk", "Kaufnebenkosten", "eur", "Grunderwerbsteuer + Notar/Grundbuch + Makler"),
     ("gesamt", "Gesamtinvestition", "eur", "Kaufpreis + Nebenkosten + Sofort-Investitionen"),
     ("darlehen", "Darlehen", "eur", "Gesamtinvestition − Eigenkapital"),
     ("rate", "Kreditrate pro Monat", "eur", "Darlehen × (Zins + Tilgung) ÷ 12"),
     ("sec", "Monatliche Rechnung (1. Jahr, voll vermietet)"),
-    ("m_kalt", "Kaltmiete beide Wohnungen", "eur", ""),
+    ("m_kalt", "Kaltmiete alle Wohnungen", "eur", ""),
     ("m_ausfall", "Mietausfall-Reserve", "eur", ""),
     ("m_pv", "Einnahmen Photovoltaik", "eur", "Volleinspeisung laut Exposé, Höhe unbekannt"),
     ("m_rate", "Kreditrate", "eur", ""),
