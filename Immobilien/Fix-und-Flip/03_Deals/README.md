@@ -32,3 +32,15 @@ Hinweise:
 - **Lohne:** rechtlich Wohnungseigentum (524/1.000 Miteigentum, Teilungserklärung prüfen), Gasheizung neuwertig, 2 Bäder, Doppelgarage; Käuferprovision 3,57 %.
 - **Ostercappeln:** Energieklasse C, Heizung 2019 → Sanierung eher am unteren Ende; Käuferprovision 3,57 %; 139 Tage online.
 - In Leverage ist die Maklerprovision bei beiden auf 0 % gesetzt – in der App auf 3,57 % korrigieren.
+
+### Nachgerechnet mit deinem FixundFlipRechner (Datei `02_Rechner/FixundFlip_Rechner_Kandidaten_2026-11.xlsx`, ein Blatt je Objekt)
+Annahmen: Grunderwerbsteuer 5 %, Notar 2 %, Makler 3,57 %, Zins 5,5 % auf 100 % Kaufpreis, Puffer 15 %, Verkauf mit Makler 3,57 %.
+
+| Objekt | Gewinn GERING / HOCH | „Goldene Mitte“ | Kaufpreis für ca. 20 % Marge |
+|---|---|---|---|
+| DHH Lohne | −19.700 € / +39.500 € | +9.900 € (2,7 %) | ca. 123.000 € (−27 %) |
+| EFH Ostercappeln | −38.700 € / +7.800 € | −15.500 € | ca. 117.000 € (−35 %) |
+| EFH Stemwede 1900 | −30.100 € / +11.900 € | −9.100 € | nicht erreichbar |
+| EFH Diepholz-Aschen | −54.300 € / −17.100 € | −35.700 € | ca. 88.000 € (−45 %) |
+| DHH Stemwede 1961 | −62.000 € / −20.000 € | −41.000 € | ca. 93.000 € (−45 %) |
+| REH Quakenbrück | −66.300 € / −34.500 € | −50.400 € | nicht erreichbar |
