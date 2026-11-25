@@ -55,3 +55,9 @@ Vermietet, Heizung 2019 → **keine Sanierung eingerechnet**, nur 1.000 € Rese
 5. Was wurde wann modernisiert (Fenster, Bad, Elektrik)?
 6. Warum wird verkauft? Gibt es eine Zwangsversteigerung oder einen Verkauf durch die Bank?
 7. Teilungserklärung und Grundbuchauszug (Belastungen, Wohnrechte)?
+
+## Gegenprobe Fix & Flip (dein FixundFlipRechner, Blatt „Bohmte ETW“ in `Fix-und-Flip/02_Rechner/FixundFlip_Rechner_Kandidaten_2026-11.xlsx`)
+Annahme: Wohnung ist leer, 500 €/m² Renovierung + 15 % Puffer, 8 Monate, volles Hausgeld 280 €, Verkauf renoviert 1.800–2.100 €/m² mit Makler.
+- Gesamtkosten 167.761 € · Verkauf 144.000–168.000 € · **Gewinn −28.900 € / −4.900 €**, Goldene Mitte −16.900 € (−9,8 %).
+- 20 % Marge erst bei ca. 37 % Nachlass (Kaufpreis ca. 64.000 €).
+- Zusätzlich: Die Wohnung ist vermietet – ein Flip geht erst, wenn der Mieter auszieht. **Als Flip ungeeignet, als Vermietungsobjekt deutlich besser.**
