@@ -15,3 +15,20 @@ Jedes Objekt hat einen eigenen Ordner mit Steckbrief. Neue Objekte: Ordner `Ort_
 - Steinfeld, Handorfer Straße 81 – Verkehrswert 370.000 €, AG Vechta; Termin 24.04.2026 vorbei, Status erfragen
 - Dinklage – Verkehrswert 495.000 €, laut Portal Termin 27.11.2026 (unbestätigt)
 - AG Diepholz (Hüde/Lemförde) – wöchentlich auf zvg-portal.de prüfen
+
+## Neue Kandidaten aus Leverage (Suche 25.11.2026, 25 km um Damme, bis 300.000 €)
+338 Treffer. Herausgefiltert: Neubau-/Bausatz-Anzeigen, Baudenkmäler/Fachwerk, Ausland, Rohbau. Gerechnet mit `_Werkzeuge/flip_pruefung.py`, vorsichtig / günstig (Verkaufspreise nach Sanierung sind Schätzungen).
+
+| Objekt | Preis | Gewinn vorsichtig / günstig | Max. Kaufpreis (15 % Marge) vorsichtig / günstig | In Leverage |
+|---|---|---|---|---|
+| [DHH Lohne, 1932, 148 m²](https://www.immobilienscout24.de/expose/172517721) | 169.000 € | −16.500 € / +98.700 € | 109.500 € / 204.600 € | ja |
+| [EFH Ostercappeln, 1955, 155 m²](https://www.kleinanzeigen.de/s-anzeige/viel-platz-bei-bad-essen-immobilie-mit-potenzial-fuer-handwerker-und-kreative-koepfe/3453692508-208-2632) | 179.000 € | −35.600 € / +59.800 € | 106.500 € / 184.800 € | ja |
+| [EFH Stemwede, 1900, 140 m²](https://www.immobilienscout24.de/expose/172795623) | 51.750 € | −30.800 € / +70.000 € | – / 79.300 € | nein (Monatslimit) |
+| EFH Diepholz-Aschen, 1965, 124 m² | 159.000 € | −50.800 € / +25.000 € | 82.700 € / 144.300 € | nein |
+| DHH Stemwede, 1961, 140 m² | 169.000 € | −58.500 € / +26.600 € | 83.700 € / 152.800 € | nein |
+| REH Quakenbrück, 1936, 106 m² | 127.000 € | −63.800 € / +8.500 € | 45.400 € / 104.100 € | nein |
+
+Hinweise:
+- **Lohne:** rechtlich Wohnungseigentum (524/1.000 Miteigentum, Teilungserklärung prüfen), Gasheizung neuwertig, 2 Bäder, Doppelgarage; Käuferprovision 3,57 %.
+- **Ostercappeln:** Energieklasse C, Heizung 2019 → Sanierung eher am unteren Ende; Käuferprovision 3,57 %; 139 Tage online.
+- In Leverage ist die Maklerprovision bei beiden auf 0 % gesetzt – in der App auf 3,57 % korrigieren.
