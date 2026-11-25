@@ -1,0 +1,510 @@
+<title>Projekt Bohmte ETW</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+  /* Layout: Kopf mit Kennzahlen, Abschnittsnavigation, darunter fünf Arbeitsbereiche (Ergebnis, Bewertung, Renovierung, Material, Zeitplan) untereinander. */
+  :root {
+    --bg: #f2f3f1; --paper: #ffffff; --fg: #1e2522; --muted: #5f6964; --line: #d9ddd8; --soft: #eef1ee;
+    --accent: #c2541c; --input: #e3edf8; --input-line: #9fbad8;
+    --eigen: #4f9a45; --fremd: #3b6fbf; --grau: #9aa29d; --puffer: #e0832e;
+    --good: #2f7d43; --warn: #b7791f; --bad: #b8392f;
+    --display: "Archivo", "Arial Narrow", Arial, sans-serif;
+    --body: "Source Sans 3", "Segoe UI", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #131715; --paper: #1b201d; --fg: #e6ebe7; --muted: #9ba59f; --line: #2f3632; --soft: #222824;
+      --accent: #ef8a52; --input: #1f2b38; --input-line: #3e5c7c;
+      --eigen: #6cbd61; --fremd: #6d9be0; --grau: #7d857f; --puffer: #f0a052;
+      --good: #63c27a; --warn: #e2b04c; --bad: #ef7a6f; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #131715; --paper: #1b201d; --fg: #e6ebe7; --muted: #9ba59f; --line: #2f3632; --soft: #222824;
+    --accent: #ef8a52; --input: #1f2b38; --input-line: #3e5c7c;
+    --eigen: #6cbd61; --fremd: #6d9be0; --grau: #7d857f; --puffer: #f0a052;
+    --good: #63c27a; --warn: #e2b04c; --bad: #ef7a6f; color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--fg); font: 15px/1.5 var(--body);
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 48px; }
+  .wrap { max-width: 1240px; margin: 0 auto; display: grid; gap: 22px; }
+  h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; }
+  h1 { font-size: clamp(26px, 4vw, 38px); font-weight: 800; line-height: 1.05; }
+  h2 { font-size: 22px; font-weight: 700; }
+  h3 { font-size: 16px; font-weight: 700; }
+  .eyebrow { font: 700 12px var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+  .muted { color: var(--muted); }
+  .small { font-size: 13px; }
+  header { display: grid; gap: 8px; }
+  .facts { display: flex; flex-wrap: wrap; gap: 6px 14px; color: var(--muted); font-size: 14px; }
+  .kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+  @media (max-width: 820px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .kpi { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; display: grid; gap: 2px; }
+  .kpi b { font: 800 24px var(--display); font-variant-numeric: tabular-nums; }
+  .kpi span { font-size: 13px; color: var(--muted); }
+  nav { display: flex; flex-wrap: wrap; gap: 6px; }
+  nav a { text-decoration: none; color: var(--fg); background: var(--paper); border: 1px solid var(--line); padding: 6px 12px; border-radius: 999px; font-weight: 600; font-size: 14px; }
+  nav a:hover, nav a:focus-visible { border-color: var(--accent); outline: none; }
+  section { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: grid; gap: 14px; min-width: 0; }
+  .sec-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+  @media (max-width: 900px) { .grid3 { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 640px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+  .box { border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+  .box h3 { padding-bottom: 4px; border-bottom: 1px solid var(--line); }
+  .row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; font-size: 14px; }
+  .row .v { font-variant-numeric: tabular-nums; text-align: right; }
+  .row.total { font-weight: 700; border-top: 1px solid var(--line); padding-top: 6px; }
+  input[type=number], input[type=date], select { font: inherit; font-size: 14px; color: var(--fg); background: var(--input); border: 1px solid var(--input-line); border-radius: 5px; padding: 3px 6px; width: 100px; text-align: right; font-variant-numeric: tabular-nums; }
+  input[type=date] { width: 140px; text-align: left; }
+  select { width: auto; text-align: left; }
+  input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  input.s { width: 64px; }
+  .res { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  @media (max-width: 640px) { .res { grid-template-columns: 1fr; } }
+  .rescard { border-radius: 8px; padding: 12px; display: grid; gap: 2px; border: 1px solid var(--line); }
+  .rescard b { font: 800 26px var(--display); font-variant-numeric: tabular-nums; }
+  .pos { color: var(--good); } .neg { color: var(--bad); }
+  .tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; font-variant-numeric: tabular-nums; }
+  th, td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+  th { background: var(--soft); font-weight: 700; font-size: 12.5px; text-transform: none; position: sticky; top: 0; }
+  td.l, th.l { text-align: left; white-space: normal; min-width: 180px; }
+  tr.sum td { font-weight: 700; background: var(--soft); }
+  .chip { display: inline-block; font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 999px; color: #fff; }
+  .c-Eigen { background: var(--eigen); } .c-Fremd { background: var(--fremd); } .c-Kauf, .c-Verkauf { background: var(--grau); } .c-Puffer { background: var(--puffer); }
+  .note { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; font-weight: 700; color: #fff; }
+  .n1, .n2 { background: var(--good); } .n3 { background: var(--warn); } .n4, .n5 { background: var(--bad); }
+  .bar { display: flex; height: 18px; border-radius: 4px; overflow: hidden; background: var(--soft); }
+  .bar i { display: block; height: 100%; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--muted); }
+  .legend span { display: inline-flex; gap: 6px; align-items: center; }
+  .legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+  .verdict { padding: 10px 12px; border-radius: 8px; background: var(--soft); border-left: 4px solid var(--accent); }
+  /* Gantt */
+  .gantt { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
+  .g-inner { min-width: 760px; display: grid; }
+  .g-row { display: grid; grid-template-columns: 250px minmax(0, 1fr); border-bottom: 1px solid var(--line); min-height: 30px; }
+  .g-row:last-child { border-bottom: 0; }
+  .g-name { padding: 5px 8px; font-size: 13px; display: flex; gap: 6px; align-items: center; border-right: 1px solid var(--line); }
+  .g-name small { color: var(--muted); margin-left: auto; font-variant-numeric: tabular-nums; }
+  .g-track { position: relative; }
+  .g-week { position: absolute; top: 0; bottom: 0; border-left: 1px dashed var(--line); }
+  .g-bar { position: absolute; top: 6px; bottom: 6px; border-radius: 4px; min-width: 4px; }
+  .g-head .g-track { height: 34px; }
+  .g-head .g-week span { position: absolute; top: 8px; left: 3px; font-size: 11px; color: var(--muted); white-space: nowrap; }
+  .g-month span { font-weight: 700; color: var(--fg) !important; }
+  .btn { font: 600 14px var(--body); background: var(--paper); color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+  .btn:hover { border-color: var(--accent); }
+  .inputs { display: flex; flex-wrap: wrap; gap: 10px 18px; }
+  .inputs label { display: grid; gap: 2px; font-size: 13px; color: var(--muted); }
+  .hint { font-size: 12.5px; color: var(--muted); }
+  footer { font-size: 12.5px; color: var(--muted); }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Fix &amp; Flip · Projektplanung</div>
+    <h1>Eigentumswohnung Bohmte, 1. OG</h1>
+    <div class="facts"><span>Baujahr 1964</span><span>80 m², 4 Zimmer</span><span>Angebot 102.000 €</span><span>Gas 2019, Klasse E</span><span>vermietet</span><span>Kleinanzeigen 3563162731</span></div>
+    <p class="muted small" style="margin:0">Alle hellblauen Felder kannst du ändern – Kosten, Zeitplan und Gewinn rechnen sich sofort neu. Deine Änderungen bleiben in diesem Browser gespeichert. <button class="btn" id="reset" type="button">Auf Ausgangswerte zurücksetzen</button></p>
+  </header>
+
+  <div class="kpis" id="kpis"></div>
+
+  <nav aria-label="Abschnitte">
+    <a href="#ergebnis">1 Fix &amp; Flip</a><a href="#bewertung">2 Bewertung</a><a href="#renovierung">3 Renovierung</a><a href="#material">4 Material</a><a href="#zeitplan">5 Zeitplan</a>
+  </nav>
+
+  <section id="ergebnis">
+    <div class="sec-head"><h2>1 · Fix &amp; Flip-Kalkulation</h2><span class="hint">Aufbau wie deine Excel-Vorlage</span></div>
+    <div class="res" id="res"></div>
+    <div class="verdict" id="verdict"></div>
+    <div class="grid3">
+      <div class="box"><h3>Ankauf</h3><div id="ankauf"></div></div>
+      <div class="box"><h3>Renovierung (aus Abschnitt 3)</h3><div id="reno"></div></div>
+      <div class="box"><h3>Finanzierung &amp; laufend</h3><div id="fin"></div></div>
+      <div class="box"><h3>Verkauf</h3><div id="vk"></div></div>
+      <div class="box" style="grid-column: span 2"><h3>Gesamt-Investment</h3><div id="gik"></div>
+        <div class="bar" id="gikbar" aria-hidden="true"></div><div class="legend" id="giklegend"></div></div>
+    </div>
+    <h3>Verhandlungstabelle</h3>
+    <div class="tbl"><table id="verh"></table></div>
+    <p class="hint" style="margin:0">Marge = Gewinn ÷ Kosten (wie in deiner Vorlage). Ziel laut Vorlage: mindestens 20 % Marge und ca. 50.000 € Gewinn – bei einer 80-m²-Wohnung ist 20 % Marge der sinnvollere Maßstab.</p>
+  </section>
+
+  <section id="bewertung">
+    <div class="sec-head"><h2>2 · Zustandsbewertung</h2><span class="hint">Einschätzung aus der Anzeige, noch ohne Besichtigung</span></div>
+    <div class="verdict"><b>Mittlerer Renovierungsbedarf.</b> Bad, Elektrik, Böden, Wände und Innentüren erneuern. Die Heizung ist von 2019; Fenster, Dach und Wohnungstür gehören meist der Eigentümergemeinschaft. Die Wohnung ist vermietet – die Renovierung beginnt erst nach Auszug.</div>
+    <div class="tbl"><table id="bew"></table></div>
+    <h3>Maße und Optionen</h3>
+    <div class="inputs" id="masse"></div>
+  </section>
+
+  <section id="renovierung">
+    <div class="sec-head"><h2>3 · Renovierungs-Raster</h2><span class="hint">Dauer in Arbeitstagen · Vorgänger bestimmen den Start</span></div>
+    <div class="inputs" id="team"></div>
+    <div class="legend"><span><i style="background:var(--eigen)"></i>Eigenleistung (du + Helfer)</span><span><i style="background:var(--fremd)"></i>Fremdfirma (Angebot inkl. Anfahrt)</span><span><i style="background:var(--grau)"></i>Kauf / Verkauf</span><span><i style="background:var(--puffer)"></i>Puffer</span></div>
+    <div class="tbl"><table id="tasks"></table></div>
+    <div class="grid2">
+      <div class="box"><h3>Kosten der Renovierung</h3><div id="kosten"></div><div class="bar" id="kbar" aria-hidden="true"></div><div class="legend" id="klegend"></div></div>
+      <div class="box"><h3>Zeit und Aufwand</h3><div id="zeit"></div></div>
+    </div>
+  </section>
+
+  <section id="material">
+    <div class="sec-head"><h2>4 · Material &amp; Entsorgung</h2><span class="hint">Mengen aus den Maßen · Preise änderbar</span></div>
+    <div class="tbl"><table id="mat"></table></div>
+  </section>
+
+  <section id="zeitplan">
+    <div class="sec-head"><h2>5 · Zeitplan</h2><span class="hint" id="zeithint"></span></div>
+    <div class="legend"><span><i style="background:var(--eigen)"></i>Eigenleistung</span><span><i style="background:var(--fremd)"></i>Fremdfirma</span><span><i style="background:var(--grau)"></i>Kauf / Verkauf</span><span><i style="background:var(--puffer)"></i>Zeitpuffer</span></div>
+    <div class="gantt"><div class="g-inner" id="gantt"></div></div>
+  </section>
+
+  <footer>Schätzwerte Stand 25.11.2026: Materialpreise aus Baumarkt/Online, Fremdfirmen-Preise vor Angebot, Verkaufspreise 1.800–2.100 €/m² für renovierte Wohnungen Baujahr 1964 in Bohmte (Portal-Durchschnitte 2.090–2.700 €/m² inkl. neuerer Häuser). Hausgeld 280 €/Monat geschätzt – bei der Maklerin erfragen. Keine Steuer- oder Rechtsberatung; Gewinn vor Steuern.</footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  const KEY = "bohmte-etw-v1";
+  const DEF = {
+    flip: { kp: 102000, notar: 2, makler: 3.57, grest: 5, finq: 100, zins: 5.5, bearb: 1, prov: 0, hausgeld: 280, strom: 60, vkLo: 1800, vkHi: 2100, vkMakler: 3.57, staging: 0 },
+    m: { wfl: 80, badboden: 6, fliesh: 2.0, badumf: 10, tueren: 6, fenster: 7, dosen: 45 },
+    opt: { fenster: "Nein", kueche: "Nein", kpreis: 3000 },
+    team: { start: "2027-01-11", satz: 20, std: 8, km: 25, kms: 0.30, fz: 30, fzb: "Ja", kp: 15, zp: 15, klm: 5, samstag: "Nein" },
+    tasks: [
+      [0, "Kauf: Notar, Finanzierung, Grundbuch → Übergabe (leer)", "Kauf", null, null, 30, 0, 0, 0, 0],
+      [1, "Übergabe, Aufmaß, Termine mit Fremdfirmen", "Eigen", 0, null, 2, 0, 1, 1, 0],
+      [2, "Entrümpelung inkl. Container und Trennung", "Eigen", 1, null, 2, 1, 1, 1, 0],
+      [3, "Demontage & Abbruch (Fliesen, Böden, Tapete, Türen)", "Eigen", 2, null, 4, 2, 1, 1, 0],
+      [4, "Sanitär Rohinstallation (Bad, Küche)", "Fremd", 3, null, 3, 0, 0, 0, 3500],
+      [5, "Elektro Rohinstallation (Schlitze, Leitungen, Verteilung)", "Eigen", 3, null, 5, 1, 1, 1, 0],
+      [6, "Heizung: Bad-Heizkörper, Thermostate, Abgleich", "Fremd", 3, null, 2, 0, 0, 0, 1500],
+      [7, "Fenster (nur mit Option)", "Fremd", 3, null, 2, 0, 0, 0, 850],
+      [8, "Spachteln, Putz, Trockenbau", "Eigen", 4, 5, 4, 2, 1, 1, 0],
+      [9, "Bad: Abdichtung und Fliesen", "Eigen", 8, null, 5, 1, 1, 1, 0],
+      [10, "Sanitär Endmontage (WC, Waschtisch, Dusche)", "Fremd", 9, null, 2, 0, 0, 0, 4500],
+      [11, "Malerarbeiten (Vlies + 2× streichen)", "Eigen", 8, null, 6, 2, 1, 1, 0],
+      [12, "Bodenbelag Vinyl + Sockelleisten", "Eigen", 11, null, 4, 1, 1, 1, 0],
+      [13, "Innentüren einbauen", "Eigen", 12, null, 2, 1, 1, 1, 0],
+      [14, "Elektro Feininstallation + Prüfprotokoll", "Eigen", 11, null, 2, 1, 1, 1, 0],
+      [15, "Küchenzeile (nur mit Option)", "Fremd", 12, null, 1, 0, 0, 0, 0],
+      [16, "Endreinigung, Verkaufsfotos", "Eigen", 13, 14, 1, 1, 1, 1, 0],
+      [17, "Zeitpuffer", "Puffer", 16, 10, 0, 0, 0, 0, 0],
+      [18, "Vermarktung, Besichtigungen, Verkauf bis Zahlung", "Verkauf", 17, null, 40, 0, 0, 0, 0],
+    ],
+    // [Nr, Position, Mengenregel, Einheit, Verschnitt, Gebinde, Preis]
+    mat: [
+      [2, "Container Sperrmüll 7 m³", "sperr", "m³", 0, 7, 520], [2, "Container Bauschutt/Fliesen 3 m³", "schutt", "m³", 0, 3, 380],
+      [2, "Big Bags, Wertstoffhof", 1, "psch", 0, 1, 80], [3, "Abdeckfolie, Krepp, Schuttsäcke", 1, "psch", 0, 1, 90],
+      [3, "Trennscheiben, Meißel, Tapetenlöser", 1, "psch", 0, 1, 70], [5, "Unterverteilung bestückt (FI/LS)", 1, "Stk", 0, 1, 450],
+      [5, "NYM-J 3×1,5 mm² (100-m-Ring)", "kabel", "m", 0.1, 100, 95], [5, "NYM-J 5×2,5 mm² Herd (25 m)", 15, "m", 0.1, 25, 60],
+      [5, "Unterputz-/Abzweigdosen (25er)", "dosen10", "Stk", 0.1, 25, 22], [5, "Schnellputz 20 kg", "gips", "Sack", 0, 1, 12],
+      [8, "Fertigspachtel 20 kg (≈ 60 m²)", "wd", "m²", 0, 60, 26], [8, "Tiefgrund 10 l (≈ 80 m²)", "wd", "m²", 0, 80, 32],
+      [8, "Schleifgitter, Gewebe, Kantenschutz", 1, "psch", 0, 1, 60], [9, "Wandfliesen", "badwand", "m²", 0.1, 1, 25],
+      [9, "Bodenfliesen R10", "badboden", "m²", 0.1, 1, 30], [9, "Flexkleber 25 kg (≈ 4 kg/m²)", "kleber", "kg", 0.1, 25, 18],
+      [9, "Fugenmörtel 5 kg", "fuge", "kg", 0.1, 5, 16], [9, "Abdichtungs-Set", 1, "Set", 0, 1, 130],
+      [9, "Silikon, Schienen, Kreuze", 1, "psch", 0, 1, 70], [11, "Malervlies (Rolle 25 m²)", "wd", "m²", 0.1, 25, 32],
+      [11, "Vlieskleber 16 kg (≈ 80 m²)", "wd", "m²", 0.1, 80, 38], [11, "Wandfarbe 12,5 l (2 Anstriche, 7 m²/l)", "farbe", "l", 0.05, 12.5, 55],
+      [11, "Acryl, Abdeckung, Rollen/Pinsel", 1, "psch", 0, 1, 90], [12, "Vinyl-Klickboden mit Trittschall", "boden", "m²", 0.08, 1, 24],
+      [12, "Ausgleichsmasse 25 kg", "ausgl", "kg", 0, 25, 18], [12, "Sockelleisten 2,5 m", "sockel", "m", 0.1, 2.5, 7],
+      [12, "Übergangsprofile", "tueren", "Stk", 0, 1, 12], [13, "Innentür mit Zarge", "tueren", "Stk", 0, 1, 190],
+      [13, "Drückergarnitur", "tueren", "Stk", 0, 1, 25], [13, "Montageschaum, Keile", 1, "psch", 0, 1, 40],
+      [14, "Schalter/Steckdosen inkl. Rahmen", "dosen", "Stk", 0.05, 1, 8], [14, "Leuchten/Fassungen", 8, "Stk", 0, 1, 15],
+      [14, "Prüfprotokoll Elektriker", 1, "psch", 0, 1, 350], [16, "Reinigungsmittel", 1, "psch", 0, 1, 50],
+      [16, "Werkzeugmiete (Nassschneider, Trockner)", 1, "psch", 0, 1, 120],
+    ],
+  };
+  const BEW = [
+    ["Heizung (Gas 2019)", "Gemeinschaft", "neu", 1, "keine", "Fremd"],
+    ["Heizkörper / Thermostate", "Sondereigentum*", "vermutlich alt", 3, "Bad-Heizkörper + Thermostatköpfe", "Fremd"],
+    ["Fenster", "meist Gemeinschaft*", "unbekannt", 3, "prüfen, Tausch nur mit WEG-Beschluss (Option)", "Fremd"],
+    ["Elektrik", "Sondereigentum", "teils original 1964", 4, "neue Verteilung mit FI, Leitungen teils neu", "Eigen"],
+    ["Bad", "Sondereigentum", "vermutlich 80er/90er", 4, "komplett neu", "Sanitär fremd, Fliesen eigen"],
+    ["Küche", "Sondereigentum", "Anschlüsse alt", 3, "Anschlüsse neu, Küchenzeile optional", "Fremd"],
+    ["Böden", "Sondereigentum", "alt", 4, "raus, ausgleichen, Vinyl", "Eigen"],
+    ["Wände / Decken", "Sondereigentum", "Tapete, Gebrauchsspuren", 3, "Vlies + 2× streichen", "Eigen"],
+    ["Innentüren", "Sondereigentum", "Original 1964", 4, "neue Türen mit Zarge", "Eigen"],
+    ["Keller / Stellplätze", "Sondereigentum", "unbekannt", 2, "entrümpeln, reinigen", "Eigen"],
+  ];
+
+  let S = clone(DEF);
+  try { const raw = localStorage.getItem(KEY); if (raw) S = merge(clone(DEF), JSON.parse(raw)); } catch (e) {}
+  function clone(o) { return JSON.parse(JSON.stringify(o)); }
+  function merge(a, b) { for (const k in b) { if (b[k] && typeof b[k] === "object" && !Array.isArray(b[k]) && a[k]) merge(a[k], b[k]); else if (k in a) a[k] = b[k]; } return a; }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+
+  const eur = new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+  const num = (v, d = 0) => new Intl.NumberFormat("de-DE", { maximumFractionDigits: d, minimumFractionDigits: d }).format(v);
+  const pct = v => num(v * 100, 1) + " %";
+  const dfmt = d => d.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "2-digit" });
+  const $ = id => document.getElementById(id);
+  const cls = v => (v >= 0 ? "pos" : "neg");
+
+  // ---------- Arbeitstage ----------
+  const isWork = d => { const w = d.getDay(); return w !== 0 && (w !== 6 || S.team.samstag === "Ja"); };
+  const add = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+  const nextWork = d => { let x = new Date(d); while (!isWork(x)) x = add(x, 1); return x; };
+  function addWork(d, n) { let x = new Date(d), c = 0; while (c < n) { x = add(x, 1); if (isWork(x)) c++; } return x; }
+  function netWork(a, b) { let c = 0; for (let x = new Date(a); x <= b; x = add(x, 1)) if (isWork(x)) c++; return c; }
+
+  // ---------- Modell ----------
+  function model() {
+    const m = S.m, t = S.team, f = S.flip;
+    const d = {
+      wfl: m.wfl, badboden: m.badboden, badwand: m.fliesh * m.badumf - 2,
+    };
+    d.wand = m.wfl * 2.6; d.wandstreich = d.wand - d.badwand; d.wd = d.wandstreich + m.wfl;
+    d.boden = m.wfl - m.badboden; d.sockel = Math.round(m.wfl * 1.1);
+    const rule = {
+      sperr: Math.round(m.wfl * 0.08 * 10) / 10, schutt: Math.round((d.badwand + m.badboden) * 0.045 * 10) / 10,
+      kabel: m.wfl * 3, dosen10: m.dosen + 10, gips: m.wfl / 20, wd: d.wd, badwand: d.badwand, badboden: m.badboden,
+      kleber: (d.badwand + m.badboden) * 4, fuge: (d.badwand + m.badboden) * 0.5, farbe: d.wd * 2 / 7, boden: d.boden,
+      ausgl: d.boden * 1.5, sockel: d.sockel, tueren: m.tueren, dosen: m.dosen,
+    };
+    const mat = S.mat.map(r => {
+      const q = typeof r[2] === "number" ? r[2] : rule[r[2]];
+      const brutto = q * (1 + r[4]);
+      const packs = q <= 0 ? 0 : (r[5] > 0 ? Math.ceil(brutto / r[5] - 1e-9) : brutto);
+      return { nr: r[0], pos: r[1], q, unit: r[3], vs: r[4], geb: r[5], preis: r[6], packs, sum: packs * r[6] };
+    });
+    const matBy = {}; mat.forEach(x => matBy[x.nr] = (matBy[x.nr] || 0) + x.sum);
+
+    // Zeitplan + Kosten je Schritt
+    const T = S.tasks.map(r => ({ nr: r[0], name: r[1], art: r[2], v1: r[3], v2: r[4], dur: r[5], hel: r[6], ich: r[7], fzg: r[8], fremd: r[9] }));
+    T.forEach(x => {
+      if (x.nr === 7) { x.dur = S.opt.fenster === "Ja" ? 2 : 0; x.fremdEff = S.opt.fenster === "Ja" ? m.fenster * x.fremd : 0; }
+      else if (x.nr === 15) { x.dur = S.opt.kueche === "Ja" ? 1 : 0; x.fremdEff = S.opt.kueche === "Ja" ? S.opt.kpreis : 0; }
+      else x.fremdEff = x.fremd;
+    });
+    const start0 = nextWork(new Date(t.start + "T00:00:00"));
+    const byNr = {};
+    T.forEach(x => {
+      const ends = [x.v1, x.v2].filter(v => v !== null && v !== "" && byNr[v]).map(v => byNr[v].end);
+      if (x.art === "Puffer") {
+        const renoStart = byNr[1].start, renoEnd = new Date(Math.max(...T.filter(y => y.nr >= 1 && y.nr < x.nr).map(y => y.end || 0)));
+        x.dur = Math.ceil(netWork(renoStart, renoEnd) * t.zp / 100);
+        ends.push(renoEnd);
+      }
+      x.start = ends.length ? addWork(new Date(Math.max(...ends)), 1) : start0;
+      x.end = x.dur > 0 ? addWork(x.start, x.dur - 1) : add(x.start, -1);
+      const eig = x.art === "Eigen";
+      x.stdH = eig ? x.dur * x.hel * t.std : 0;
+      x.lohn = x.stdH * t.satz;
+      x.fahrt = eig ? x.dur * x.fzg * 2 * t.km * t.kms : 0;
+      x.fzeit = eig && t.fzb === "Ja" ? x.dur * x.hel * 2 * t.fz / 60 * t.satz : 0;
+      x.mat = matBy[x.nr] || 0;
+      x.sum = x.lohn + x.fahrt + x.fzeit + x.mat + x.fremdEff;
+      x.ichStd = eig ? x.dur * x.ich * t.std : 0;
+      byNr[x.nr] = x;
+    });
+    const sum = k => T.reduce((a, x) => a + (x[k] || 0), 0);
+    const K = {
+      mat: sum("mat"), klein: sum("mat") * t.klm / 100, fremd: sum("fremdEff"), lohn: sum("lohn"), fahrt: sum("fahrt"), fzeit: sum("fzeit"),
+    };
+    K.zwi = K.mat + K.klein + K.fremd + K.lohn + K.fahrt + K.fzeit;
+    K.entr = byNr[2].sum + byNr[2].mat * t.klm / 100;
+    K.kueche = byNr[15].sum;
+    K.reno = K.zwi - K.entr - K.kueche;
+    K.puffer = K.reno * t.kp / 100;
+    K.gesamt = K.zwi + K.puffer;
+    const last = T[T.length - 1];
+    const months = Math.ceil(((last.end - start0) / 864e5 + 1) / 30.4);
+
+    // Fix & Flip wie Vorlage
+    const F = {};
+    F.nk = f.kp * (f.notar + f.makler + f.grest) / 100;
+    F.ankauf = f.kp + F.nk;
+    F.renoGes = K.entr + K.reno + K.puffer + K.kueche;
+    const loan = f.kp * f.finq / 100;
+    F.zinsen = loan * f.zins / 100 / 12 * months; F.bearb = loan * f.bearb / 100; F.prov = loan * f.prov / 100;
+    F.fin = F.zinsen + F.bearb + F.prov;
+    F.monat = f.hausgeld + f.strom; F.lfd = F.monat * months;
+    F.gik = F.ankauf + F.renoGes + F.fin + F.lfd;
+    F.vkLo = f.vkLo * m.wfl; F.vkHi = f.vkHi * m.wfl; F.vkM = F.vkLo * f.vkMakler / 100;
+    const res = (vk, gik) => { const cost = gik + F.vkM + f.staging; return { g: vk - cost, m: (vk - cost) / cost }; };
+    F.lo = res(F.vkLo, F.gik); F.hi = res(F.vkHi, F.gik);
+    F.mid = { g: (F.lo.g + F.hi.g) / 2, m: (F.lo.m + F.hi.m) / 2 };
+    const gikAt = c => c * (1 + (f.grest + f.makler + f.notar) / 100) + c * f.prov / 100 + c * f.bearb / 100 + c * f.zins / 100 / 12 * months + F.renoGes + F.lfd;
+    F.verh = [0, .1, .15, .2, .25, .3, .35, .4, .45].map(dc => {
+      const c = f.kp * (1 - dc), g = gikAt(c), lo = res(F.vkLo, g), hi = res(F.vkHi, g);
+      return { dc, c, g, lo, hi, mid: { g: (lo.g + hi.g) / 2, m: (lo.m + hi.m) / 2 } };
+    });
+    // Kaufpreis für 20 % Marge (Mitte)
+    let a = 0, b = f.kp * 2;
+    const midM = c => { const g = gikAt(c); return (res(F.vkLo, g).m + res(F.vkHi, g).m) / 2; };
+    if (midM(0) < 0.2) F.ziel = null; else { for (let i = 0; i < 60; i++) { const c = (a + b) / 2; if (midM(c) >= 0.2) a = c; else b = c; } F.ziel = a; }
+    return { d, mat, T, K, F, months, start0, end: last.end, byNr };
+  }
+
+  // ---------- Eingabe-Helfer ----------
+  function field(path, label, opts = {}) {
+    const [grp, key] = path.split(".");
+    const id = "in-" + grp + "-" + key;
+    const v = S[grp][key];
+    let ctl;
+    if (opts.select) ctl = `<select id="${id}" data-p="${path}">${opts.select.map(o => `<option${o === v ? " selected" : ""}>${o}</option>`).join("")}</select>`;
+    else if (opts.date) ctl = `<input type="date" id="${id}" data-p="${path}" value="${v}">`;
+    else ctl = `<input type="number" id="${id}" data-p="${path}" value="${v}" step="${opts.step || "any"}" class="${opts.s ? "s" : ""}">`;
+    return opts.inline ? ctl : `<label for="${id}">${label}${ctl}</label>`;
+  }
+  function row(label, val, extra = "") { return `<div class="row ${extra}"><span>${label}</span><span class="v">${val}</span></div>`; }
+
+  // ---------- Statische Teile (einmal) ----------
+  function buildStatic() {
+    $("masse").innerHTML = [
+      field("m.wfl", "Wohnfläche m²"), field("m.badboden", "Bad Boden m²"), field("m.fliesh", "Fliesenhöhe m", { step: 0.1 }),
+      field("m.badumf", "Bad Wandumfang m"), field("m.tueren", "Innentüren"), field("m.fenster", "Fenster"), field("m.dosen", "Steckdosen + Schalter"),
+      field("opt.fenster", "Fenster tauschen?", { select: ["Nein", "Ja"] }), field("opt.kueche", "Küchenzeile?", { select: ["Nein", "Ja"] }),
+      field("opt.kpreis", "Küchenzeile €"),
+    ].join("");
+    $("team").innerHTML = [
+      field("team.start", "Notartermin", { date: true }), field("team.satz", "Helfer €/h"), field("team.std", "Std./Tag"),
+      field("team.km", "km einfach"), field("team.kms", "€/km", { step: 0.01 }), field("team.fz", "Fahrtzeit min"),
+      field("team.fzb", "Fahrtzeit bezahlen", { select: ["Ja", "Nein"] }), field("team.samstag", "Samstags arbeiten", { select: ["Nein", "Ja"] }),
+      field("team.kp", "Kostenpuffer %"), field("team.zp", "Zeitpuffer %"), field("team.klm", "Kleinmaterial %"),
+    ].join("");
+    $("bew").innerHTML = `<thead><tr><th class="l">Bauteil</th><th class="l">Eigentum</th><th class="l">Zustand</th><th>Note</th><th class="l">Maßnahme</th><th class="l">Wer</th></tr></thead><tbody>` +
+      BEW.map(b => `<tr><td class="l">${b[0]}</td><td class="l">${b[1]}</td><td class="l">${b[2]}</td><td><span class="note n${b[3]}" aria-label="Note ${b[3]}">${b[3]}</span></td><td class="l">${b[4]}</td><td class="l">${b[5]}</td></tr>`).join("") +
+      `</tbody><tfoot><tr><td class="l" colspan="6"><span class="hint">Note 1 = gut, 5 = schlecht. * laut Teilungserklärung prüfen.</span></td></tr></tfoot>`;
+  }
+
+  // ---------- Rendern ----------
+  function render() {
+    const R = model(), F = R.F, K = R.K, f = S.flip;
+    // KPIs
+    $("kpis").innerHTML = [
+      [eur.format(K.gesamt), "Renovierung inkl. Puffer"],
+      [R.months + " Monate", "vom Notar bis Geld da"],
+      [`<span class="${cls(F.mid.g)}">${eur.format(F.mid.g)}</span>`, "Gewinn „Goldene Mitte“"],
+      [F.ziel ? eur.format(Math.floor(F.ziel / 500) * 500) : "–", "Kaufpreis für 20 % Marge"],
+    ].map(k => `<div class="kpi"><b>${k[0]}</b><span>${k[1]}</span></div>`).join("");
+
+    $("res").innerHTML = [["Gewinn gering", F.lo, f.vkLo], ["Goldene Mitte", F.mid, null], ["Gewinn hoch", F.hi, f.vkHi]].map(r =>
+      `<div class="rescard"><span class="muted small">${r[0]}${r[2] ? " · " + num(r[2]) + " €/m²" : ""}</span><b class="${cls(r[1].g)}">${eur.format(r[1].g)}</b><span class="small">Marge ${pct(r[1].m)}</span></div>`).join("");
+    const disc = F.ziel ? 1 - F.ziel / f.kp : null;
+    $("verdict").innerHTML = F.mid.m >= 0.2 ? `<b>Deal.</b> Die Goldene Mitte erreicht ${pct(F.mid.m)} Marge.` :
+      `<b>Zum Angebotspreis kein Deal.</b> Die Goldene Mitte liegt bei ${pct(F.mid.m)} Marge. ` +
+      (F.ziel ? `20 % Marge gibt es bei rund <b>${eur.format(Math.floor(F.ziel / 500) * 500)}</b> Kaufpreis (${num(disc * 100, 0)} % Nachlass).` : "20 % Marge sind mit diesen Annahmen nicht erreichbar.") +
+      ` Wichtig: Die Wohnung ist vermietet – ein Flip geht erst nach Auszug des Mieters.`;
+
+    $("ankauf").innerHTML = row("Kaufpreis", field("flip.kp", "", { inline: true })) +
+      row("Notar + Grundbuch %", field("flip.notar", "", { inline: true, s: true, step: 0.1 })) +
+      row("Makler %", field("flip.makler", "", { inline: true, s: true, step: 0.01 })) +
+      row("Grunderwerbsteuer %", field("flip.grest", "", { inline: true, s: true, step: 0.1 })) +
+      row("Nebenkosten", eur.format(F.nk)) + row("Gesamtkosten Ankauf", eur.format(F.ankauf), "total");
+    $("reno").innerHTML = row("Entrümpelung (Container, Helfer, Fahrten)", eur.format(K.entr)) + row("Renovierung", eur.format(K.reno)) +
+      row(`Sicherheitspuffer ${num(S.team.kp)} %`, eur.format(K.puffer)) + row("Küchenzeile", eur.format(K.kueche)) +
+      row("Gesamtkosten Renovierung", eur.format(F.renoGes), "total");
+    $("fin").innerHTML = row("Projektdauer (aus Zeitplan)", R.months + " Monate") +
+      row("Finanzierung % vom Kaufpreis", field("flip.finq", "", { inline: true, s: true })) +
+      row("Zins %", field("flip.zins", "", { inline: true, s: true, step: 0.1 })) + row("Bearbeitung %", field("flip.bearb", "", { inline: true, s: true, step: 0.1 })) +
+      row("Finanzierungskosten", eur.format(F.fin)) +
+      row("Hausgeld €/Monat", field("flip.hausgeld", "", { inline: true, s: true })) + row("Strom + Heizung €/Monat", field("flip.strom", "", { inline: true, s: true })) +
+      row("Laufende Kosten gesamt", eur.format(F.lfd), "total");
+    $("vk").innerHTML = row("Verkaufspreis gering €/m²", field("flip.vkLo", "", { inline: true, s: true })) +
+      row("Verkaufspreis hoch €/m²", field("flip.vkHi", "", { inline: true, s: true })) +
+      row("Verkauf gering", eur.format(F.vkLo)) + row("Verkauf hoch", eur.format(F.vkHi)) +
+      row("Verkaufsmakler %", field("flip.vkMakler", "", { inline: true, s: true, step: 0.01 })) + row("Maklerkosten (gering)", eur.format(F.vkM)) +
+      row("Homestaging €", field("flip.staging", "", { inline: true, s: true }));
+    $("gik").innerHTML = row("Ankauf", eur.format(F.ankauf)) + row("Renovierung", eur.format(F.renoGes)) + row("Finanzierung", eur.format(F.fin)) +
+      row("Laufende Kosten", eur.format(F.lfd)) + row("Gesamt-Investment", eur.format(F.gik), "total");
+    const parts = [["Ankauf", F.ankauf, "var(--grau)"], ["Renovierung", F.renoGes, "var(--eigen)"], ["Finanzierung", F.fin, "var(--fremd)"], ["Laufend", F.lfd, "var(--puffer)"]];
+    $("gikbar").innerHTML = parts.map(p => `<i style="width:${p[1] / F.gik * 100}%;background:${p[2]}"></i>`).join("");
+    $("giklegend").innerHTML = parts.map(p => `<span><i style="background:${p[2]}"></i>${p[0]} ${pct(p[1] / F.gik)}</span>`).join("");
+
+    $("verh").innerHTML = `<thead><tr><th>Nachlass</th><th>Kaufpreis</th><th>Gesamtkosten</th><th>Gewinn gering</th><th>Marge</th><th>Goldene Mitte</th><th>Marge</th><th>Gewinn hoch</th><th>Marge</th><th class="l">Einordnung</th></tr></thead><tbody>` +
+      F.verh.map(v => `<tr><td>${v.dc ? num(v.dc * 100) + " %" : "Angebot"}</td><td>${eur.format(v.c)}</td><td>${eur.format(v.g)}</td><td class="${cls(v.lo.g)}">${eur.format(v.lo.g)}</td><td>${pct(v.lo.m)}</td><td class="${cls(v.mid.g)}"><b>${eur.format(v.mid.g)}</b></td><td><b>${pct(v.mid.m)}</b></td><td class="${cls(v.hi.g)}">${eur.format(v.hi.g)}</td><td>${pct(v.hi.m)}</td><td class="l">${v.mid.m >= 0.2 ? "guter Deal" : v.mid.m >= 0.1 ? "knapp" : "kein Deal"}</td></tr>`).join("") + `</tbody>`;
+
+    // Raster
+    const ARTEN = ["Eigen", "Fremd", "Kauf", "Verkauf", "Puffer"];
+    $("tasks").innerHTML = `<thead><tr><th>Nr</th><th class="l">Arbeitsschritt</th><th>Art</th><th>Vorg. 1</th><th>Vorg. 2</th><th>Dauer AT</th><th>Start</th><th>Ende</th><th>Helfer</th><th>Ich</th><th>Fahrz./Tag</th><th>Lohn Helfer</th><th>Fahrtkosten</th><th>Fahrtzeit</th><th>Material</th><th>Fremdfirma</th><th>Summe</th></tr></thead><tbody>` +
+      R.T.map((x, i) => {
+        const auto = x.art === "Puffer" || x.nr === 7 || x.nr === 15;
+        const inp = (j, v, w = "s") => `<input type="number" class="${w}" data-t="${i}" data-j="${j}" value="${v ?? ""}" aria-label="${x.name}">`;
+        return `<tr><td>${x.nr}</td><td class="l">${x.name}</td><td><span class="chip c-${x.art}">${x.art}</span></td>` +
+          `<td>${inp(3, x.v1)}</td><td>${inp(4, x.v2)}</td><td>${auto ? x.dur : inp(5, x.dur)}</td><td>${dfmt(x.start)}</td><td>${x.dur > 0 ? dfmt(x.end) : "–"}</td>` +
+          `<td>${x.art === "Eigen" ? inp(6, x.hel) : ""}</td><td>${x.art === "Eigen" ? inp(7, x.ich) : ""}</td><td>${x.art === "Eigen" ? inp(8, x.fzg) : ""}</td>` +
+          `<td>${x.lohn ? eur.format(x.lohn) : ""}</td><td>${x.fahrt ? eur.format(x.fahrt) : ""}</td><td>${x.fzeit ? eur.format(x.fzeit) : ""}</td><td>${x.mat ? eur.format(x.mat) : ""}</td>` +
+          `<td>${x.art === "Fremd" ? (x.nr === 15 ? eur.format(x.fremdEff) : inp(9, x.fremd, "")) + (x.nr === 7 ? `<div class="hint">je Fenster</div>` : "") : ""}</td><td><b>${x.sum ? eur.format(x.sum) : ""}</b></td></tr>`;
+      }).join("") +
+      `<tr class="sum"><td></td><td class="l">Summe</td><td colspan="9"></td><td>${eur.format(K.lohn)}</td><td>${eur.format(K.fahrt)}</td><td>${eur.format(K.fzeit)}</td><td>${eur.format(K.mat)}</td><td>${eur.format(K.fremd)}</td><td>${eur.format(K.zwi - K.klein)}</td></tr></tbody>`;
+
+    const kp = [["Material", K.mat + K.klein, "var(--eigen)"], ["Fremdfirmen", K.fremd, "var(--fremd)"], ["Helfer", K.lohn, "var(--accent)"], ["Fahrten", K.fahrt + K.fzeit, "var(--grau)"], ["Puffer", K.puffer, "var(--puffer)"]];
+    $("kosten").innerHTML = row("Material + Entsorgung", eur.format(K.mat)) + row(`Kleinmaterial ${num(S.team.klm)} %`, eur.format(K.klein)) +
+      row("Fremdfirmen", eur.format(K.fremd)) + row("Lohn Helfer", eur.format(K.lohn)) + row("Fahrtkosten (eigenes Team)", eur.format(K.fahrt)) +
+      row("Fahrtzeit bezahlt", eur.format(K.fzeit)) + row(`Kostenpuffer ${num(S.team.kp)} %`, eur.format(K.puffer)) +
+      row("Gesamt inkl. Puffer", eur.format(K.gesamt), "total") + row("je m² Wohnfläche", eur.format(K.gesamt / S.m.wfl));
+    $("kbar").innerHTML = kp.map(p => `<i style="width:${p[1] / K.gesamt * 100}%;background:${p[2]}"></i>`).join("");
+    $("klegend").innerHTML = kp.map(p => `<span><i style="background:${p[2]}"></i>${p[0]} ${eur.format(p[1])}</span>`).join("");
+    const reno0 = R.byNr[1].start, reno1 = R.byNr[17].end;
+    $("zeit").innerHTML = row("Notartermin", dfmt(R.start0)) + row("Renovierung", `${dfmt(reno0)} – ${dfmt(reno1)}`) +
+      row("Arbeitstage inkl. Zeitpuffer", netWork(reno0, reno1)) + row("Verkauf abgeschlossen", dfmt(R.end)) +
+      row("Projektdauer", R.months + " Monate", "total") + row("Deine Stunden", num(R.T.reduce((a, x) => a + x.ichStd, 0))) +
+      row("Helfer-Stunden (bezahlt)", num(R.T.reduce((a, x) => a + x.stdH, 0)));
+
+    // Material
+    const titles = {}; R.T.forEach(x => titles[x.nr] = x.name);
+    let html = `<thead><tr><th>Nr</th><th class="l">Position</th><th>Menge</th><th>Einheit</th><th>Verschnitt</th><th>Gebinde</th><th>Packungen</th><th>Preis je Pack</th><th>Summe</th></tr></thead><tbody>`, cur = null;
+    R.mat.forEach((x, i) => {
+      if (x.nr !== cur) { cur = x.nr; html += `<tr class="sum"><td>${x.nr}</td><td class="l" colspan="7">${titles[x.nr]}</td><td>${eur.format(R.mat.filter(y => y.nr === x.nr).reduce((a, y) => a + y.sum, 0))}</td></tr>`; }
+      html += `<tr><td></td><td class="l">${x.pos}</td><td>${num(x.q, 1)}</td><td>${x.unit}</td><td>${num(x.vs * 100)} %</td><td>${num(x.geb, 1)}</td><td>${num(x.packs)}</td>` +
+        `<td><input type="number" class="s" data-m="${i}" value="${x.preis}" aria-label="Preis ${x.pos}"></td><td>${eur.format(x.sum)}</td></tr>`;
+    });
+    $("mat").innerHTML = html + `<tr class="sum"><td></td><td class="l">Summe Material und Entsorgung</td><td colspan="6"></td><td>${eur.format(K.mat)}</td></tr></tbody>`;
+
+    // Gantt
+    const t0 = new Date(R.start0); t0.setDate(t0.getDate() - ((t0.getDay() + 6) % 7));
+    const t1 = add(R.end, 7 - ((R.end.getDay() + 6) % 7));
+    const span = (t1 - t0) / 864e5;
+    const pos = d => ((d - t0) / 864e5) / span * 100;
+    let weeks = "";
+    for (let w = new Date(t0); w < t1; w = add(w, 7)) {
+      const first = w.getDate() <= 7;
+      weeks += `<div class="g-week${first ? " g-month" : ""}" style="left:${pos(w)}%"><span>${first ? w.toLocaleDateString("de-DE", { month: "short" }) + " " : ""}${w.getDate()}.</span></div>`;
+    }
+    const gridOnly = weeks.replace(/<span>.*?<\/span>/g, "");
+    const color = { Eigen: "var(--eigen)", Fremd: "var(--fremd)", Kauf: "var(--grau)", Verkauf: "var(--grau)", Puffer: "var(--puffer)" };
+    $("gantt").innerHTML = `<div class="g-row g-head"><div class="g-name"><b>Arbeitsschritt</b><small>AT</small></div><div class="g-track">${weeks}</div></div>` +
+      R.T.filter(x => x.dur > 0).map(x => `<div class="g-row"><div class="g-name">${x.nr} · ${x.name}<small>${x.dur}</small></div><div class="g-track">${gridOnly}` +
+        `<div class="g-bar" style="left:${pos(x.start)}%;width:${Math.max(pos(add(x.end, 1)) - pos(x.start), 0.4)}%;background:${color[x.art]}" title="${x.name}: ${dfmt(x.start)} – ${dfmt(x.end)}"></div></div></div>`).join("");
+    $("zeithint").textContent = `${dfmt(R.start0)} bis ${dfmt(R.end)} · ${R.months} Monate · Mo–Fr${S.team.samstag === "Ja" ? " + Sa" : ""}`;
+  }
+
+  // ---------- Ereignisse ----------
+  document.addEventListener("change", onInput);
+  document.addEventListener("input", e => { if (e.target.matches("input[type=number]")) onInput(e, true); });
+  let timer;
+  function onInput(e, typing) {
+    const el = e.target;
+    if (!el.matches("input, select")) return;
+    let v = el.type === "number" ? (el.value === "" ? null : Number(el.value)) : el.value;
+    if (el.dataset.p) { const [g, k] = el.dataset.p.split("."); if (v === null && el.type === "number") return; S[g][k] = v; }
+    else if (el.dataset.t) { S.tasks[+el.dataset.t][+el.dataset.j] = (+el.dataset.j <= 4 && v === null) ? null : (v ?? 0); }
+    else if (el.dataset.m) { if (v === null) return; S.mat[+el.dataset.m][6] = v; }
+    else return;
+    save();
+    clearTimeout(timer);
+    const id = el.id, t = el.dataset.t, j = el.dataset.j, m = el.dataset.m;
+    timer = setTimeout(() => {
+      render();
+      // Fokus nach dem Neuzeichnen zurückgeben
+      let back = id ? document.getElementById(id) : null;
+      if (!back && t !== undefined) back = document.querySelector(`[data-t="${t}"][data-j="${j}"]`);
+      if (!back && m !== undefined) back = document.querySelector(`[data-m="${m}"]`);
+      if (back && typing) { back.focus(); const n = back.value.length; try { back.setSelectionRange(n, n); } catch (_) {} }
+    }, typing ? 450 : 0);
+  }
+  $("reset").addEventListener("click", () => { S = clone(DEF); try { localStorage.removeItem(KEY); } catch (e) {} buildStatic(); render(); });
+
+  buildStatic();
+  render();
+})();
+</script>

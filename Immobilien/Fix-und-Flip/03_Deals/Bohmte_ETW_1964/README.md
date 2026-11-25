@@ -1,5 +1,7 @@
 # ETW Bohmte (1. OG, Bj. 1964, 80 m², 102.000 €) – Fix & Flip mit Renovierungsplanung
 
+Webseite (interaktiv): `bohmte_projekt.html` – online: https://claude.ai/artifact/SpzPYbxpGB5D7sCZii38Wp
+
 Datei: `Bohmte_ETW_FixFlip_Renovierung.xlsx` (erzeugt mit `_Werkzeuge/bohmte_reno_rechner.py`)
 
 | Blatt | Inhalt |
