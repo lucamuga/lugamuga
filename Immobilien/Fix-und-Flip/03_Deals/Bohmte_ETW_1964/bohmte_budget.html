@@ -1,0 +1,294 @@
+<title>Renovierungsbudget Bohmte</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+  /* Layout: links die Stellschrauben (Kauf, Verkauf, Ziel), rechts das Ergebnis-Budget; darunter je Gewerk eine Karte mit Budget, Bedarf und Ampel. */
+  :root {
+    --bg: #f2f3f1; --paper: #ffffff; --fg: #1e2522; --muted: #5f6964; --line: #d9ddd8; --soft: #eef1ee;
+    --accent: #c2541c; --input: #e3edf8; --input-line: #9fbad8;
+    --ok: #2f7d43; --ok-bg: #e3f1e6; --knapp: #a86b12; --knapp-bg: #fbefd9; --nein: #b8392f; --nein-bg: #f8e1de;
+    --eigen: #4f9a45; --fremd: #3b6fbf; --puffer: #e0832e; --grau: #9aa29d;
+    --display: "Archivo", "Arial Narrow", Arial, sans-serif;
+    --body: "Source Sans 3", "Segoe UI", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #131715; --paper: #1b201d; --fg: #e6ebe7; --muted: #9ba59f; --line: #2f3632; --soft: #222824;
+      --accent: #ef8a52; --input: #1f2b38; --input-line: #3e5c7c;
+      --ok: #63c27a; --ok-bg: #1d3324; --knapp: #e2b04c; --knapp-bg: #3a2e16; --nein: #ef7a6f; --nein-bg: #3d1f1c;
+      --eigen: #6cbd61; --fremd: #6d9be0; --puffer: #f0a052; --grau: #7d857f; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #131715; --paper: #1b201d; --fg: #e6ebe7; --muted: #9ba59f; --line: #2f3632; --soft: #222824;
+    --accent: #ef8a52; --input: #1f2b38; --input-line: #3e5c7c;
+    --ok: #63c27a; --ok-bg: #1d3324; --knapp: #e2b04c; --knapp-bg: #3a2e16; --nein: #ef7a6f; --nein-bg: #3d1f1c;
+    --eigen: #6cbd61; --fremd: #6d9be0; --puffer: #f0a052; --grau: #7d857f; color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--fg); font: 15px/1.5 var(--body);
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 48px; }
+  .wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 20px; }
+  h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; }
+  h1 { font-size: clamp(26px, 4vw, 38px); font-weight: 800; line-height: 1.05; }
+  h2 { font-size: 21px; } h3 { font-size: 16px; }
+  .eyebrow { font: 700 12px var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+  .muted { color: var(--muted); } .small { font-size: 13px; }
+  header { display: grid; gap: 6px; }
+  .top { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 16px; align-items: start; }
+  @media (max-width: 860px) { .top { grid-template-columns: 1fr; } }
+  .panel { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: grid; gap: 12px; min-width: 0; }
+  .ctl { display: grid; gap: 10px; }
+  .ctl fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 6px; }
+  .ctl legend { font: 700 13px var(--display); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+  .f { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; font-size: 14px; }
+  input[type=number], select { font: inherit; font-size: 14px; color: var(--fg); background: var(--input); border: 1px solid var(--input-line); border-radius: 5px; padding: 3px 6px; width: 110px; text-align: right; font-variant-numeric: tabular-nums; }
+  select { text-align: left; width: auto; }
+  input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+  .seg button { font: 600 13px var(--body); border: 0; background: var(--paper); color: var(--fg); padding: 5px 12px; cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--fg); color: var(--paper); }
+  .big { display: grid; gap: 4px; }
+  .big b { font: 800 clamp(34px, 6vw, 48px) var(--display); font-variant-numeric: tabular-nums; line-height: 1; }
+  .calc { display: grid; gap: 3px; font-size: 14px; font-variant-numeric: tabular-nums; }
+  .calc div { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+  .calc .t { border-top: 1px solid var(--line); padding-top: 4px; font-weight: 700; }
+  .verdict { padding: 10px 12px; border-radius: 8px; font-size: 14.5px; }
+  .v-ok { background: var(--ok-bg); } .v-knapp { background: var(--knapp-bg); } .v-nein { background: var(--nein-bg); }
+  .gauge { display: grid; gap: 6px; }
+  .track { position: relative; height: 22px; border-radius: 6px; background: var(--soft); overflow: hidden; }
+  .range { position: absolute; top: 0; bottom: 0; background: repeating-linear-gradient(135deg, var(--knapp-bg), var(--knapp-bg) 6px, transparent 6px, transparent 12px); border-left: 2px solid var(--knapp); border-right: 2px solid var(--nein); }
+  .fill { position: absolute; top: 5px; bottom: 5px; left: 0; border-radius: 4px; background: var(--fg); opacity: .85; }
+  .scale { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .need { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; color: var(--muted); }
+  .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  @media (max-width: 960px) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 600px) { .cards { grid-template-columns: 1fr; } }
+  .card { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+  .card.off { opacity: .55; }
+  .ch { display: flex; gap: 8px; align-items: flex-start; justify-content: space-between; }
+  .who { font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 999px; color: #fff; white-space: nowrap; }
+  .w-Eigen { background: var(--eigen); } .w-Fremd { background: var(--fremd); } .w-Mix { background: linear-gradient(90deg, var(--fremd) 50%, var(--eigen) 50%); }
+  .pill { font-size: 13px; font-weight: 700; padding: 3px 10px; border-radius: 999px; display: inline-flex; gap: 6px; align-items: center; }
+  .p-ok { background: var(--ok-bg); color: var(--ok); } .p-knapp { background: var(--knapp-bg); color: var(--knapp); } .p-nein { background: var(--nein-bg); color: var(--nein); }
+  .pill::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+  .nums { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+  .nums span { color: var(--muted); display: block; font-size: 12px; }
+  .mini { position: relative; height: 10px; border-radius: 5px; background: var(--soft); overflow: hidden; }
+  .mini .range { border-width: 1px; }
+  .mini .fill { top: 2px; bottom: 2px; }
+  .tip { font-size: 13px; color: var(--muted); margin: 0; }
+  .prio { font-size: 12px; color: var(--muted); }
+  .row2 { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+  .btn { font: 600 14px var(--body); background: var(--paper); color: var(--fg); border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+  .btn:hover { border-color: var(--accent); }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--muted); align-items: center; }
+  footer { font-size: 12.5px; color: var(--muted); }
+  a { color: var(--accent); }
+  @media (prefers-reduced-motion: no-preference) { .fill { transition: width .25s; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Fix &amp; Flip · Budget-Variante</div>
+    <h1>Renovierungsbudget Bohmte</h1>
+    <p class="muted" style="margin:0;max-width:75ch">Eigentumswohnung, 1. OG, Baujahr 1964, 80 m². Die Seite rechnet rückwärts: Was darf die Renovierung kosten, damit nach Kauf, Finanzierung und Verkauf dein Zielgewinn übrig bleibt? Dann teilt sie das Budget auf die Gewerke auf und sagt je Gewerk, ob es reicht.</p>
+  </header>
+
+  <div class="top">
+    <div class="panel ctl" id="ctl">
+      <fieldset><legend>Kauf</legend>
+        <div class="f"><label for="kp">Kaufpreis €</label><input type="number" id="kp" step="500"></div>
+        <div class="f"><label for="nk">Kaufnebenkosten % (Notar, Makler, Grunderwerbsteuer)</label><input type="number" id="nk" step="0.01"></div>
+      </fieldset>
+      <fieldset><legend>Verkauf</legend>
+        <div class="f"><span>Szenario</span><div class="seg" id="szen" role="group" aria-label="Verkaufsszenario"></div></div>
+        <div class="f"><label for="vkqm">Verkaufspreis €/m²</label><input type="number" id="vkqm" step="50"></div>
+        <div class="f"><label for="vkm">Verkaufsmakler %</label><input type="number" id="vkm" step="0.01"></div>
+      </fieldset>
+      <fieldset><legend>Dein Ziel</legend>
+        <div class="f"><span>Ziel als</span><div class="seg" id="zielart" role="group" aria-label="Ziel"></div></div>
+        <div class="f"><label for="ziel" id="ziellabel">Marge %</label><input type="number" id="ziel" step="1"></div>
+      </fieldset>
+      <fieldset><legend>Laufzeit und Kosten</legend>
+        <div class="f"><label for="monate">Projektdauer Monate</label><input type="number" id="monate" step="1"></div>
+        <div class="f"><label for="zins">Zins % (100 % Finanzierung, 1 % Gebühr)</label><input type="number" id="zins" step="0.1"></div>
+        <div class="f"><label for="lfd">Hausgeld + Strom €/Monat</label><input type="number" id="lfd" step="10"></div>
+        <div class="f"><label for="puffer">Reserve vom Budget %</label><input type="number" id="puffer" step="1"></div>
+      </fieldset>
+      <fieldset><legend>Extras</legend>
+        <div class="f"><label for="kueche">Küchenzeile einbauen</label><select id="kueche"><option>Nein</option><option>Ja</option></select></div>
+        <div class="f"><label for="fenster">Fenster tauschen (WEG-Beschluss nötig)</label><select id="fenster"><option>Nein</option><option>Ja</option></select></div>
+      </fieldset>
+    </div>
+
+    <div class="panel">
+      <div class="big"><span class="muted small">Renovierungsbudget für dein Ziel</span><b id="budget"></b></div>
+      <div class="verdict" id="verdict"></div>
+      <div class="gauge">
+        <div class="track" aria-hidden="true"><div class="range" id="grange"></div><div class="fill" id="gfill"></div></div>
+        <div class="scale" id="gscale"></div>
+        <div class="need" id="gneed"></div>
+      </div>
+      <div class="calc" id="calc"></div>
+      <div class="calc" id="ziele"></div>
+    </div>
+  </div>
+
+  <div class="row2">
+    <h2>Budget je Gewerk</h2>
+    <div class="legend">
+      <span class="pill p-ok">reicht</span><span class="pill p-knapp">knapp</span><span class="pill p-nein">reicht nicht</span>
+      <button class="btn" id="auto" type="button">Budget automatisch verteilen</button>
+    </div>
+  </div>
+  <p class="muted small" style="margin:-8px 0 0">Automatisch: Erst bekommt jedes Gewerk seinen günstigsten Betrag, danach wird nach Priorität (Pflicht, dann was den Verkaufspreis hebt, dann Optik) bis zum vorsichtigen Bedarf aufgestockt. Du kannst jeden Betrag selbst ändern. „Reicht“ = Budget deckt auch den vorsichtigen Wert, „knapp“ = nur mit viel Eigenleistung und günstigem Material, „reicht nicht“ = unter dem günstigsten Wert.</p>
+  <div class="cards" id="cards"></div>
+
+  <footer>Pauschalen aus der Detailplanung vom 25.11.2026 (Material, Helfer zu 20 €/h, Fahrten 25 km, Fremdfirmen geschätzt vor Angebot). Verkaufspreise 1.800–2.100 €/m² für renovierte Wohnungen Baujahr 1964 in Bohmte. Gewinn vor Steuern. Die Wohnung ist vermietet – ein Flip beginnt erst nach Auszug. Detailplanung mit Material und Zeitplan: <a href="https://claude.ai/artifact/SpzPYbxpGB5D7sCZii38Wp" target="_blank" rel="noopener">Projekt Bohmte ETW</a>.</footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  const KEY = "bohmte-budget-v1";
+  const SZEN = { gering: 1800, mitte: 1950, hoch: 2100 };
+  // Gewerke: Bedarf günstig / mittel / vorsichtig (Material + Helfer + Fahrten bzw. Angebot), Priorität 1 = Pflicht
+  const GEW = [
+    { id: "entr", name: "Entrümpelung & Container", who: "Eigen", prio: 1, lo: 1100, mid: 1400, hi: 1800, tip: "Container Sperrmüll und Bauschutt, 2 Tage mit einem Helfer.", spar: "Sperrmüll über die Gemeinde anmelden statt Container." },
+    { id: "abbr", name: "Demontage & Abbruch", who: "Eigen", prio: 1, lo: 1200, mid: 1700, hi: 2100, tip: "Fliesen, Böden, Tapeten, alte Türen raus.", spar: "Mit eigenen Leuten an einem Wochenende statt bezahlter Helfer." },
+    { id: "elek", name: "Elektrik", who: "Eigen", prio: 1, lo: 2600, mid: 3200, hi: 4200, tip: "Neue Verteilung mit FI, Leitungen teils neu, Schalter, Prüfprotokoll.", spar: "Nur Verteilung + FI neu, Leitungen wo möglich weiter nutzen." },
+    { id: "sani", name: "Sanitär (Fremdfirma)", who: "Fremd", prio: 1, lo: 6500, mid: 8000, hi: 10000, tip: "Rohinstallation Bad und Küche, Endmontage mit WC, Waschtisch, Dusche.", spar: "Sanitärobjekte selbst kaufen, nur Montage vergeben." },
+    { id: "flie", name: "Bad: Abdichtung & Fliesen", who: "Eigen", prio: 1, lo: 1500, mid: 2000, hi: 2600, tip: "Abdichtung, Wand- und Bodenfliesen, Kleber, Fugen.", spar: "Fliesen nur im Spritzbereich, sonst streichfähiger Putz." },
+    { id: "heiz", name: "Heizung (Fremdfirma)", who: "Fremd", prio: 2, lo: 1000, mid: 1500, hi: 2200, tip: "Bad-Heizkörper, Thermostatköpfe, Abgleich.", spar: "Nur Bad-Heizkörper tauschen, Rest reinigen und lackieren." },
+    { id: "wand", name: "Wände & Decken", who: "Eigen", prio: 2, lo: 4000, mid: 5100, hi: 6200, tip: "Spachteln, Vlies, zweimal weiß streichen.", spar: "Auf Vlies verzichten, wo die Wände glatt sind." },
+    { id: "bode", name: "Böden", who: "Eigen", prio: 2, lo: 2600, mid: 3150, hi: 3800, tip: "Ausgleichen, Vinyl-Klickboden, Sockelleisten.", spar: "Günstigere Vinyl-Serie, Ausgleich nur wo nötig." },
+    { id: "tuer", name: "Innentüren", who: "Eigen", prio: 3, lo: 1300, mid: 1750, hi: 2300, tip: "Sechs Türen mit Zarge und Drückern.", spar: "Zargen behalten, nur Türblätter tauschen oder lackieren." },
+    { id: "rest", name: "Endreinigung, Fotos, Kleinmaterial", who: "Eigen", prio: 3, lo: 500, mid: 800, hi: 1000, tip: "Reinigung, Verkaufsfotos, Schrauben und Kleinkram.", spar: "Fotos selbst machen, Reinigung selbst." },
+    { id: "kue", name: "Küchenzeile (Option)", who: "Fremd", prio: 3, lo: 2000, mid: 3000, hi: 4500, opt: "kueche", tip: "Einfache Küchenzeile mit Geräten, Lieferung und Montage.", spar: "Nur Anschlüsse, Käufer bringt eigene Küche mit." },
+    { id: "fen", name: "Fenster (Option)", who: "Fremd", prio: 3, lo: 4900, mid: 6000, hi: 7400, opt: "fenster", tip: "Sieben Kunststofffenster – nur mit Beschluss der Eigentümer.", spar: "Fenster bleiben, nur Dichtungen und Beschläge einstellen." },
+  ];
+  const DEF = { kp: 102000, nk: 10.57, szen: "mitte", vkqm: 1950, vkm: 3.57, zielart: "marge", ziel: 20, zielG: 20000, monate: 5, zins: 5.5, lfd: 340, puffer: 10, kueche: "Nein", fenster: "Nein", alloc: {} };
+  const WFL = 80;
+  let S = JSON.parse(JSON.stringify(DEF));
+  try { const raw = localStorage.getItem(KEY); if (raw) Object.assign(S, JSON.parse(raw)); } catch (e) {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+
+  const eur = new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+  const num = (v, d = 0) => new Intl.NumberFormat("de-DE", { maximumFractionDigits: d, minimumFractionDigits: d }).format(v);
+  const $ = id => document.getElementById(id);
+  const active = () => GEW.filter(g => !g.opt || S[g.opt] === "Ja");
+
+  function rechne(kp) {
+    const vk = S.vkqm * WFL, vm = vk * S.vkm / 100;
+    const ankauf = kp * (1 + S.nk / 100);
+    const fin = kp * S.zins / 100 / 12 * S.monate + kp * 0.01;
+    const lfd = S.lfd * S.monate;
+    const kostenMax = S.zielart === "marge" ? (vk - vm) / (1 + S.ziel / 100) : vk - vm - S.zielG;
+    return { vk, vm, ankauf, fin, lfd, kostenMax, budget: kostenMax - ankauf - fin - lfd };
+  }
+  // Kaufpreis, bei dem das Budget einen bestimmten Bedarf (inkl. Reserve) deckt
+  function kpFuer(bedarf) {
+    const brutto = bedarf / (1 - S.puffer / 100);
+    const r = rechne(0);
+    const faktor = 1 + S.nk / 100 + S.zins / 100 / 12 * S.monate + 0.01;
+    return (r.kostenMax - r.lfd - brutto) / faktor;
+  }
+
+  function verteile(budget) {
+    const frei = Math.max(0, budget) * (1 - S.puffer / 100);
+    let rest = frei; const a = {};
+    const order = [1, 2, 3].flatMap(p => active().filter(g => g.prio === p));
+    // 1. Durchgang: jedes Gewerk bekommt seinen günstigsten Wert (nach Priorität, solange Geld da ist)
+    order.forEach(g => { const x = Math.min(g.lo, Math.max(0, rest)); a[g.id] = x; rest -= x; });
+    // 2. Durchgang: nach Priorität bis zum vorsichtigen Wert aufstocken
+    order.forEach(g => { const x = Math.min(g.hi - a[g.id], Math.max(0, rest)); a[g.id] += x; rest -= x; });
+    order.forEach(g => a[g.id] = Math.floor(a[g.id] / 50) * 50);
+    return a;
+  }
+  const status = (g, x) => x >= g.hi ? ["ok", "reicht"] : x >= g.lo ? ["knapp", "knapp"] : ["nein", "reicht nicht"];
+
+  function render() {
+    const r = rechne(S.kp);
+    const B = r.budget;
+    const auto = verteile(B);
+    const A = {}; active().forEach(g => A[g.id] = (S.alloc[g.id] ?? auto[g.id]));
+    const verteilt = Object.values(A).reduce((a, b) => a + b, 0);
+    const reserve = B - verteilt;
+    const nLo = active().reduce((a, g) => a + g.lo, 0), nMid = active().reduce((a, g) => a + g.mid, 0), nHi = active().reduce((a, g) => a + g.hi, 0);
+
+    $("budget").textContent = eur.format(B);
+    $("budget").style.color = B >= nHi ? "var(--ok)" : B >= nLo ? "var(--knapp)" : "var(--nein)";
+    const kpMid = kpFuer(nMid), kpHi = kpFuer(nHi);
+    let v, cls;
+    if (B < 0) { cls = "nein"; v = `<b>Reicht nicht.</b> Schon ohne Renovierung wird dein Ziel verfehlt. Erst ab einem Kaufpreis von etwa <b>${eur.format(Math.floor(kpMid / 500) * 500)}</b> passt eine normale Renovierung ins Budget.`; }
+    else if (B >= nHi / (1 - S.puffer / 100)) { cls = "ok"; v = `<b>Reicht.</b> Das Budget deckt alle Gewerke auch vorsichtig gerechnet und lässt ${num(S.puffer)} % Reserve.`; }
+    else if (B >= nLo) { cls = "knapp"; v = `<b>Knapp.</b> Das Budget liegt zwischen dem günstigsten (${eur.format(nLo)}) und dem vorsichtigen Bedarf (${eur.format(nHi)}). Für Luft brauchst du einen Kaufpreis um <b>${eur.format(Math.floor(kpHi / 500) * 500)}</b>.`; }
+    else { cls = "nein"; v = `<b>Reicht nicht.</b> Für eine normale Renovierung (ca. ${eur.format(nMid)}) fehlen ${eur.format(nMid / (1 - S.puffer / 100) - B)}. Das passt ab einem Kaufpreis von etwa <b>${eur.format(Math.floor(kpMid / 500) * 500)}</b>, vorsichtig gerechnet ab <b>${eur.format(Math.floor(kpHi / 500) * 500)}</b>.`; }
+    $("verdict").className = "verdict v-" + cls; $("verdict").innerHTML = v;
+
+    const max = Math.max(nHi * 1.25, B * 1.05, 1);
+    const p = x => Math.max(0, Math.min(100, x / max * 100));
+    $("grange").style.left = p(nLo) + "%"; $("grange").style.width = (p(nHi) - p(nLo)) + "%";
+    $("gfill").style.width = p(Math.max(0, B)) + "%";
+    $("gfill").style.background = B >= nHi ? "var(--ok)" : B >= nLo ? "var(--knapp)" : "var(--nein)";
+    $("gscale").innerHTML = `<span>0 €</span><span>${eur.format(max / 2)}</span><span>${eur.format(max)}</span>`;
+    $("gneed").innerHTML = `<span>Balken = dein Budget</span><span>Schraffur = Bedarf ${eur.format(nLo)} (günstig) bis ${eur.format(nHi)} (vorsichtig)</span><span>mittel ${eur.format(nMid)}</span>`;
+
+    $("calc").innerHTML = [
+      ["Verkaufspreis " + num(S.vkqm) + " €/m² × 80 m²", eur.format(r.vk)], ["− Verkaufsmakler", eur.format(-r.vm)],
+      [S.zielart === "marge" ? `÷ (1 + ${num(S.ziel)} % Marge) = erlaubte Gesamtkosten` : `− Zielgewinn = erlaubte Gesamtkosten`, eur.format(r.kostenMax)],
+      ["− Kauf inkl. Nebenkosten", eur.format(-r.ankauf)], ["− Finanzierung " + num(S.monate) + " Monate", eur.format(-Math.round(r.fin))],
+      ["− Hausgeld und Strom", eur.format(-r.lfd)],
+    ].map(x => `<div><span>${x[0]}</span><span>${x[1]}</span></div>`).join("") +
+      `<div class="t"><span>= Renovierungsbudget</span><span>${eur.format(B)}</span></div>` +
+      `<div><span>davon verteilt auf Gewerke</span><span>${eur.format(verteilt)}</span></div>` +
+      `<div><span>Reserve (nicht verteilt)</span><span style="color:${reserve < 0 ? "var(--nein)" : "inherit"}">${eur.format(reserve)}</span></div>`;
+    const gewinn = r.vk - r.vm - (r.ankauf + r.fin + r.lfd + nMid);
+    $("ziele").innerHTML = `<div class="t"><span>Zum Vergleich: Gewinn bei mittlerem Bedarf (${eur.format(nMid)})</span><span style="color:${gewinn >= 0 ? "var(--ok)" : "var(--nein)"}">${eur.format(gewinn)}</span></div>`;
+
+    $("cards").innerHTML = GEW.map(g => {
+      const on = !g.opt || S[g.opt] === "Ja";
+      if (!on) return `<div class="card off"><div class="ch"><h3>${g.name}</h3><span class="who w-${g.who}">${g.who === "Fremd" ? "Fremdfirma" : "Eigenleistung"}</span></div><p class="tip">Nicht eingeplant – oben bei „Extras“ einschalten.</p></div>`;
+      const x = A[g.id], [s, t] = status(g, x);
+      const mx = g.hi * 1.3, q = v => Math.min(100, v / mx * 100);
+      return `<div class="card"><div class="ch"><h3>${g.name}</h3><span class="who w-${g.who}">${g.who === "Fremd" ? "Fremdfirma" : "Eigenleistung"}</span></div>
+        <div class="row2"><span class="pill p-${s}">${t}</span><span class="prio">${["", "Pflicht", "hebt den Preis", "Optik"][g.prio]}</span></div>
+        <div class="nums"><div><span>Budget</span><input type="number" step="50" data-g="${g.id}" value="${x}" aria-label="Budget ${g.name}"></div><div><span>Bedarf pauschal</span>${eur.format(g.lo)} – ${eur.format(g.hi)}</div></div>
+        <div class="mini" aria-hidden="true"><div class="range" style="left:${q(g.lo)}%;width:${q(g.hi) - q(g.lo)}%"></div><div class="fill" style="width:${q(x)}%;background:var(--${s === "ok" ? "ok" : s === "knapp" ? "knapp" : "nein"})"></div></div>
+        <p class="tip">${g.tip}</p>${s !== "ok" ? `<p class="tip"><b>Sparen:</b> ${g.spar}</p>` : ""}</div>`;
+    }).join("");
+  }
+
+  function initControls() {
+    ["kp", "nk", "vkqm", "vkm", "monate", "zins", "lfd", "puffer"].forEach(k => $(k).value = S[k]);
+    $("ziel").value = S.zielart === "marge" ? S.ziel : S.zielG;
+    $("ziellabel").textContent = S.zielart === "marge" ? "Marge % auf die Kosten" : "Gewinn €";
+    $("kueche").value = S.kueche; $("fenster").value = S.fenster;
+    $("szen").innerHTML = Object.keys(SZEN).map(k => `<button type="button" data-s="${k}" aria-pressed="${S.szen === k}">${k} ${num(SZEN[k])}</button>`).join("");
+    $("zielart").innerHTML = [["marge", "Marge %"], ["gewinn", "Gewinn €"]].map(z => `<button type="button" data-z="${z[0]}" aria-pressed="${S.zielart === z[0]}">${z[1]}</button>`).join("");
+  }
+  document.addEventListener("input", e => {
+    const el = e.target;
+    if (el.dataset.g) { S.alloc[el.dataset.g] = Number(el.value) || 0; save(); clearTimeout(window._t); window._t = setTimeout(() => { const id = el.dataset.g; render(); const b = document.querySelector(`[data-g="${id}"]`); if (b) { b.focus(); const n = b.value.length; try { b.setSelectionRange(n, n); } catch (_) {} } }, 500); return; }
+    if (!el.id || el.value === "") return;
+    if (el.id === "ziel") { if (S.zielart === "marge") S.ziel = Number(el.value); else S.zielG = Number(el.value); }
+    else if (el.tagName === "SELECT") S[el.id] = el.value;
+    else if (el.id in S) { S[el.id] = Number(el.value); if (el.id === "vkqm") { S.szen = Object.keys(SZEN).find(k => SZEN[k] === S.vkqm) || ""; initControls(); } }
+    if (["kp", "nk", "vkqm", "vkm", "ziel", "monate", "zins", "lfd", "puffer", "kueche", "fenster"].includes(el.id)) S.alloc = {};
+    save(); render();
+  });
+  document.addEventListener("change", e => { if (e.target.tagName === "SELECT") { S[e.target.id] = e.target.value; S.alloc = {}; save(); render(); } });
+  document.addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.s) { S.szen = b.dataset.s; S.vkqm = SZEN[b.dataset.s]; S.alloc = {}; }
+    else if (b.dataset.z) { S.zielart = b.dataset.z; S.alloc = {}; }
+    else if (b.id === "auto") { S.alloc = {}; }
+    else return;
+    save(); initControls(); render();
+  });
+  initControls(); render();
+})();
+</script>
