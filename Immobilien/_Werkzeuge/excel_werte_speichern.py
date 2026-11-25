@@ -6,6 +6,7 @@ Handy-Vorschau, Numbers, Google Sheets). Die Formeln bleiben unverändert.
 Aufruf: python excel_werte_speichern.py EINGABE.xlsx AUSGABE.xlsx
 Benötigt: LibreOffice (soffice), openpyxl, lxml.
 """
+import datetime
 import glob
 import json
 import os
@@ -72,6 +73,11 @@ for name, path in sheet_files.items():
         elif isinstance(v, (int, float)):
             c.attrib.pop("t", None)
             ve.text = repr(float(v)) if isinstance(v, float) else str(v)
+        elif isinstance(v, (datetime.datetime, datetime.date)):  # Datum als Excel-Seriennummer
+            c.attrib.pop("t", None)
+            if not isinstance(v, datetime.datetime):
+                v = datetime.datetime(v.year, v.month, v.day)
+            ve.text = repr((v - datetime.datetime(1899, 12, 30)).total_seconds() / 86400)
         else:
             c.set("t", "str")
             ve.text = str(v)
