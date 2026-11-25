@@ -13,6 +13,7 @@ Häuser und Wohnungen kaufen, vermieten und langfristig halten (Buy & Hold).
 | `Damme-Glueckauf_Zweifamilienhaus_IS24-171741799` | −896 € / −48 € | zu teuer für Vermietung; max. ca. 207.500 € |
 | `Damme-CAD_Mehrfamilienhaus_KA-3558261375` | −1.056 € / −150 € | Preis fehlt; erst Mietliste und Preis erfragen |
 | `Damme-Neubau-DHH_allkauf_KA-3578260976` | −1.465 € / −94 € | Neubau-Ausbauhaus; Gesamtkosten weit über Anzeigepreis |
+| `Bohmte_ETW_KA-3563162731` | −120 € / +89 € | günstige ETW, Faktor 13–16; Miete und Hausgeld erfragen |
 
 ## Regel: Nur einrechnen, was nötig ist
 Sanierung und Umbau kommen nur in den Rechner, wenn sie **Pflicht** sind (Gesetz, Sicherheit) oder du **ohne sie nicht vermieten kannst**. Beispiele:

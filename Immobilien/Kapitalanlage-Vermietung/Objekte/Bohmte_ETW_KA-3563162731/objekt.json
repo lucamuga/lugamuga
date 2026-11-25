@@ -1,0 +1,45 @@
+{
+ "titel": "Objekt-Rechner: Eigentumswohnung Bohmte, 1. OG, 80 m² (Kleinanzeigen 3563162731 / ImmoScout 172422160)",
+ "untertitel": "Gelb = Annahmen (änderbar). Grün markierte Quellen stammen aus der Anzeige. ACHTUNG: Die Anzeige nennt weder die aktuelle Miete noch das Hausgeld – beides ist geschätzt und muss beim Makler (OLB) erfragt werden. Spalte C ist vorsichtig und wird gerechnet, D zeigt die Spanne, E den günstigen Fall. Stand 25.11.2026 – keine Steuer- oder Rechtsberatung.",
+ "eingaben": [
+  {"gruppe": "Kauf", "werte": [
+   {"name": "preis", "label": "Kaufpreis", "konservativ": 102000, "guenstig": 92000, "spanne": "92.000–102.000 € (Verhandlung)", "einheit": "€", "fmt": "eur", "quelle": "Anzeige: 102.000 € (1.275 €/m²); günstig ca. 10 % Nachlass", "aus_expose": true},
+   {"name": "grest", "label": "Grunderwerbsteuer", "konservativ": 0.05, "guenstig": 0.05, "spanne": "fest", "einheit": "%", "fmt": "pct", "quelle": "Niedersachsen 5 %"},
+   {"name": "notar", "label": "Notar & Grundbuch", "konservativ": 0.02, "guenstig": 0.015, "spanne": "1,5–2,0 %", "einheit": "%", "fmt": "pct", "quelle": "übliche Spanne"},
+   {"name": "makler", "label": "Maklerprovision Käufer", "konservativ": 0.0357, "guenstig": 0.0357, "spanne": "fest", "einheit": "%", "fmt": "pct2", "quelle": "Anzeige: 3,57 % inkl. MwSt. (Oldenburgische Landesbank)", "aus_expose": true},
+   {"name": "sofort", "label": "Pflicht-Maßnahmen / Reserve", "konservativ": 1000, "guenstig": 0, "spanne": "0–1.000 €", "einheit": "€", "fmt": "eur", "quelle": "Vermietet, Gasheizung 2019 → keine Sanierung einrechnen. Nur Reserve (z. B. Rauchmelder prüfen)"}
+  ]},
+  {"gruppe": "Einnahmen (Miete fehlt in der Anzeige!)", "werte": [
+   {"name": "wf1", "label": "Wohnfläche", "konservativ": 80, "guenstig": 80, "spanne": "fest", "einheit": "m²", "fmt": "num1", "quelle": "Anzeige", "aus_expose": true},
+   {"name": "miete1", "label": "Kaltmiete", "konservativ": 6.5, "guenstig": 7.5, "spanne": "6,50–7,50 €/m² (520–600 €)", "einheit": "€/m²", "fmt": "eur2", "quelle": "Bohmte: Median ca. 7,33 €/m², Spanne 6,52–11,11 (mietpreise.info), Ø 8,32 (immoportal). Bestandsmiete Baujahr 1964 eher unten. TATSÄCHLICHE MIETE ERFRAGEN"},
+   {"name": "pv", "label": "Sonstige Einnahmen pro Jahr (Stellplätze)", "konservativ": 0, "guenstig": 360, "spanne": "0–360 €/Jahr", "einheit": "€/Jahr", "fmt": "eur", "quelle": "2 Stellplätze laut Anzeige – evtl. schon in der Miete enthalten oder separat vermietbar (ca. 30 €/Monat)"}
+  ]},
+  {"gruppe": "Finanzierung", "werte": [
+   {"name": "ek", "label": "Eigenkapital", "konservativ": 25000, "guenstig": 25000, "spanne": "dein Wert", "einheit": "€", "fmt": "eur", "quelle": "Annahme: Nebenkosten + ca. 14 % des Preises – bitte anpassen"},
+   {"name": "zins", "label": "Sollzins (10 Jahre fest)", "konservativ": 0.045, "guenstig": 0.039, "spanne": "3,9–4,5 %", "einheit": "% p. a.", "fmt": "pct2", "quelle": "Nov. 2026 ca. 4,0–4,3 %; kleine Darlehen oft mit Aufschlag"},
+   {"name": "tilgung", "label": "Anfängliche Tilgung", "konservativ": 0.02, "guenstig": 0.02, "spanne": "1–3 %", "einheit": "% p. a.", "fmt": "pct2", "quelle": "Standard"}
+  ]},
+  {"gruppe": "Laufende Kosten & Steuer", "werte": [
+   {"name": "ausfall", "label": "Mietausfall-Reserve", "konservativ": 0.03, "guenstig": 0.02, "spanne": "2–3 %", "einheit": "% der Miete", "fmt": "pct", "quelle": "vermietet; ein Mieter"},
+   {"name": "instand", "label": "Instandhaltung Sondereigentum", "konservativ": 8, "guenstig": 5, "spanne": "5–8 €/m² und Jahr", "einheit": "€/m²·Jahr", "fmt": "eur2", "quelle": "nur deine Wohnung (Bad, Böden, Fenster innen) – Dach/Fassade zahlt die WEG über die Rücklage"},
+   {"name": "sonst", "label": "Nicht umlagefähiges Hausgeld + Kosten", "konservativ": 130, "guenstig": 80, "spanne": "80–130 €/Monat", "einheit": "€/Monat", "fmt": "eur", "quelle": "Verwaltung ca. 25–35 €, Erhaltungsrücklage ca. 50–90 €, Bankgebühren. HAUSGELD + WIRTSCHAFTSPLAN ERFRAGEN"},
+   {"name": "leer_monate", "label": "Monate ohne Miete am Anfang", "konservativ": 0, "guenstig": 0, "spanne": "0", "einheit": "Monate", "fmt": "num", "quelle": "Anzeige: vermietet"},
+   {"name": "gebaeude", "label": "Gebäudeanteil (abschreibbar)", "konservativ": 0.8, "guenstig": 0.85, "spanne": "80–85 %", "einheit": "%", "fmt": "pct", "quelle": "Wohnung: kleiner Grundstücksanteil"},
+   {"name": "afa", "label": "AfA-Satz", "konservativ": 0.02, "guenstig": 0.02, "spanne": "fest", "einheit": "% p. a.", "fmt": "pct", "quelle": "Baujahr 1925–2022: 2 %"},
+   {"name": "steuersatz", "label": "Persönlicher Steuersatz", "konservativ": 0.25, "guenstig": 0.35, "spanne": "25–42 %", "einheit": "%", "fmt": "pct", "quelle": "dein Grenzsteuersatz; niedriger Satz = vorsichtiger"}
+  ]}
+ ],
+ "verhandlung": [
+  ["Angebotspreis", 102000, "1.275 €/m²"],
+  ["−5 %", 96900, ""],
+  ["−10 %", 91800, ""],
+  ["−15 %", 86700, ""],
+  ["−20 %", 81600, ""]
+ ],
+ "hinweise": [
+  "Wichtige Hinweise",
+  "• Zuerst erfragen: aktuelle Kaltmiete und Mietbeginn, Hausgeld (gesamt / umlagefähig / Rücklage), Höhe der Erhaltungsrücklage der WEG, Protokolle der letzten 3 Eigentümerversammlungen, geplante Sonderumlagen, Teilungserklärung.",
+  "• Leverage markiert die Anzeige als mögliche Zwangsversteigerung – das passt nicht zu einem Makler-Angebot; beim Makler klären.",
+  "• Bestehender Mietvertrag geht auf dich über (Kauf bricht nicht Miete)."
+ ]
+}
